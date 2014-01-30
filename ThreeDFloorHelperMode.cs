@@ -118,6 +118,99 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		#region ================== Methods
 
+		public static void ProcessSectors(List<ThreeDFloor> threedfloors)
+		{
+			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+			var sectorsByTag = new Dictionary<int, List<Sector>>();
+			var sectorsToThreeDFloors = new Dictionary<Sector, List<ThreeDFloor>>();
+			var sectorGroups = new List<List<Sector>>();
+			var tmpSelectedSectors = new List<Sector>(selectedSectors);
+
+			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
+
+			foreach (ThreeDFloor tdf in threedfloors)
+			{
+				if (tdf.IsNew)
+					if (tdf.CreateGeometry())
+						tdf.UpdateGeometry();
+			}
+
+			// Fill the sectorsToThreeDFloors dictionary, with a selected sector as key
+			// and a list of all 3D floors, that should be applied to to this sector, as value
+			foreach (Sector s in selectedSectors)
+			{
+				if (!sectorsToThreeDFloors.ContainsKey(s))
+					sectorsToThreeDFloors.Add(s, new List<ThreeDFloor>());
+
+				foreach (ThreeDFloor tdf in threedfloors)
+				{
+					if(tdf.TaggedSectors.Contains(s))
+						sectorsToThreeDFloors[s].Add(tdf);
+
+					/*
+					for (int i = 0; i < ctrl.checkedListBoxSectors.Items.Count; i++)
+					{
+						string text = ctrl.checkedListBoxSectors.Items[i].ToString();
+						bool ischecked = ctrl.checkedListBoxSectors.GetItemChecked(i);
+
+						if (ischecked && text == "Sector " + s.Index.ToString())
+						{
+							sectorsToThreeDFloors[s].Add(ctrl.ThreeDFloor);
+						}
+					}
+					*/
+				}
+			}
+
+			// Group all selected sectors by their 3D floors. I.e. each element of sectorGroups
+			// is a list of sectors that have the same 3D floors
+			while (tmpSelectedSectors.Count > 0)
+			{
+				Sector s1 = tmpSelectedSectors.First();
+				var list = new List<Sector>();
+				var delsectors = new List<Sector>();
+
+				foreach (Sector s2 in tmpSelectedSectors)
+				{
+					if (sectorsToThreeDFloors[s1].ContainsAllElements(sectorsToThreeDFloors[s2]))
+					{
+						list.Add(s2);
+						delsectors.Add(s2);
+					}
+				}
+
+				foreach (Sector s in delsectors)
+					tmpSelectedSectors.Remove(s);
+
+				tmpSelectedSectors.Remove(s1);
+
+				sectorGroups.Add(list);
+			}
+
+			// Bind the 3D floors to the selected sectors
+			foreach (List<Sector> sectors in sectorGroups)
+			{
+				int newtag;
+
+				// Just use sectors.First(), all elements in sectors have the same 3D floors anyway
+				// If there are no 3D floors associated set the tag to 0
+				if (sectorsToThreeDFloors[sectors.First()].Count == 0)
+					newtag = 0;
+				else
+					newtag = BuilderPlug.Me.ControlSectorArea.GetNewTag();
+
+				foreach (Sector s in sectors)
+					s.Tag = newtag;
+
+				foreach (ThreeDFloor tdf in sectorsToThreeDFloors[sectors.First()])
+					tdf.BindTag(newtag);
+			}
+
+			// Remove unused tags from the 3D floors
+			foreach (ThreeDFloor tdf in threedfloors)
+				tdf.Cleanup();
+		}
+
 		// This makes a CRC for the selection
 		public int CreateSelectionCRC()
 		{
@@ -753,8 +846,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 						{
 							// Show sector edit dialog
 							// General.Interface.ShowEditSectors(selected);
-							BuilderPlug.Me.ThreeDFloorEditor();
-							General.Map.Map.Update();
+							DialogResult result = BuilderPlug.Me.ThreeDFloorEditor();
+
+							if (result == DialogResult.OK)
+							{
+								ProcessSectors(BuilderPlug.TDFEW.ThreeDFloors);
+								General.Map.Map.Update();
+							}
 
 							// When a single sector was selected, deselect it now
 							if (selected.Count == 1)

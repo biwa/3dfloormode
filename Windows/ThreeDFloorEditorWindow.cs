@@ -22,6 +22,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 {
 	public partial class ThreeDFloorEditorWindow : Form
 	{
+		List<ThreeDFloor> threedfloors;
+
+		public List<ThreeDFloor> ThreeDFloors { get { return threedfloors; } set { threedfloors = value; } }
+
 		public ThreeDFloorEditorWindow()
 		{
 			this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width/2, Screen.PrimaryScreen.WorkingArea.Height/2);
@@ -30,12 +34,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		private void ThreeDFloorEditorWindow_Load(object sender, EventArgs e)
 		{
-			FillThreeDFloorPanel(BuilderPlug.ThreeDFloors);
+			FillThreeDFloorPanel(threedfloors);
 		}
 
 		private void okButton_Click(object sender, EventArgs e)
 		{
-			BuilderPlug.ProcessSectors(threeDFloorPanel.Controls);
+			// BuilderPlug.ProcessSectors(threeDFloorPanel.Controls);
+
+			threedfloors = new List<ThreeDFloor>();
+
+			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+			{
+				ctrl.ApplyToThreeDFloor();
+				threedfloors.Add(ctrl.ThreeDFloor);
+			}
 
 			/*
 			int tag = General.Map.Map.GetNewTag();
@@ -53,6 +65,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			}
 			*/
 
+			this.DialogResult = DialogResult.OK;
 			this.Close();
 
 			// General.Editing.AcceptMode();
@@ -60,6 +73,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		private void cancelButton_Click(object sender, EventArgs e)
 		{
+			this.DialogResult = DialogResult.Cancel;
 			this.Close();
 		}
 
@@ -132,7 +146,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		private void sharedThreeDFloorsCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			if (BuilderPlug.SelectedSectors.Count > 1 && sharedThreeDFloorsCheckBox.Checked)
+			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+
+			if (selectedSectors.Count > 1 && sharedThreeDFloorsCheckBox.Checked)
 			{
 				var deleteControls = new List<ThreeDFloorHelperControl>();
 

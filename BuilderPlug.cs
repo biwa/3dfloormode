@@ -97,13 +97,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		private static BuilderPlug me;
 
 		// Lines tagged to the selected sectors
-		private static List<Linedef> taggedLines = new List<Linedef>();
 		private static List<ThreeDFloor> threeDFloors = new List<ThreeDFloor>();
-		private static List<Sector> selectedSectors;
 		private static ThreeDFloorEditorWindow tdfew = new ThreeDFloorEditorWindow();
 
-		public static List<Linedef> TaggedLines { get { return taggedLines; } set { taggedLines = value; } }
-		public static List<Sector> SelectedSectors { get { return selectedSectors; } set { selectedSectors = value; } }
+		//public static List<Sector> SelectedSectors { get { return selectedSectors; } set { selectedSectors = value; } }
 		public static List<ThreeDFloor> ThreeDFloors { get { return threeDFloors; } set { threeDFloors = value; } }
 		public static ThreeDFloorEditorWindow TDFEW { get { return tdfew; } }
 
@@ -151,7 +148,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		
 		// [BeginAction("threedfloorhelper")]
-		public void ThreeDFloorEditor()
+		public DialogResult ThreeDFloorEditor()
 		{
 			// Only make this action possible if a map is actually opened and the we are in sectors mode
 			/*
@@ -161,7 +158,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			}
 			*/
 
-			selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
 
 			if (selectedSectors.Count <= 0 && General.Editing.Mode.HighlightedObject is Sector)
 				selectedSectors.Add((Sector)General.Editing.Mode.HighlightedObject);
@@ -170,13 +167,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			{
 				// Show a warning in the status bar
 				General.Interface.DisplayStatus(StatusType.Warning, "Please highlight a sector to copy the properties from");
-				return;
+				return DialogResult.Abort;
 			}
 
-			taggedLines = GetTaggedLinedefs(selectedSectors).OrderByDescending(o => o.Front.Sector.CeilHeight).ToList();
-			threeDFloors = GetThreeDFloors(selectedSectors);
+			tdfew.ThreeDFloors = GetThreeDFloors(selectedSectors);
 
-			tdfew.ShowDialog((Form)General.Interface);
+			DialogResult result = tdfew.ShowDialog((Form)General.Interface);
+
+			return result;
 		}
 
         #endregion
@@ -189,95 +187,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
 			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
-		}
-
-		public static void ProcessSectors(Control.ControlCollection controls)
-		{
-			var sectorsByTag = new Dictionary<int, List<Sector>>();
-			var sectorsToThreeDFloors = new Dictionary<Sector, List<ThreeDFloor>>();
-			var sectorGroups = new List<List<Sector>>();
-			var tmpSelectedSectors = new List<Sector>(selectedSectors);
-
-			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
-
-			foreach (ThreeDFloorHelperControl ctrl in controls)
-			{
-				ctrl.ApplyToThreeDFloor();
-
-				if (ctrl.IsNew)
-					if(ctrl.ThreeDFloor.CreateGeometry())
-						ctrl.ThreeDFloor.UpdateGeometry();
-			}
-
-			// Fill the sectorsToThreeDFloors dictionary, with a selected sector as key
-			// and a list of all 3D floors, that should be applied to to this sector, as value
-			foreach(Sector s in selectedSectors)
-			{
-				if (!sectorsToThreeDFloors.ContainsKey(s))
-					sectorsToThreeDFloors.Add(s, new List<ThreeDFloor>());
-
-				foreach (ThreeDFloorHelperControl ctrl in controls)
-				{
-					for (int i = 0; i < ctrl.checkedListBoxSectors.Items.Count; i++)
-					{
-						string text = ctrl.checkedListBoxSectors.Items[i].ToString();
-						bool ischecked = ctrl.checkedListBoxSectors.GetItemChecked(i);
-
-						if (ischecked && text == "Sector " + s.Index.ToString())
-						{
-							sectorsToThreeDFloors[s].Add(ctrl.ThreeDFloor);
-						}
-					}
-				}
-			}
-
-			// Group all selected sectors by their 3D floors. I.e. each element of sectorGroups
-			// is a list of sectors that have the same 3D floors
-			while (tmpSelectedSectors.Count > 0)
-			{
-				Sector s1 = tmpSelectedSectors.First();
-				var list = new List<Sector>();
-				var delsectors = new List<Sector>();
-
-				foreach (Sector s2 in tmpSelectedSectors)
-				{
-					if (sectorsToThreeDFloors[s1].ContainsAllElements(sectorsToThreeDFloors[s2]))
-					{
-						list.Add(s2);
-						delsectors.Add(s2);
-					}
-				}
-
-				foreach(Sector s in delsectors)
-					tmpSelectedSectors.Remove(s);
-
-				tmpSelectedSectors.Remove(s1);
-
-				sectorGroups.Add(list);
-			}
-
-			// Bind the 3D floors to the selected sectors
-			foreach (List<Sector> sectors in sectorGroups)
-			{
-				int newtag;
-
-				// Just use sectors.First(), all elements in sectors have the same 3D floors anyway
-				// If there are no 3D floors associated set the tag to 0
-				if (sectorsToThreeDFloors[sectors.First()].Count == 0)
-					newtag = 0;
-				else
-					newtag = BuilderPlug.me.ControlSectorArea.GetNewTag();
-
-				foreach (Sector s in sectors)
-					s.Tag = newtag;
-								
-				foreach (ThreeDFloor tdf in sectorsToThreeDFloors[sectors.First()])
-					tdf.BindTag(newtag);
-			}
-
-			// Remove unused tags from the 3D floors
-			foreach (ThreeDFloor tdf in threeDFloors)
-				tdf.Cleanup();
 		}
 
 		public static List<Linedef> GetTaggedLinedefs(List<Sector> sectors)

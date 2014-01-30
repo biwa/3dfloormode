@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 using CodeImp.DoomBuilder.Windows;
 using CodeImp.DoomBuilder.IO;
 using CodeImp.DoomBuilder.Map;
@@ -109,6 +110,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		public void ApplyToThreeDFloor()
 		{
+			Regex r = new Regex(@"\d+");
+
 			threeDFloor.TopHeight = sectorCeilingHeight.GetResult(threeDFloor.TopHeight);
 			threeDFloor.BottomHeight = sectorFloorHeight.GetResult(threeDFloor.BottomHeight);
 			// threeDFloor.TopHeight = int.Parse(sectorCeilingHeight.Text);
@@ -120,14 +123,33 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			threeDFloor.Type = int.Parse(typeArgument.Text);
 			threeDFloor.Flags = int.Parse(flagsArgument.Text);
 			threeDFloor.Alpha = int.Parse(alphaArgument.Text);
+
+			threeDFloor.IsNew = isnew;
+
+			threeDFloor.TaggedSectors = new List<Sector>();
+
+			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
+			{
+				string text = checkedListBoxSectors.Items[i].ToString();
+				bool ischecked = checkedListBoxSectors.GetItemChecked(i);
+
+				if (ischecked)
+				{
+					var matches = r.Matches(text);
+					Sector s = General.Map.Map.GetSectorByIndex(int.Parse(matches[0].ToString()));
+					threeDFloor.TaggedSectors.Add(s);
+				}
+			}
 		}
 
 		private void AddSectorCheckboxes()
 		{
-			if (BuilderPlug.SelectedSectors == null)
+			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+
+			if (selectedSectors == null)
 				return;
 
-			foreach(Sector s in BuilderPlug.SelectedSectors.OrderBy(o => o.Index).ToList())
+			foreach(Sector s in selectedSectors.OrderBy(o => o.Index).ToList())
 				checkedListBoxSectors.Items.Add("Sector " + s.Index.ToString(), ThreeDFloor.TaggedSectors.Contains(s));
 		}
 

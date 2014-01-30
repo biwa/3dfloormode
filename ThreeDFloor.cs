@@ -45,11 +45,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		private int alpha;
 		private int topHeight;
 		private int bottomHeight;
+		private bool isNew;
 
 		public static Rectangle controlsectorarea = new Rectangle(-512, 512, 512, -512);
 
 		public Sector Sector { get { return sector; } }
-		public List<Sector> TaggedSectors { get { return taggedSectors; } }
+		public List<Sector> TaggedSectors { get { return taggedSectors; } set { taggedSectors = value; } }
 		public string BorderTexture { get { return borderTexture; } set { borderTexture = value; } }
 		public string TopFlat { get { return topFlat; } set { topFlat = value; } }
 		public string BottomFlat { get { return bottomFlat; } set { bottomFlat = value; } }
@@ -58,6 +59,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		public int Alpha { get { return alpha; } set { alpha = value; } }
 		public int TopHeight { get { return topHeight; } set { topHeight = value; } }
 		public int BottomHeight { get { return bottomHeight; } set { bottomHeight = value; } }
+		public bool IsNew { get { return isNew; } set { isNew = value; } }
 
 
 		public ThreeDFloor()
