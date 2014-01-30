@@ -39,8 +39,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		private void okButton_Click(object sender, EventArgs e)
 		{
-			// BuilderPlug.ProcessSectors(threeDFloorPanel.Controls);
-
 			threedfloors = new List<ThreeDFloor>();
 
 			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
@@ -49,26 +47,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 				threedfloors.Add(ctrl.ThreeDFloor);
 			}
 
-			/*
-			int tag = General.Map.Map.GetNewTag();
-
-			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
-			{
-				if (ctrl.IsNew)
-				{
-					BuilderPlug.CreateNewControlSector(ctrl, tag);
-				}
-				else
-				{
-					BuilderPlug.UpdateControlSector(ctrl);
-				}
-			}
-			*/
-
 			this.DialogResult = DialogResult.OK;
 			this.Close();
-
-			// General.Editing.AcceptMode();
 		}
 
 		private void cancelButton_Click(object sender, EventArgs e)
@@ -180,7 +160,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			}
 			else
 			{
-				FillThreeDFloorPanel(BuilderPlug.ThreeDFloors);
+				FillThreeDFloorPanel(threedfloors);
 			}
 		}
 	}

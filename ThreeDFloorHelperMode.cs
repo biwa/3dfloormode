@@ -42,10 +42,6 @@ using CodeImp.DoomBuilder.Controls;
 
 #endregion
 
-// WICHTIG
-//BuilderModes.BuilderPlug.Me.HighlightRange
-
-// namespace CodeImp.DoomBuilder.BuilderModes
 namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 {
 	[EditMode(DisplayName = "3D Floor Editing Mode",
@@ -146,19 +142,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 				{
 					if(tdf.TaggedSectors.Contains(s))
 						sectorsToThreeDFloors[s].Add(tdf);
-
-					/*
-					for (int i = 0; i < ctrl.checkedListBoxSectors.Items.Count; i++)
-					{
-						string text = ctrl.checkedListBoxSectors.Items[i].ToString();
-						bool ischecked = ctrl.checkedListBoxSectors.GetItemChecked(i);
-
-						if (ischecked && text == "Sector " + s.Index.ToString())
-						{
-							sectorsToThreeDFloors[s].Add(ctrl.ThreeDFloor);
-						}
-					}
-					*/
 				}
 			}
 
@@ -291,12 +274,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					}
 				}
 
-				// renderer.RenderLine(new Vector2D(ThreeDFloor.controlsectorarea.Left, ThreeDFloor.controlsectorarea.Top), new Vector2D(ThreeDFloor.controlsectorarea.Left, ThreeDFloor.controlsectorarea.Bottom), 10.0f, new PixelColor(128, 255, 0, 0), true);
-				// renderer.RenderRectangleFilled(ThreeDFloor.controlsectorarea, new PixelColor(128, 255, 0, 0), true);
-				// renderer.RenderRectangle(ThreeDFloor.controlsectorarea, 1.5f, new PixelColor(255, 255, 0, 0), true);
 				BuilderPlug.Me.ControlSectorArea.Draw(renderer, csahighlight);
-
-				// DrawTooltipOverlay();
 
 				renderer.Finish();
 			}
@@ -463,13 +441,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					if((highlighted != null) && !highlighted.IsDisposed)
 						renderer.PlotSector(highlighted);
 					
-					/*
-					// Undraw highlighted things
-					if(highlighted != null)
-						foreach(Thing t in highlighted.Things)
-							renderer.RenderThing(t, renderer.DetermineThingColor(t));
-					*/
-
 					// Set new highlight
 					highlighted = s;
 
@@ -477,13 +448,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					if((highlighted != null) && !highlighted.IsDisposed)
 						renderer.PlotSector(highlighted, General.Colors.Highlight);
 					
-					/*
-					// Render highlighted things
-					if(highlighted != null)
-						foreach(Thing t in highlighted.Things)
-							renderer.RenderThing(t, General.Colors.Highlight);
-					*/
-
 					// Done
 					renderer.Finish();
 				}
@@ -607,17 +571,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			docker = new Docker("threedfloorhelper", "3D floors", panel);
 			General.Interface.AddDocker(docker);
 			General.Interface.SelectDocker(docker);
-
-			/*
-			for (int i = 0; i < 10; i++)
-			{
-				var tt = new ThreeDFloorHelperTooltipElementControl();
-				tt.Visible = false;
-				tooltipelements.Add(tt);
-				panel.flowLayoutPanel1.Controls.Add(tt);
-			}
-			*/
-
 
 			// Add toolbar buttons
 			/*
@@ -958,26 +911,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			if(e.Button == MouseButtons.Right)
 				dragging = true;
 
-			/*
-			// Edit button used?
-			if(General.Actions.CheckActionActive(null, "classicedit"))
-			{
-				// Anything highlighted?
-				if((highlighted != null) && !highlighted.IsDisposed)
-				{
-					// Highlighted item not selected?
-					if(!highlighted.Selected)
-					{
-						// Select only this sector for dragging
-						General.Map.Map.ClearSelectedSectors();
-						SelectSector(highlighted, true, true);
-					}
-
-					// Start dragging the selection
-					General.Editing.ChangeMode(new DragSectorsMode(mousedownmappos));
-				}
-			}
-			*/
 		}
 
 		protected override void OnDragStop(MouseEventArgs e)

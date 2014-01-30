@@ -97,11 +97,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		private static BuilderPlug me;
 
 		// Lines tagged to the selected sectors
-		private static List<ThreeDFloor> threeDFloors = new List<ThreeDFloor>();
 		private static ThreeDFloorEditorWindow tdfew = new ThreeDFloorEditorWindow();
 
-		//public static List<Sector> SelectedSectors { get { return selectedSectors; } set { selectedSectors = value; } }
-		public static List<ThreeDFloor> ThreeDFloors { get { return threeDFloors; } set { threeDFloors = value; } }
 		public static ThreeDFloorEditorWindow TDFEW { get { return tdfew; } }
 
 		// Static property to access the BuilderPlug
@@ -145,19 +142,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
         }
 
         #region ================== Actions
-
 		
-		// [BeginAction("threedfloorhelper")]
+        #endregion
+
+		#region ================== Methods
+
 		public DialogResult ThreeDFloorEditor()
 		{
-			// Only make this action possible if a map is actually opened and the we are in sectors mode
-			/*
-			if (General.Editing.Mode == null || General.Editing.Mode.Attributes.SwitchAction != "sectorsmode")
-			{
-				return;
-			}
-			*/
-
 			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
 
 			if (selectedSectors.Count <= 0 && General.Editing.Mode.HighlightedObject is Sector)
@@ -177,29 +168,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			return result;
 		}
 
-        #endregion
-
-		#region ================== Methods
-
 		// Use the same settings as the BuilderModes plugin
 		private void LoadSettings()
 		{
 			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
 			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
-		}
-
-		public static List<Linedef> GetTaggedLinedefs(List<Sector> sectors)
-		{
-			List<Linedef> linedefs = new List<Linedef>();
-
-			foreach (Linedef ld in General.Map.Map.Linedefs)
-				if (ld.Action == 160)
-					foreach (Sector s in sectors)
-						if (ld.Args[0] == s.Tag)
-							linedefs.Add(ld);
-
-			return linedefs;
 		}
 
 		public static List<ThreeDFloor> GetThreeDFloors(List<Sector> sectors)
@@ -222,31 +196,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					tdf.Add(new ThreeDFloor(s));
 
 			return tdf;
-		}
-
-		private List<Sector> GetControlSectors(List<Sector> sectors)
-		{
-			List<Sector> controlsectors = new List<Sector>();
-
-			foreach (Linedef ld in General.Map.Map.Linedefs)
-				if (ld.Action == 160)
-					foreach (Sector s in sectors)
-						if (ld.Args[0] == s.Tag)
-							controlsectors.Add(ld.Front.Sector);
-
-			return controlsectors;
-		}
-
-		private static List<Sector> GetControlSectors(int tag)
-		{
-			List<Sector> controlsectors = new List<Sector>();
-
-			foreach (Linedef ld in General.Map.Map.Linedefs)
-				if (ld.Action == 160)
-					if (ld.Args[0] == tag && !controlsectors.Contains(ld.Front.Sector))
-						controlsectors.Add(ld.Front.Sector);
-
-			return controlsectors;
 		}
 
 		#endregion

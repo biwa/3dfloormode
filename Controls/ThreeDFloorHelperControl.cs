@@ -114,8 +114,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 			threeDFloor.TopHeight = sectorCeilingHeight.GetResult(threeDFloor.TopHeight);
 			threeDFloor.BottomHeight = sectorFloorHeight.GetResult(threeDFloor.BottomHeight);
-			// threeDFloor.TopHeight = int.Parse(sectorCeilingHeight.Text);
-			// threeDFloor.BottomHeight = int.Parse(sectorFloorHeight.Text);
 			threeDFloor.TopFlat = sectorTopFlat.TextureName;
 			threeDFloor.BottomFlat = sectorBottomFlat.TextureName;
 			threeDFloor.BorderTexture = sectorBorderTexture.TextureName;
@@ -173,36 +171,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		{
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, false);
-		}
-
-		private void sectorTopFlat_Load(object sender, EventArgs e)
-		{
-
-		}
-
-		private void label1_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void sectorBorderTexture_Load(object sender, EventArgs e)
-		{
-
-		}
-
-		private void label3_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void label2_Click(object sender, EventArgs e)
-		{
-
-		}
-
-		private void sectorBottomFlat_Load(object sender, EventArgs e)
-		{
-
 		}
 	}
 }

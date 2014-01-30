@@ -60,7 +60,6 @@
 			this.sectorTopFlat.Size = new System.Drawing.Size(115, 136);
 			this.sectorTopFlat.TabIndex = 3;
 			this.sectorTopFlat.TextureName = "";
-			this.sectorTopFlat.Load += new System.EventHandler(this.sectorTopFlat_Load);
 			// 
 			// sectorBorderTexture
 			// 
@@ -70,7 +69,6 @@
 			this.sectorBorderTexture.Size = new System.Drawing.Size(115, 136);
 			this.sectorBorderTexture.TabIndex = 4;
 			this.sectorBorderTexture.TextureName = "";
-			this.sectorBorderTexture.Load += new System.EventHandler(this.sectorBorderTexture_Load);
 			// 
 			// sectorBottomFlat
 			// 
@@ -79,7 +77,6 @@
 			this.sectorBottomFlat.Size = new System.Drawing.Size(115, 136);
 			this.sectorBottomFlat.TabIndex = 5;
 			this.sectorBottomFlat.TextureName = "";
-			this.sectorBottomFlat.Load += new System.EventHandler(this.sectorBottomFlat_Load);
 			// 
 			// sectorCeilingHeight
 			// 
@@ -118,7 +115,6 @@
 			this.label1.Size = new System.Drawing.Size(26, 13);
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Top";
-			this.label1.Click += new System.EventHandler(this.label1_Click);
 			// 
 			// label2
 			// 
@@ -129,7 +125,6 @@
 			this.label2.Size = new System.Drawing.Size(40, 13);
 			this.label2.TabIndex = 6;
 			this.label2.Text = "Bottom";
-			this.label2.Click += new System.EventHandler(this.label2_Click);
 			// 
 			// label3
 			// 
@@ -140,7 +135,6 @@
 			this.label3.Size = new System.Drawing.Size(38, 13);
 			this.label3.TabIndex = 7;
 			this.label3.Text = "Border";
-			this.label3.Click += new System.EventHandler(this.label3_Click);
 			// 
 			// typeArgument
 			// 

@@ -344,7 +344,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			blockmap = new BlockMap<BlockEntry>(area, (int)gridsize);
 			blockmap.AddLinedefsSet(General.Map.Map.Linedefs);
 			blockmap.AddSectorsSet(General.Map.Map.Sectors);
-			// blockmap.AddThingsSet(General.Map.Map.Things);
 		}
 
 		public void Edit()
