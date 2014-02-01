@@ -109,7 +109,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		public void BindTag(int tag)
 		{
 			Linedef line = null;
-			bool isBound = false;
 
 			// try to find an line without an action
 			foreach (Sidedef sd in sector.Sidedefs)
@@ -121,7 +120,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 				// nothing has to be done
 				if (sd.Line.Args[0] == tag)
 				{
-					isBound = true;
 					return;
 				}
 			}
@@ -137,6 +135,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					if (sd.Line.Length > line.Length)
 						line = sd.Line;
 				}
+
+				// Lines may not have a length of less than 1 after splitting
+				if (line.Length / 2 < 1)
+					throw new Exception("Can't split more lines in Sector " + line.Front.Sector.Index.ToString() + ".");
 
 				Vertex v = General.Map.Map.CreateVertex(line.Line.GetCoordinatesAt(0.5f));
 				v.SnapToAccuracy();
@@ -183,15 +185,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			List<Vertex> vertices = new List<Vertex>();
 			Point p;
 
-			try
-			{
-				p = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition();
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show(e.Message);
-				return false;
-			}
+			p = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition();
 
 			drawnvertices.Add(SectorVertex(p.X, p.Y));
 			drawnvertices.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));

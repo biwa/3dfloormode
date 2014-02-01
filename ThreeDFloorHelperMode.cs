@@ -124,11 +124,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
 
-			foreach (ThreeDFloor tdf in threedfloors)
+			try
 			{
-				if (tdf.IsNew)
-					if (tdf.CreateGeometry())
-						tdf.UpdateGeometry();
+				foreach (ThreeDFloor tdf in threedfloors)
+				{
+					if (tdf.IsNew)
+						if (tdf.CreateGeometry())
+							tdf.UpdateGeometry();
+				}
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message + "\nPlease increase the size of the control sector area.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				General.Map.UndoRedo.WithdrawUndo();
+				return;
 			}
 
 			// Fill the sectorsToThreeDFloors dictionary, with a selected sector as key
@@ -185,8 +194,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 				foreach (Sector s in sectors)
 					s.Tag = newtag;
 
-				foreach (ThreeDFloor tdf in sectorsToThreeDFloors[sectors.First()])
-					tdf.BindTag(newtag);
+				try
+				{
+					foreach (ThreeDFloor tdf in sectorsToThreeDFloors[sectors.First()])
+						tdf.BindTag(newtag);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					General.Map.UndoRedo.WithdrawUndo();
+					return;
+				}
 			}
 
 			// Remove unused tags from the 3D floors
