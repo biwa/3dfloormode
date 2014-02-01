@@ -323,7 +323,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					{
 						foreach (BlockEntry be in blocks)
 						{
-							if (be.Lines.Count == 0)
+							if (be.Sectors.Count == 0)
 							{
 								return new Point(x + margin, y - margin);
 							}
