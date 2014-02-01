@@ -863,9 +863,42 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				if (csahighlight != ControlSectorArea.Highlight.None)
 				{
+					switch (csahighlight)
+					{
+						case ControlSectorArea.Highlight.OuterTop:
+						case ControlSectorArea.Highlight.OuterBottom:
+						case ControlSectorArea.Highlight.InnerTop:
+						case ControlSectorArea.Highlight.InnerBottom:
+							General.Interface.SetCursor(Cursors.SizeNS);
+							break;
+						case ControlSectorArea.Highlight.OuterLeft:
+						case ControlSectorArea.Highlight.OuterRight:
+						case ControlSectorArea.Highlight.InnerLeft:
+						case ControlSectorArea.Highlight.InnerRight:
+							General.Interface.SetCursor(Cursors.SizeWE);
+							break;
+						case ControlSectorArea.Highlight.OuterTopLeft:
+						case ControlSectorArea.Highlight.OuterBottomRight:
+						case ControlSectorArea.Highlight.InnerTopLeft:
+						case ControlSectorArea.Highlight.InnerBottomRight:
+							General.Interface.SetCursor(Cursors.SizeNWSE);
+							break;
+						case ControlSectorArea.Highlight.OuterTopRight:
+						case ControlSectorArea.Highlight.OuterBottomLeft:
+						case ControlSectorArea.Highlight.InnerTopRight:
+						case ControlSectorArea.Highlight.InnerBottomLeft:
+							General.Interface.SetCursor(Cursors.SizeNESW);
+							break;
+						case ControlSectorArea.Highlight.Body:
+							General.Interface.SetCursor(Cursors.Hand);
+							break;
+					}
+
 					Highlight(null);
 					return;
 				}
+
+				General.Interface.SetCursor(Cursors.Default);
 
 				// Find the nearest linedef within highlight range
 				Linedef l = General.Map.Map.NearestLinedef(mousemappos);
