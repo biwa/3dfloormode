@@ -8,8 +8,8 @@
     <ProjectGuid>{88CFD996-027B-4CBE-9828-26B2728B6127}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ThreeDFloorHelper</RootNamespace>
-    <AssemblyName>ThreeDFloorHelper</AssemblyName>
+    <RootNamespace>ThreeDFloorMode</RootNamespace>
+    <AssemblyName>ThreeDFloorMode</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
