@@ -335,6 +335,34 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			throw new Exception("No space left for control sectors");
 		}
 
+		// Aligns the area to the grid, expanding the area if necessary
+		private RectangleF AlignAreaToGrid(RectangleF area)
+		{
+			List<float> f = new List<float>
+			{
+				area.Left,
+				area.Top,
+				area.Right,
+				area.Bottom
+			};
+
+			for (int i = 0; i < f.Count; i++)
+			{
+				if (f[i] < 0)
+					f[i] = (float)Math.Floor(f[i] / gridsize) * gridsize;
+				else
+					f[i] = (float)Math.Ceiling(f[i] / gridsize) * gridsize;
+			}
+
+
+			float l = f[0];
+			float t = f[1];
+			float r = f[2];
+			float b = f[3];
+
+			return new RectangleF(l, t, r - l, b - t);
+		}
+
 		private void CreateBlockmap()
 		{
 			// Make blockmap
@@ -342,6 +370,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			area = MapSet.IncreaseArea(area, General.Map.Map.Things);
 			area = MapSet.IncreaseArea(area, new Vector2D(outerleft, outertop));
 			area = MapSet.IncreaseArea(area, new Vector2D(outerright, outerbottom));
+
+			area = AlignAreaToGrid(area);
+
 			if (blockmap != null) blockmap.Dispose();
 			blockmap = new BlockMap<BlockEntry>(area, (int)gridsize);
 			blockmap.AddLinedefsSet(General.Map.Map.Linedefs);

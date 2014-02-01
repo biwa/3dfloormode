@@ -279,8 +279,69 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 			if (taggedLines == 0)
 			{
-				// delete geometry here
+				DeleteSector(sector);
 			}
+		}
+
+		private void DeleteSector(Sector sector)
+		{
+			if (sector == null)
+				return;
+
+			General.Map.Map.BeginAddRemove(); //mxd
+
+			//mxd. Get all the linedefs
+			List<Linedef> lines = new List<Linedef>(sector.Sidedefs.Count);
+			foreach (Sidedef side in sector.Sidedefs) lines.Add(side.Line);
+
+			// Dispose the sector
+			sector.Dispose();
+
+			// Check all the lines
+			for (int i = lines.Count - 1; i >= 0; i--)
+			{
+				// If the line has become orphaned, remove it
+				if ((lines[i].Front == null) && (lines[i].Back == null))
+				{
+					// Remove line
+					lines[i].Dispose();
+				}
+				else
+				{
+					// If the line only has a back side left, flip the line and sides
+					if ((lines[i].Front == null) && (lines[i].Back != null))
+					{
+						lines[i].FlipVertices();
+						lines[i].FlipSidedefs();
+					}
+
+					//mxd. Check textures.
+					if (lines[i].Front.MiddleRequired() && (lines[i].Front.MiddleTexture.Length == 0 || lines[i].Front.MiddleTexture == "-"))
+					{
+						if (lines[i].Front.HighTexture.Length > 0 && lines[i].Front.HighTexture != "-")
+						{
+							lines[i].Front.SetTextureMid(lines[i].Front.HighTexture);
+						}
+						else if (lines[i].Front.LowTexture.Length > 0 && lines[i].Front.LowTexture != "-")
+						{
+							lines[i].Front.SetTextureMid(lines[i].Front.LowTexture);
+						}
+					}
+
+					//mxd. Do we still need high/low textures?
+					lines[i].Front.RemoveUnneededTextures(false);
+
+					// Update sided flags
+					lines[i].ApplySidedFlags();
+				}
+			}
+
+			General.Map.Map.EndAddRemove(); //mxd
+
+			// Update cache values
+			General.Map.IsChanged = true;
+			General.Map.Map.Update();
+
 		}
 	}
 }

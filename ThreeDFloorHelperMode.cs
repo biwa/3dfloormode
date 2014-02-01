@@ -805,6 +805,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 							{
 								ProcessSectors(BuilderPlug.TDFEW.ThreeDFloors);
 								General.Map.Map.Update();
+								SetupLabels();
+								UpdateSelectedLabels();
 							}
 
 							// When a single sector was selected, deselect it now
