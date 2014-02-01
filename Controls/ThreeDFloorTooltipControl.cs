@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace CodeImp.DoomBuilder.ThreeDFloorHelper
+namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
 	public partial class ThreeDFloorHelperTooltipElementControl : UserControl
 	{

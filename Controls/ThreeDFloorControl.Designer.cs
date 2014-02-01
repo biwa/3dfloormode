@@ -1,4 +1,4 @@
-﻿namespace CodeImp.DoomBuilder.ThreeDFloorHelper
+﻿namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
 	partial class ThreeDFloorHelperControl
 	{

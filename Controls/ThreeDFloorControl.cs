@@ -19,7 +19,7 @@ using CodeImp.DoomBuilder.Types;
 using CodeImp.DoomBuilder.Config;
 using CodeImp.DoomBuilder.Data;
 
-namespace CodeImp.DoomBuilder.ThreeDFloorHelper
+namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
 	public partial class ThreeDFloorHelperControl : UserControl
 	{

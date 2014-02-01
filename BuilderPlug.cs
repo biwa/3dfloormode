@@ -44,7 +44,7 @@ using CodeImp.DoomBuilder.GZBuilder.Geometry;
 
 #endregion
 
-namespace CodeImp.DoomBuilder.ThreeDFloorHelper
+namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
 	//
 	// MANDATORY: The plug!

@@ -26,7 +26,7 @@ using CodeImp.DoomBuilder.Rendering;
 using CodeImp.DoomBuilder.Editing;
 using CodeImp.DoomBuilder.Map;
 
-namespace CodeImp.DoomBuilder.ThreeDFloorHelper
+namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
 	public class ControlSectorArea
 	{

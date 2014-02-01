@@ -42,7 +42,7 @@ using CodeImp.DoomBuilder.Controls;
 
 #endregion
 
-namespace CodeImp.DoomBuilder.ThreeDFloorHelper
+namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
 	[EditMode(DisplayName = "3D Floor Editing Mode",
 			  SwitchAction = "threedfloorhelpermode",		// Action name used to switch to this mode
