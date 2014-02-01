@@ -29,11 +29,11 @@
 		private void InitializeComponent()
 		{
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
 			this.lastTag = new CodeImp.DoomBuilder.Controls.NumericTextbox();
 			this.firstTag = new CodeImp.DoomBuilder.Controls.NumericTextbox();
 			this.useTagRange = new System.Windows.Forms.CheckBox();
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
 			this.okButton = new System.Windows.Forms.Button();
 			this.cancelButton = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
@@ -51,6 +51,24 @@
 			this.groupBox1.Size = new System.Drawing.Size(225, 57);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(120, 27);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(27, 13);
+			this.label2.TabIndex = 4;
+			this.label2.Text = "Last";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(6, 27);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(26, 13);
+			this.label1.TabIndex = 3;
+			this.label1.Text = "First";
 			// 
 			// lastTag
 			// 
@@ -87,24 +105,6 @@
 			this.useTagRange.UseVisualStyleBackColor = true;
 			this.useTagRange.CheckedChanged += new System.EventHandler(this.useTagRange_CheckedChanged);
 			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 27);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(26, 13);
-			this.label1.TabIndex = 3;
-			this.label1.Text = "First";
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(120, 27);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(27, 13);
-			this.label2.TabIndex = 4;
-			this.label2.Text = "Last";
-			// 
 			// okButton
 			// 
 			this.okButton.Location = new System.Drawing.Point(47, 75);
@@ -135,6 +135,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "ControlSectorAreaConfig";
+			this.ShowIcon = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Control Sector Area Configuration";
 			this.groupBox1.ResumeLayout(false);

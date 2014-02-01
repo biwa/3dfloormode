@@ -40,11 +40,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 		private void cancelButton_Click(object sender, EventArgs e)
 		{
+			this.DialogResult = DialogResult.Cancel;
 			this.Close();
 		}
 
 		private void okButton_Click(object sender, EventArgs e)
 		{
+			if (useTagRange.Checked && int.Parse(lastTag.Text) < int.Parse(firstTag.Text))
+			{
+				MessageBox.Show("Last tag of range must be bigger than first tag of range", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
 			csa.UseCustomTagRnage = useTagRange.Checked;
 
 			if (useTagRange.Checked)
@@ -53,6 +60,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 				csa.LastTag = int.Parse(lastTag.Text);
 			}
 
+			this.DialogResult = DialogResult.OK;
 			this.Close();
 		}
 	}

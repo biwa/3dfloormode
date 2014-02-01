@@ -154,13 +154,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 			if (selectedSectors.Count <= 0 && General.Editing.Mode.HighlightedObject is Sector)
 				selectedSectors.Add((Sector)General.Editing.Mode.HighlightedObject);
 
-			if (selectedSectors.Count <= 0)
-			{
-				// Show a warning in the status bar
-				General.Interface.DisplayStatus(StatusType.Warning, "Please highlight a sector to copy the properties from");
-				return DialogResult.Abort;
-			}
-
 			tdfew.ThreeDFloors = GetThreeDFloors(selectedSectors);
 
 			DialogResult result = tdfew.ShowDialog((Form)General.Interface);

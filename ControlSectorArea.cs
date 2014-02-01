@@ -299,6 +299,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 		{
 			CreateBlockmap();
 
+			int margin = (int)((gridsize - sectorsize) / 2);
+
 			// find position for new control sector
 			for (int x = (int)outerleft; x < (int)outerright; x += (int)gridsize)
 			{
@@ -315,7 +317,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					// no elements in the area yet
 					if (blocks.Count == 0)
 					{
-						return new Point(x, y);
+						return new Point(x + margin, y - margin);
 					}
 					else
 					{
@@ -323,7 +325,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 						{
 							if (be.Lines.Count == 0)
 							{
-								return new Point(x, y);
+								return new Point(x + margin, y - margin);
 							}
 						}
 					}
