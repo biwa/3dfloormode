@@ -46,7 +46,7 @@
 			this.threeDFloorPanel.Location = new System.Drawing.Point(12, 12);
 			this.threeDFloorPanel.Name = "threeDFloorPanel";
 			this.threeDFloorPanel.Size = new System.Drawing.Size(760, 494);
-			this.threeDFloorPanel.TabIndex = 1;
+			this.threeDFloorPanel.TabIndex = 0;
 			// 
 			// okButton
 			// 
@@ -54,7 +54,7 @@
 			this.okButton.Location = new System.Drawing.Point(616, 513);
 			this.okButton.Name = "okButton";
 			this.okButton.Size = new System.Drawing.Size(75, 23);
-			this.okButton.TabIndex = 2;
+			this.okButton.TabIndex = 3;
 			this.okButton.Text = "OK";
 			this.okButton.UseVisualStyleBackColor = true;
 			this.okButton.Click += new System.EventHandler(this.okButton_Click);
@@ -62,10 +62,11 @@
 			// cancelButton
 			// 
 			this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.cancelButton.Location = new System.Drawing.Point(697, 513);
 			this.cancelButton.Name = "cancelButton";
 			this.cancelButton.Size = new System.Drawing.Size(75, 23);
-			this.cancelButton.TabIndex = 3;
+			this.cancelButton.TabIndex = 4;
 			this.cancelButton.Text = "Cancel";
 			this.cancelButton.UseVisualStyleBackColor = true;
 			this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -76,7 +77,7 @@
 			this.addThreeDFloorButton.Location = new System.Drawing.Point(12, 513);
 			this.addThreeDFloorButton.Name = "addThreeDFloorButton";
 			this.addThreeDFloorButton.Size = new System.Drawing.Size(75, 23);
-			this.addThreeDFloorButton.TabIndex = 4;
+			this.addThreeDFloorButton.TabIndex = 1;
 			this.addThreeDFloorButton.Text = "Add 3D floor";
 			this.addThreeDFloorButton.UseVisualStyleBackColor = true;
 			this.addThreeDFloorButton.Click += new System.EventHandler(this.addThreeDFloorButton_Click);
@@ -88,15 +89,17 @@
 			this.sharedThreeDFloorsCheckBox.Location = new System.Drawing.Point(93, 517);
 			this.sharedThreeDFloorsCheckBox.Name = "sharedThreeDFloorsCheckBox";
 			this.sharedThreeDFloorsCheckBox.Size = new System.Drawing.Size(155, 17);
-			this.sharedThreeDFloorsCheckBox.TabIndex = 5;
+			this.sharedThreeDFloorsCheckBox.TabIndex = 2;
 			this.sharedThreeDFloorsCheckBox.Text = "Show shared 3D floors only";
 			this.sharedThreeDFloorsCheckBox.UseVisualStyleBackColor = true;
 			this.sharedThreeDFloorsCheckBox.CheckedChanged += new System.EventHandler(this.sharedThreeDFloorsCheckBox_CheckedChanged);
 			// 
 			// ThreeDFloorEditorWindow
 			// 
+			this.AcceptButton = this.okButton;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.CancelButton = this.cancelButton;
 			this.ClientSize = new System.Drawing.Size(784, 548);
 			this.Controls.Add(this.sharedThreeDFloorsCheckBox);
 			this.Controls.Add(this.addThreeDFloorButton);

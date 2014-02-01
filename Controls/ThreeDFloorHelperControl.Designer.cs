@@ -58,7 +58,7 @@
 			this.sectorTopFlat.Location = new System.Drawing.Point(251, 38);
 			this.sectorTopFlat.Name = "sectorTopFlat";
 			this.sectorTopFlat.Size = new System.Drawing.Size(115, 136);
-			this.sectorTopFlat.TabIndex = 3;
+			this.sectorTopFlat.TabIndex = 4;
 			this.sectorTopFlat.TextureName = "";
 			// 
 			// sectorBorderTexture
@@ -67,7 +67,7 @@
 			this.sectorBorderTexture.Name = "sectorBorderTexture";
 			this.sectorBorderTexture.Required = false;
 			this.sectorBorderTexture.Size = new System.Drawing.Size(115, 136);
-			this.sectorBorderTexture.TabIndex = 4;
+			this.sectorBorderTexture.TabIndex = 3;
 			this.sectorBorderTexture.TextureName = "";
 			// 
 			// sectorBottomFlat
@@ -75,7 +75,7 @@
 			this.sectorBottomFlat.Location = new System.Drawing.Point(9, 38);
 			this.sectorBottomFlat.Name = "sectorBottomFlat";
 			this.sectorBottomFlat.Size = new System.Drawing.Size(115, 136);
-			this.sectorBottomFlat.TabIndex = 5;
+			this.sectorBottomFlat.TabIndex = 2;
 			this.sectorBottomFlat.TextureName = "";
 			// 
 			// sectorCeilingHeight
@@ -90,7 +90,7 @@
 			this.sectorCeilingHeight.Name = "sectorCeilingHeight";
 			this.sectorCeilingHeight.Size = new System.Drawing.Size(70, 24);
 			this.sectorCeilingHeight.StepValues = null;
-			this.sectorCeilingHeight.TabIndex = 6;
+			this.sectorCeilingHeight.TabIndex = 1;
 			// 
 			// sectorFloorHeight
 			// 
@@ -104,7 +104,7 @@
 			this.sectorFloorHeight.Name = "sectorFloorHeight";
 			this.sectorFloorHeight.Size = new System.Drawing.Size(70, 24);
 			this.sectorFloorHeight.StepValues = null;
-			this.sectorFloorHeight.TabIndex = 2;
+			this.sectorFloorHeight.TabIndex = 0;
 			// 
 			// label1
 			// 
@@ -205,7 +205,7 @@
 			this.groupBox1.Location = new System.Drawing.Point(372, 8);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(124, 166);
-			this.groupBox1.TabIndex = 14;
+			this.groupBox1.TabIndex = 5;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "3D floor properties";
 			// 
@@ -216,7 +216,7 @@
 			this.groupBox2.Location = new System.Drawing.Point(502, 8);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(124, 166);
-			this.groupBox2.TabIndex = 15;
+			this.groupBox2.TabIndex = 6;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Sectors";
 			// 
@@ -234,7 +234,7 @@
 			this.buttonDuplicate.Location = new System.Drawing.Point(632, 13);
 			this.buttonDuplicate.Name = "buttonDuplicate";
 			this.buttonDuplicate.Size = new System.Drawing.Size(75, 23);
-			this.buttonDuplicate.TabIndex = 6;
+			this.buttonDuplicate.TabIndex = 7;
 			this.buttonDuplicate.Text = "Duplicate";
 			this.buttonDuplicate.UseVisualStyleBackColor = true;
 			this.buttonDuplicate.Click += new System.EventHandler(this.buttonDuplicate_Click);
@@ -244,7 +244,7 @@
 			this.buttonSplit.Location = new System.Drawing.Point(632, 42);
 			this.buttonSplit.Name = "buttonSplit";
 			this.buttonSplit.Size = new System.Drawing.Size(75, 23);
-			this.buttonSplit.TabIndex = 7;
+			this.buttonSplit.TabIndex = 8;
 			this.buttonSplit.Text = "Split";
 			this.buttonSplit.UseVisualStyleBackColor = true;
 			this.buttonSplit.Click += new System.EventHandler(this.buttonSplit_Click);
@@ -254,7 +254,7 @@
 			this.buttonCheckAll.Location = new System.Drawing.Point(632, 71);
 			this.buttonCheckAll.Name = "buttonCheckAll";
 			this.buttonCheckAll.Size = new System.Drawing.Size(75, 23);
-			this.buttonCheckAll.TabIndex = 16;
+			this.buttonCheckAll.TabIndex = 9;
 			this.buttonCheckAll.Text = "Check all";
 			this.buttonCheckAll.UseVisualStyleBackColor = true;
 			this.buttonCheckAll.Click += new System.EventHandler(this.buttonCheckAll_Click);
@@ -264,7 +264,7 @@
 			this.buttonUncheckAll.Location = new System.Drawing.Point(632, 100);
 			this.buttonUncheckAll.Name = "buttonUncheckAll";
 			this.buttonUncheckAll.Size = new System.Drawing.Size(75, 23);
-			this.buttonUncheckAll.TabIndex = 17;
+			this.buttonUncheckAll.TabIndex = 10;
 			this.buttonUncheckAll.Text = "Uncheck all";
 			this.buttonUncheckAll.UseVisualStyleBackColor = true;
 			this.buttonUncheckAll.Click += new System.EventHandler(this.buttonUncheckAll_Click);

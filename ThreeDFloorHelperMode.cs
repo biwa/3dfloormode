@@ -129,8 +129,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 				foreach (ThreeDFloor tdf in threedfloors)
 				{
 					if (tdf.IsNew)
-						if (tdf.CreateGeometry())
-							tdf.UpdateGeometry();
+						tdf.CreateGeometry();
+					
+					tdf.UpdateGeometry();
 				}
 			}
 			catch (Exception e)

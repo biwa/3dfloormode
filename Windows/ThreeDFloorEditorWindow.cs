@@ -130,7 +130,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 
 			if (selectedSectors.Count > 1 && sharedThreeDFloorsCheckBox.Checked)
 			{
-				var deleteControls = new List<ThreeDFloorHelperControl>();
+				var hideControls = new List<ThreeDFloorHelperControl>();
 
 				foreach(ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
 				{
@@ -150,12 +150,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorHelper
 					}
 
 					if(!allChecked)
-						deleteControls.Add(ctrl);
+						hideControls.Add(ctrl);
 				}
 
-				foreach (ThreeDFloorHelperControl ctrl in deleteControls)
+				foreach (ThreeDFloorHelperControl ctrl in hideControls)
 				{
-					threeDFloorPanel.Controls.Remove(ctrl);
+					ctrl.Visible = false;
 				}
 			}
 			else
