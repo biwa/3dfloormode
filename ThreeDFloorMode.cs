@@ -190,7 +190,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (sectorsToThreeDFloors[sectors.First()].Count == 0)
 					newtag = 0;
 				else
-					newtag = BuilderPlug.Me.ControlSectorArea.GetNewTag();
+					try
+					{
+						newtag = BuilderPlug.Me.ControlSectorArea.GetNewTag();
+					}
+					catch (Exception e)
+					{
+						MessageBox.Show(e.Message + "\nPlease increase the custom tag range.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						General.Map.UndoRedo.WithdrawUndo();
+						return;
+					}
+			
 
 				foreach (Sector s in sectors)
 					s.Tag = newtag;

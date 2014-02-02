@@ -561,7 +561,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						return i;
 				}
 
-				throw new Exception("No free tags in the range between " + firsttag.ToString() + " and " + lasttag.ToString() + ".");
+				throw new Exception("No free tags in the custom range between " + firsttag.ToString() + " and " + lasttag.ToString() + ".");
 			}
 
 			return General.Map.Map.GetNewTag();
