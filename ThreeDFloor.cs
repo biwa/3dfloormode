@@ -41,8 +41,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int bottomheight;
 		Vector2D origin;
 		Vector2D direction;
-		Vector2D topdirection;
-		Vector2D bottomdirection;
 
 		public bool TopSloped { get { return topsloped; } set { topsloped = value; } }
 		public bool BottomSloped { get { return bottomsloped; } set { bottomsloped = value; } }

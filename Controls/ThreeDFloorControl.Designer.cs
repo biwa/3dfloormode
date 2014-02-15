@@ -53,6 +53,7 @@
 			this.bottomSlopeHeight = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.topSlopeHeight = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.topSlope = new System.Windows.Forms.CheckBox();
+			this.buttonEditSector = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -163,7 +164,7 @@
 			// 
 			this.label5.AutoSize = true;
 			this.label5.BackColor = System.Drawing.Color.Transparent;
-			this.label5.Location = new System.Drawing.Point(6, 54);
+			this.label5.Location = new System.Drawing.Point(7, 54);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(35, 13);
 			this.label5.TabIndex = 10;
@@ -200,6 +201,7 @@
 			// groupBox1
 			// 
 			this.groupBox1.BackColor = System.Drawing.Color.Transparent;
+			this.groupBox1.Controls.Add(this.buttonEditSector);
 			this.groupBox1.Controls.Add(this.label6);
 			this.groupBox1.Controls.Add(this.alphaArgument);
 			this.groupBox1.Controls.Add(this.typeArgument);
@@ -327,6 +329,16 @@
 			this.topSlope.UseVisualStyleBackColor = false;
 			this.topSlope.CheckedChanged += new System.EventHandler(this.topSlope_CheckedChanged);
 			// 
+			// buttonEditSector
+			// 
+			this.buttonEditSector.Location = new System.Drawing.Point(9, 109);
+			this.buttonEditSector.Name = "buttonEditSector";
+			this.buttonEditSector.Size = new System.Drawing.Size(106, 23);
+			this.buttonEditSector.TabIndex = 15;
+			this.buttonEditSector.Text = "Edit control sector";
+			this.buttonEditSector.UseVisualStyleBackColor = true;
+			this.buttonEditSector.Click += new System.EventHandler(this.buttonEditSector_Click);
+			// 
 			// ThreeDFloorHelperControl
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -386,5 +398,6 @@
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox bottomSlopeHeight;
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox topSlopeHeight;
 		private System.Windows.Forms.CheckBox topSlope;
+		private System.Windows.Forms.Button buttonEditSector;
 	}
 }

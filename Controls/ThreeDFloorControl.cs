@@ -25,11 +25,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	{
 		private ThreeDFloor threeDFloor;
 		public Linedef linedef;
-		public Sector sector;
 		private bool isnew;
+		private Sector sector;
 
 		public ThreeDFloor ThreeDFloor { get { return threeDFloor; } }
 		public bool IsNew { get { return isnew; } }
+		public Sector Sector { get { return sector; } }
 
 		// Create the control from an existing linedef
 		public ThreeDFloorHelperControl(ThreeDFloor threeDFloor)
@@ -61,6 +62,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			topSlopeHeight.Text = threeDFloor.Slope.TopHeight.ToString();
 
 			AddSectorCheckboxes();
+
+			sector = General.Map.Map.CreateSector();
+
+			if (threeDFloor.Sector != null)
+				threeDFloor.Sector.CopyPropertiesTo(sector);
 		}
 
 		// Create a duplicate of the given control
@@ -112,6 +118,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			for(int i=0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, true);
+
+			sector = General.Map.Map.CreateSector();
 		}
 
 		public void ApplyToThreeDFloor()
@@ -131,6 +139,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			threeDFloor.IsNew = isnew;
 
+			sector.CopyPropertiesTo(threeDFloor.Sector);
 
 			si = threeDFloor.Slope;
 			si.BottomSloped = bottomSlope.Checked;
@@ -198,6 +207,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void topSlope_CheckedChanged(object sender, EventArgs e)
 		{
 			topSlopeHeight.Enabled = topSlope.Checked;
+		}
+
+		private void buttonEditSector_Click(object sender, EventArgs e)
+		{
+			sector.SetCeilTexture(sectorTopFlat.TextureName);
+			sector.SetFloorTexture(sectorBottomFlat.TextureName);
+			sector.CeilHeight = sectorCeilingHeight.GetResult(sector.CeilHeight);
+			sector.FloorHeight = sectorFloorHeight.GetResult(sector.FloorHeight);
+
+			DialogResult result = General.Interface.ShowEditSectors(new List<Sector> { sector });
+
+			if (result == DialogResult.OK)
+			{
+				sectorTopFlat.TextureName = sector.CeilTexture;
+				sectorBottomFlat.TextureName = sector.FloorTexture;
+				sectorCeilingHeight.Text = sector.CeilHeight.ToString();
+				sectorFloorHeight.Text = sector.FloorHeight.ToString();
+			}
 		}
 	}
 }
