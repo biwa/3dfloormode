@@ -39,6 +39,7 @@ using CodeImp.DoomBuilder.Types;
 using CodeImp.DoomBuilder.BuilderModes;
 using CodeImp.DoomBuilder.BuilderModes.Interface;
 using CodeImp.DoomBuilder.Controls;
+using CodeImp.DoomBuilder.GZBuilder.Geometry;
 
 #endregion
 
@@ -80,6 +81,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		ControlSectorArea.Highlight csahighlight = ControlSectorArea.Highlight.None;
 		bool dragging = false;
 
+		private List<ThreeDFloor> threedfloors;
+
 		#endregion
 
 		#region ================== Properties
@@ -93,6 +96,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// Constructor
 		public ThreeDFloorHelperMode()
 		{
+			threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
 		}
 
 		// Disposer
@@ -124,7 +128,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
 
-			try
+			//try
 			{
 				foreach (ThreeDFloor tdf in threedfloors)
 				{
@@ -134,12 +138,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					tdf.UpdateGeometry();
 				}
 			}
-			catch (Exception e)
+			/*catch (Exception e)
 			{
 				MessageBox.Show(e.Message + "\nPlease increase the size of the control sector area.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				General.Map.UndoRedo.WithdrawUndo();
 				return;
-			}
+			}*/
 
 			// Fill the sectorsToThreeDFloors dictionary, with a selected sector as key
 			// and a list of all 3D floors, that should be applied to to this sector, as value
@@ -304,6 +308,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 
 				BuilderPlug.Me.ControlSectorArea.Draw(renderer, csahighlight);
+
+				foreach (ThreeDFloor tdf in threedfloors)
+				{
+					Vector3D v1 = new Vector3D(tdf.Slope.Origin);
+					Vector3D v2 = new Vector3D(tdf.Slope.Origin + tdf.Slope.Direction);
+					byte a = 64;
+
+					if (tdf.TaggedSectors.Contains(highlighted))
+						a = 192;
+
+					renderer.RenderArrow(new Line3D(v1, v2), new PixelColor(a, 255, 255, 255));
+				}
 
 				renderer.Finish();
 			}
@@ -591,6 +607,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public override void OnEngage()
 		{
 			base.OnEngage();
+
 			renderer.SetPresentation(Presentation.Standard);
 
 			tooltipelements = new List<ThreeDFloorHelperTooltipElementControl>();
@@ -626,7 +643,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 		}
-		
+
 		// Mode disengages
 		public override void OnDisengage()
 		{
@@ -836,6 +853,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 								General.Map.Map.Update();
 								SetupLabels();
 								UpdateSelectedLabels();
+
+								threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
 							}
 
 							// When a single sector was selected, deselect it now

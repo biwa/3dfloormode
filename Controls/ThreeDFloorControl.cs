@@ -54,6 +54,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			flagsArgument.SetValue(threeDFloor.Flags);
 			alphaArgument.SetValue(threeDFloor.Alpha);
 
+			bottomSlope.Checked = threeDFloor.Slope.BottomSloped;
+			topSlope.Checked = threeDFloor.Slope.TopSloped;
+
+			bottomSlopeHeight.Text = threeDFloor.Slope.BottomHeight.ToString();
+			topSlopeHeight.Text = threeDFloor.Slope.TopHeight.ToString();
+
 			AddSectorCheckboxes();
 		}
 
@@ -111,6 +117,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void ApplyToThreeDFloor()
 		{
 			Regex r = new Regex(@"\d+");
+			SlopeInfo si;
 
 			threeDFloor.TopHeight = sectorCeilingHeight.GetResult(threeDFloor.TopHeight);
 			threeDFloor.BottomHeight = sectorFloorHeight.GetResult(threeDFloor.BottomHeight);
@@ -123,6 +130,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			threeDFloor.Alpha = int.Parse(alphaArgument.Text);
 
 			threeDFloor.IsNew = isnew;
+
+
+			si = threeDFloor.Slope;
+			si.BottomSloped = bottomSlope.Checked;
+			si.TopSloped = topSlope.Checked;
+
+			si.BottomHeight = bottomSlopeHeight.GetResult(0);
+			si.TopHeight = topSlopeHeight.GetResult(0);
+
+			threeDFloor.Slope = si;
 
 			threeDFloor.TaggedSectors = new List<Sector>();
 
@@ -171,6 +188,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, false);
+		}
+
+		private void bottomSlope_CheckedChanged(object sender, EventArgs e)
+		{
+			bottomSlopeHeight.Enabled = bottomSlope.Checked;
+		}
+
+		private void topSlope_CheckedChanged(object sender, EventArgs e)
+		{
+			topSlopeHeight.Enabled = topSlope.Checked;
 		}
 	}
 }

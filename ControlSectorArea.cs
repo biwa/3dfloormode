@@ -429,9 +429,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						continue;
 
 					List<BlockEntry> blocks = blockmap.GetLineBlocks(
+						//new Vector2D(x + margin, y - margin),
+						//new Vector2D(x + sectorsize - (2 * margin), y - sectorsize - (2 * margin))
 						new Vector2D(x + 1, y - 1),
-						new Vector2D(x + 2, y - 2)
-						);
+						new Vector2D(x + sectorsize - 1, y - sectorsize - 1)
+					);
+
 
 					// no elements in the area yet
 					if (blocks.Count == 0)
@@ -452,6 +455,92 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			throw new Exception("No space left for control sectors");
+		}
+
+		public Point GetNewControlSectorPosition(Vector2D pos, Vector2D vector, out Vector2D slopethingpos)
+		{
+			Line2D line = new Line2D(pos, pos + vector);
+			Vector2D perpendicular = line.GetPerpendicular();
+			int margin = (int)((gridsize - sectorsize) / 2);
+			float half = sectorsize / 2;
+
+			float xstep;
+			float ystep;
+
+			CreateBlockmap();
+
+			if (perpendicular.x == 0)
+			{
+				xstep = 0;
+				ystep = 1;
+			}
+			else
+			{
+				xstep = 1;
+				ystep = perpendicular.y / perpendicular.x;
+			}
+
+			RectangleF a = new RectangleF(0, 0, 128, 128);
+			RectangleF b = new RectangleF(32, 32, 64, 64);
+
+			for (int i = 0; i < int.MaxValue; i++)
+			{
+				float x = i * xstep + pos.x;
+				float y = i * ystep + pos.y;
+
+				if (!(x % 1 < float.Epsilon || y % 1 < float.Epsilon))
+					continue;
+
+				Vector2D tl = new Vector2D(x - half, y + half);
+				Vector2D br = new Vector2D(x + half, y - half);
+
+				if (!(Inside(tl.x, tl.y) && Inside(tl.x, br.y) && Inside(br.x, tl.y) && Inside(br.x, br.y)))
+					continue;
+
+				List<BlockEntry> blocks = blockmap.GetLineBlocks(
+					new Vector2D(x - half + 1, y + half - 1),
+					new Vector2D(x + half - 1, y - half - 1)
+				);
+
+
+				// no elements in the area yet
+				if (blocks.Count == 0)
+				{
+					slopethingpos = new Vector2D(x, y);
+
+					return new Point((int)(x - half), (int)(y + half));
+				}
+				else
+				{
+					foreach (BlockEntry be in blocks)
+					{
+						if (be.Sectors.Count == 0)
+						{
+							slopethingpos = new Vector2D(x, y);
+
+							return new Point((int)(x - half), (int)(y + half));
+						}
+					}
+				}
+			}
+
+			throw new Exception("No space left for control sectors");
+		}
+
+		public bool Inside(float x, float y)
+		{
+			return Inside(new Vector2D(x, y));
+		}
+
+		public bool Inside(Vector2D pos)
+		{
+			if (
+				(pos.x > outerleft && pos.x < outerright && pos.y < outertop && pos.y > outerbottom) &&
+				!(pos.x > innerleft && pos.x < innerright && pos.y < innertop && pos.y > innerbottom)
+			)
+				return true;
+
+			return false;
 		}
 
 		// Aligns the area to the grid, expanding the area if necessary
