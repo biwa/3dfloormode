@@ -219,7 +219,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			List<List<DrawnVertex>> drawnvertices = new List<List<DrawnVertex>>();
 			List<Vertex> vertices = new List<Vertex>();
-			Vector3D slopethingpos = new Vector3D(0, 0, 0);
+			Vector3D slopetopthingpos = new Vector3D(0, 0, 0);
+			Vector3D slopebottomthingpos = new Vector3D(0, 0, 0);
 			Line2D slopeline = new Line2D(0, 0, 0, 0);
 			List<Sector> newsectors = new List<Sector>();
 
@@ -261,7 +262,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				slope.Direction = ld2.Line.GetCoordinatesAt(0.5f) - slope.Origin;
 
 				// drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(slope.Origin, slope.Direction, out slopethingpos);
-				drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(this, out slopethingpos, out slopeline);
+				drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(this, out slopetopthingpos, out slopebottomthingpos, out slopeline);
 			}
 			else
 			{
@@ -304,7 +305,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				Line2D l = new Line2D(slope.Origin, slope.Origin + slope.Direction);
 				int az = (int)Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle());
 				int axy = Angle2D.RealToDoom(l.GetAngle());
-				Thing t;
+				Thing t = null;
 				int lineid = BuilderPlug.Me.ControlSectorArea.GetNewLineID();
 
 				foreach (Sidedef sd in newsectors[0].Sidedefs)
@@ -320,30 +321,37 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				// MessageBox.Show(Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle()).ToString());
 
 				// Ceiling slope
-				t = General.Map.Map.CreateThing();
-				General.Settings.ApplyDefaultThingSettings(t);
-				t.Move(slopethingpos);
-				//t.Rotate(axy);
-				t.Type = 9501;
-				t.Args[0] = lineid;
+				if (slope.TopSloped)
+				{
+					t = General.Map.Map.CreateThing();
+					General.Settings.ApplyDefaultThingSettings(t);
+					t.Move(slopetopthingpos);
+					//t.Rotate(axy);
+					t.Type = 9501;
+					t.Args[0] = lineid;
 
-				// Floor slope
-				t = General.Map.Map.CreateThing();
-				General.Settings.ApplyDefaultThingSettings(t);
-				t.Move(slopethingpos);
-				// t.Rotate(axy);
-				t.Type = 9500;
-				t.Args[0] = lineid;
-
-				t.UpdateConfiguration();
-
-				General.Map.ThingsFilter.Update();
-
-				if(slope.TopSloped)
 					sector.Fields.Add("tdfh_slope_top", new UniValue(UniversalType.Boolean, true));
 
+					t.UpdateConfiguration();
+				}
+
+				// Floor slope
 				if (slope.BottomSloped)
+				{
+					t = General.Map.Map.CreateThing();
+					General.Settings.ApplyDefaultThingSettings(t);
+					t.Move(slopebottomthingpos);
+					// t.Rotate(axy);
+					t.Type = 9500;
+					t.Args[0] = lineid;
+
 					sector.Fields.Add("tdfh_slope_bottom", new UniValue(UniversalType.Boolean, true));
+
+					t.UpdateConfiguration();
+				}
+
+				if(t != null)
+					General.Map.ThingsFilter.Update();
 
 				sector.Fields.Add("tdfh_slope_origin_x", new UniValue(UniversalType.Integer, (int)slope.Origin.x));
 				sector.Fields.Add("tdfh_slope_origin_y", new UniValue(UniversalType.Integer, (int)slope.Origin.y));
