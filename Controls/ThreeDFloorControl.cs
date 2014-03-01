@@ -156,7 +156,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 			{
 				string text = checkedListBoxSectors.Items[i].ToString();
-				bool ischecked = checkedListBoxSectors.GetItemChecked(i);
+				bool ischecked = checkedListBoxSectors.GetItemCheckState(i) == CheckState.Checked;
 
 				if (ischecked)
 				{
@@ -169,13 +169,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void AddSectorCheckboxes()
 		{
-			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+			List<Sector> sectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
 
-			if (selectedSectors == null)
+			foreach (Sector s in ThreeDFloor.TaggedSectors)
+			{
+				if (!sectors.Contains(s))
+					sectors.Add(s);
+			}
+
+			if (sectors == null)
 				return;
 
-			foreach(Sector s in selectedSectors.OrderBy(o => o.Index).ToList())
-				checkedListBoxSectors.Items.Add("Sector " + s.Index.ToString(), ThreeDFloor.TaggedSectors.Contains(s));
+			foreach (Sector s in sectors)
+			{
+				int i = checkedListBoxSectors.Items.Add("Sector " + s.Index.ToString(), ThreeDFloor.TaggedSectors.Contains(s));
+
+				if(!General.Map.Map.GetSelectedSectors(true).Contains(s))
+					checkedListBoxSectors.SetItemCheckState(i, CheckState.Indeterminate);
+			}
 		}
 
 		private void buttonDuplicate_Click(object sender, EventArgs e)
@@ -203,11 +214,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void bottomSlope_CheckedChanged(object sender, EventArgs e)
 		{
 			bottomSlopeHeight.Enabled = bottomSlope.Checked;
+			threeDFloor.Rebuild = true;
 		}
 
 		private void topSlope_CheckedChanged(object sender, EventArgs e)
 		{
 			topSlopeHeight.Enabled = topSlope.Checked;
+			threeDFloor.Rebuild = true;
 		}
 
 		private void buttonEditSector_Click(object sender, EventArgs e)
@@ -226,6 +239,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				sectorCeilingHeight.Text = sector.CeilHeight.ToString();
 				sectorFloorHeight.Text = sector.FloorHeight.ToString();
 			}
+		}
+
+		private void checkedListBoxSectors_ItemCheck(object sender, ItemCheckEventArgs e)
+		{
+			if (e.CurrentValue == CheckState.Indeterminate) e.NewValue = CheckState.Indeterminate;
 		}
 	}
 }

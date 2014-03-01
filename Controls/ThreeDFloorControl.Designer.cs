@@ -43,6 +43,7 @@
 			this.flagsArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
 			this.alphaArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.buttonEditSector = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.checkedListBoxSectors = new System.Windows.Forms.CheckedListBox();
 			this.buttonDuplicate = new System.Windows.Forms.Button();
@@ -53,7 +54,6 @@
 			this.bottomSlopeHeight = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.topSlopeHeight = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.topSlope = new System.Windows.Forms.CheckBox();
-			this.buttonEditSector = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -215,6 +215,16 @@
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "3D floor properties";
 			// 
+			// buttonEditSector
+			// 
+			this.buttonEditSector.Location = new System.Drawing.Point(9, 109);
+			this.buttonEditSector.Name = "buttonEditSector";
+			this.buttonEditSector.Size = new System.Drawing.Size(106, 23);
+			this.buttonEditSector.TabIndex = 15;
+			this.buttonEditSector.Text = "Edit control sector";
+			this.buttonEditSector.UseVisualStyleBackColor = true;
+			this.buttonEditSector.Click += new System.EventHandler(this.buttonEditSector_Click);
+			// 
 			// groupBox2
 			// 
 			this.groupBox2.BackColor = System.Drawing.Color.Transparent;
@@ -234,6 +244,7 @@
 			this.checkedListBoxSectors.Name = "checkedListBoxSectors";
 			this.checkedListBoxSectors.Size = new System.Drawing.Size(110, 169);
 			this.checkedListBoxSectors.TabIndex = 0;
+			this.checkedListBoxSectors.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBoxSectors_ItemCheck);
 			// 
 			// buttonDuplicate
 			// 
@@ -328,16 +339,6 @@
 			this.topSlope.Text = "/";
 			this.topSlope.UseVisualStyleBackColor = false;
 			this.topSlope.CheckedChanged += new System.EventHandler(this.topSlope_CheckedChanged);
-			// 
-			// buttonEditSector
-			// 
-			this.buttonEditSector.Location = new System.Drawing.Point(9, 109);
-			this.buttonEditSector.Name = "buttonEditSector";
-			this.buttonEditSector.Size = new System.Drawing.Size(106, 23);
-			this.buttonEditSector.TabIndex = 15;
-			this.buttonEditSector.Text = "Edit control sector";
-			this.buttonEditSector.UseVisualStyleBackColor = true;
-			this.buttonEditSector.Click += new System.EventHandler(this.buttonEditSector_Click);
 			// 
 			// ThreeDFloorHelperControl
 			// 

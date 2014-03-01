@@ -475,94 +475,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			throw new Exception("No space left for control sectors");
 		}
 
-		public List<List<DrawnVertex>> GetNewControlSectorPosition(Vector2D pos, Vector2D vector, out Vector2D slopethingpos)
-		{
-			Line2D line = new Line2D(pos, pos + vector);
-			Vector2D perpendicular = line.GetPerpendicular();
-			int margin = (int)((gridsize - sectorsize) / 2);
-			float half = sectorsize / 2;
-
-			float xstep;
-			float ystep;
-
-			CreateBlockmap();
-
-			if (perpendicular.x == 0)
-			{
-				xstep = 0;
-				ystep = 1;
-			}
-			else
-			{
-				xstep = 1;
-				ystep = perpendicular.y / perpendicular.x;
-			}
-
-			RectangleF a = new RectangleF(0, 0, 128, 128);
-			RectangleF b = new RectangleF(32, 32, 64, 64);
-
-			for (int i = 0; i < int.MaxValue; i++)
-			{
-				float x = i * xstep + pos.x;
-				float y = i * ystep + pos.y;
-
-				if (!(x % 1 < float.Epsilon || y % 1 < float.Epsilon))
-					continue;
-
-				Vector2D tl = new Vector2D(x - half, y + half);
-				Vector2D br = new Vector2D(x + half, y - half);
-
-				if (!(Inside(tl.x, tl.y) && Inside(tl.x, br.y) && Inside(br.x, tl.y) && Inside(br.x, br.y)))
-					continue;
-
-				List<BlockEntry> blocks = blockmap.GetLineBlocks(
-					new Vector2D(x - half + 1, y + half - 1),
-					new Vector2D(x + half - 1, y - half - 1)
-				);
-
-
-				// no elements in the area yet
-				if (blocks.Count == 0)
-				{
-					Point p = new Point((int)(x - half), (int)(y + half));
-					List<DrawnVertex> dv = new List<DrawnVertex>();
-
-					slopethingpos = new Vector2D(x, y);
-
-					dv.Add(SectorVertex(p.X, p.Y));
-					dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
-					dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-					dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-					dv.Add(SectorVertex(p.X, p.Y));
-
-					return new List<List<DrawnVertex>> { dv };
-				}
-				else
-				{
-					foreach (BlockEntry be in blocks)
-					{
-						if (be.Sectors.Count == 0)
-						{
-							Point p = new Point((int)(x - half), (int)(y + half));
-							List<DrawnVertex> dv = new List<DrawnVertex>();
-
-							slopethingpos = new Vector2D(x, y);
-
-							dv.Add(SectorVertex(p.X, p.Y));
-							dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
-							dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-							dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-							dv.Add(SectorVertex(p.X, p.Y));
-
-							return new List<List<DrawnVertex>> { dv };
-						}
-					}
-				}
-			}
-
-			throw new Exception("No space left for control sectors");
-		}
-
 		public List<List<DrawnVertex>> GetNewControlSectorPosition(ThreeDFloor tdf, out Vector3D slopetopthingpos, out Vector3D slopebottomthingpos, out Line2D slopeline)
 		{
 			Line2D line = new Line2D(tdf.Slope.Origin, tdf.Slope.Origin + tdf.Slope.Direction);
@@ -593,15 +505,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				ystep = perpendicular.y / perpendicular.x;
 			}
 
-			int gcd = GCD(vals.OrderBy(o=>o).ToArray());
-
+			// Create vertices of the control sector. This would create a huge sector (a square sector with an edge length of the direction vector).
+			// It will be shrunk later
 			verts.Add(new Vector2D(0, 0));
 			verts.Add(tdf.Slope.Direction * 2);
 			verts.Add((tdf.Slope.Direction + perpendicular) * 2);
 			verts.Add(perpendicular * 2);
+
+			// X, y and z positions of the slope things. They are stored in this list to easily shrink them with the control sector size, so that
+			// all valuse keep the same aspect ratio
 			verts.Add(tdf.Slope.Direction + perpendicular); // Position of the slope things
 			verts.Add(new Vector2D(vals[0], vals[1])); // z position of the things (top = x; bottom = y)
 
+			// Shrink the control sector size until it is close to the size of the defined control sector size
 			while (new Line2D(verts[0], verts[1]).GetLength() > sectorsize)
 			{
 				for (int i = 0; i < verts.Count; i++)
@@ -610,12 +526,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 			}
 
+			// Set the z position of the slope things to a negative value when the slope goes down
 			if (tdf.TopHeight > tdf.Slope.TopHeight)
 				verts[5] = new Vector2D(verts[5].x * -1, verts[5].y);
 
 			if (tdf.BottomHeight > tdf.Slope.BottomHeight)
 				verts[5] = new Vector2D(verts[5].x, verts[5].y * -1);
 			
+			// Try to find a open space for the control sector in the CSA
 			for (int i = 0; i < int.MaxValue; i++)
 			{
 				float x = i * xstep + tdf.Slope.Origin.x;
@@ -624,45 +542,35 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (!(x % 1 < float.Epsilon || y % 1 < float.Epsilon))
 					continue;
 
-				Vector2D tl = new Vector2D(x - half, y + half);
-				Vector2D br = new Vector2D(x + half, y - half);
-
-				tl = new Vector2D(float.MaxValue, float.MinValue);
-				br = new Vector2D(float.MinValue, float.MaxValue);
+				// Get the relative bounding box of the vertices
+				Vector2D tl = new Vector2D(float.MaxValue, float.MinValue);
+				Vector2D br = new Vector2D(float.MinValue, float.MaxValue);
 
 				for (int v = 0; v < 4; v++)
 				{
-					if (verts[v].x < tl.x)
-						tl.x = verts[v].x;
-
-					if (verts[v].x > br.x)
-						br.x = verts[v].x;
-
-					if (verts[v].y > tl.y)
-						tl.y = verts[v].y;
-
-					if (verts[v].y < br.y)
-						br.y = verts[v].y;
+					if (verts[v].x < tl.x) tl.x = verts[v].x;
+					if (verts[v].x > br.x) br.x = verts[v].x;
+					if (verts[v].y > tl.y) tl.y = verts[v].y;
+					if (verts[v].y < br.y) br.y = verts[v].y;
 				}
 
+				// Now that we got the relative bounding box, make it absolute
 				tl.x += x;
 				tl.y += y;
 				br.x += x;
 				br.y += y;
 
+				// Check if all vertices will be inside the CSA
 				if (!(Inside(tl.x, tl.y) && Inside(tl.x, br.y) && Inside(br.x, tl.y) && Inside(br.x, br.y)))
 					continue;
 
 				List<BlockEntry> blocks = blockmap.GetLineBlocks(
-					//new Vector2D(x - half + 1, y + half - 1),
-					//new Vector2D(x + half - 1, y - half - 1)
-
 					new Vector2D(tl.x + 1, tl.y - 1),
 					new Vector2D(br.x - 1, br.y - 1)
 
 				);
 
-				// no elements in the area yet
+				// no elements in the area yet (control sector will be placed outside the existing blockmap)
 				if (blocks.Count == 0)
 				{
 					List<DrawnVertex> dv = new List<DrawnVertex>();

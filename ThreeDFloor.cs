@@ -63,6 +63,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int topheight;
 		private int bottomheight;
 		private bool isnew;
+		private bool rebuild;
 		private SlopeInfo slope;
 
 		public static Rectangle controlsectorarea = new Rectangle(-512, 512, 512, -512);
@@ -78,6 +79,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public int TopHeight { get { return topheight; } set { topheight = value; } }
 		public int BottomHeight { get { return bottomheight; } set { bottomheight = value; } }
 		public bool IsNew { get { return isnew; } set { isnew = value; } }
+		public bool Rebuild { get { return rebuild; } set { rebuild = value; } }
 		public SlopeInfo Slope { get { return slope; } set { slope = value; } }
 		
 		public ThreeDFloor()
@@ -149,7 +151,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// try to find an line without an action
 			foreach (Sidedef sd in sector.Sidedefs)
 			{
-				if (sd.Line.Action == 0 && line == null)
+				if (sd.Line.Action == 0 && sd.Line.Tag == 0 && line == null)
 					line = sd.Line;
 
 				// if a line of the control sector already has the tag
@@ -261,7 +263,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				slope.Origin = ld1.Line.GetCoordinatesAt(0.5f);
 				slope.Direction = ld2.Line.GetCoordinatesAt(0.5f) - slope.Origin;
 
-				// drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(slope.Origin, slope.Direction, out slopethingpos);
 				drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(this, out slopetopthingpos, out slopebottomthingpos, out slopeline);
 			}
 			else
@@ -400,16 +401,29 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (taggedLines == 0)
 			{
-				DeleteSector(sector);
+				DeleteControlSector(sector);
 			}
 		}
 
-		private void DeleteSector(Sector sector)
+		private void DeleteControlSector(Sector sector)
 		{
+			List<Thing> deletethings = new List<Thing>();
 			if (sector == null)
 				return;
 
+			// Mark slope things in the sector to be deleted
+			foreach (Thing t in General.Map.Map.Things)
+			{
+				if ((t.Type == 9500 || t.Type == 9501) && t.Sector == sector)
+					deletethings.Add(t);
+			}
+
 			General.Map.Map.BeginAddRemove(); //mxd
+
+			foreach (Thing t in deletethings)
+			{
+				t.Dispose();
+			}
 
 			//mxd. Get all the linedefs
 			List<Linedef> lines = new List<Linedef>(sector.Sidedefs.Count);
@@ -461,8 +475,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			// Update cache values
 			General.Map.IsChanged = true;
+			General.Map.ThingsFilter.Update();
 			General.Map.Map.Update();
 
+		}
+
+		public void DeleteControlSector()
+		{
+			DeleteControlSector(sector);
 		}
 	}
 }

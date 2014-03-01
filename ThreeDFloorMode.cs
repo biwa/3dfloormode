@@ -132,7 +132,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				foreach (ThreeDFloor tdf in threedfloors)
 				{
-					if (tdf.IsNew)
+					if (tdf.Rebuild)
+						tdf.DeleteControlSector();
+
+					if (tdf.IsNew || tdf.Rebuild)
 						tdf.CreateGeometry();
 					
 					tdf.UpdateGeometry();
