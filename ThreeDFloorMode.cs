@@ -196,7 +196,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				else
 					try
 					{
-						newtag = BuilderPlug.Me.ControlSectorArea.GetNewTag();
+						newtag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag();
 					}
 					catch (Exception e)
 					{

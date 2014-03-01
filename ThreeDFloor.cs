@@ -217,10 +217,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public bool CreateGeometry()
 		{
-			List<DrawnVertex> drawnvertices = new List<DrawnVertex>();
+			List<List<DrawnVertex>> drawnvertices = new List<List<DrawnVertex>>();
 			List<Vertex> vertices = new List<Vertex>();
-			Point p;
-			Vector2D slopethingpos = new Vector2D(0, 0);
+			Vector3D slopethingpos = new Vector3D(0, 0, 0);
+			Line2D slopeline = new Line2D(0, 0, 0, 0);
+			List<Sector> newsectors = new List<Sector>();
 
 			if (slope.BottomSloped || slope.TopSloped)
 			{
@@ -259,44 +260,44 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				slope.Origin = ld1.Line.GetCoordinatesAt(0.5f);
 				slope.Direction = ld2.Line.GetCoordinatesAt(0.5f) - slope.Origin;
 
-				p = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(slope.Origin, slope.Direction, out slopethingpos);
+				// drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(slope.Origin, slope.Direction, out slopethingpos);
+				drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(this, out slopethingpos, out slopeline);
 			}
 			else
 			{
-				p = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition();
+				drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition();
 			}
 
-			drawnvertices.Add(SectorVertex(p.X, p.Y));
-			drawnvertices.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
-			drawnvertices.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-			drawnvertices.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-			drawnvertices.Add(SectorVertex(p.X, p.Y));
-
-			List<Sector> oldsectors = new List<Sector>(General.Map.Map.Sectors);
-
-			Tools.DrawLines(drawnvertices);
-
-			foreach (Sector s in General.Map.Map.Sectors)
+			foreach(List<DrawnVertex> dv in drawnvertices)
 			{
-				// this is a new control sector
-				if (!oldsectors.Contains(s))
+				List<Sector> oldsectors = new List<Sector>(General.Map.Map.Sectors);
+
+				Tools.DrawLines(dv);
+
+				foreach (Sector s in General.Map.Map.Sectors)
 				{
-					s.FloorHeight = bottomheight;
-					s.CeilHeight = topheight;
-					s.SetFloorTexture(bottomflat);
-					s.SetCeilTexture(topflat);
-
-					foreach (Sidedef sd in s.Sidedefs)
+					// this is a new control sector
+					if (!oldsectors.Contains(s))
 					{
-						sd.Line.Front.SetTextureMid(bordertexture);
+						newsectors.Add(s);
 					}
-
-					if(!s.Fields.ContainsKey("tdfh_managed"))
-						s.Fields.Add("tdfh_managed", new UniValue(UniversalType.Boolean, true));
-
-					sector = s;
 				}
 			}
+
+			newsectors[0].FloorHeight = bottomheight;
+			newsectors[0].CeilHeight = topheight;
+			newsectors[0].SetFloorTexture(bottomflat);
+			newsectors[0].SetCeilTexture(topflat);
+
+			foreach (Sidedef sd in newsectors[0].Sidedefs)
+			{
+				sd.Line.Front.SetTextureMid(bordertexture);
+			}
+
+			if(!newsectors[0].Fields.ContainsKey("tdfh_managed"))
+				newsectors[0].Fields.Add("tdfh_managed", new UniValue(UniversalType.Boolean, true));
+
+			sector = newsectors[0];
 
 			if (slope.BottomSloped || slope.TopSloped)
 			{
@@ -304,24 +305,35 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				int az = (int)Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle());
 				int axy = Angle2D.RealToDoom(l.GetAngle());
 				Thing t;
+				int lineid = BuilderPlug.Me.ControlSectorArea.GetNewLineID();
 
-				MessageBox.Show(Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle()).ToString());
+				foreach (Sidedef sd in newsectors[0].Sidedefs)
+				{
+					if (	(sd.Line.Start.Position == slopeline.v1 && sd.Line.End.Position == slopeline.v2) ||
+							(sd.Line.Start.Position == slopeline.v2 && sd.Line.End.Position == slopeline.v1)
+					)
+					{
+						sd.Line.Tag = lineid;
+					}
+				}
+
+				// MessageBox.Show(Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle()).ToString());
 
 				// Ceiling slope
 				t = General.Map.Map.CreateThing();
 				General.Settings.ApplyDefaultThingSettings(t);
 				t.Move(slopethingpos);
-				t.Rotate(axy);
-				t.Type = 9503;
-				t.Args[0] = az;
+				//t.Rotate(axy);
+				t.Type = 9501;
+				t.Args[0] = lineid;
 
 				// Floor slope
 				t = General.Map.Map.CreateThing();
 				General.Settings.ApplyDefaultThingSettings(t);
 				t.Move(slopethingpos);
-				t.Rotate(axy);
-				t.Type = 9502;
-				t.Args[0] = az;
+				// t.Rotate(axy);
+				t.Type = 9500;
+				t.Args[0] = lineid;
 
 				t.UpdateConfiguration();
 
@@ -358,23 +370,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Map.IsChanged = true;
 
 			return true;
-		}
-
-		// Turns a position into a DrawnVertex and returns it
-		private DrawnVertex SectorVertex(float x, float y)
-		{
-			DrawnVertex v = new DrawnVertex();
-
-			v.stitch = true;
-			v.stitchline = true;
-			v.pos = new Vector2D((float)Math.Round(x, General.Map.FormatInterface.VertexDecimals), (float)Math.Round(y, General.Map.FormatInterface.VertexDecimals));
-
-			return v;
-		}
-
-		private DrawnVertex SectorVertex(Vector2D v)
-		{
-			return SectorVertex(v.x, v.y);
 		}
 
 		public void Cleanup()

@@ -414,7 +414,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			UpdateLinesAndPoints();
 		}
 
-		public Point GetNewControlSectorPosition()
+		public List<List<DrawnVertex>> GetNewControlSectorPosition()
 		{
 			CreateBlockmap();
 
@@ -439,7 +439,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					// no elements in the area yet
 					if (blocks.Count == 0)
 					{
-						return new Point(x + margin, y - margin);
+						List<DrawnVertex> dv = new List<DrawnVertex>();
+						Point p = new Point(x + margin, y - margin);
+
+						dv.Add(SectorVertex(p.X, p.Y));
+						dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
+						dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+						dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+						dv.Add(SectorVertex(p.X, p.Y));
+
+						return new List<List<DrawnVertex>> { dv };
 					}
 					else
 					{
@@ -447,7 +456,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						{
 							if (be.Sectors.Count == 0)
 							{
-								return new Point(x + margin, y - margin);
+								List<DrawnVertex> dv = new List<DrawnVertex>();
+								Point p = new Point(x + margin, y - margin);
+
+								dv.Add(SectorVertex(p.X, p.Y));
+								dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
+								dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+								dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+								dv.Add(SectorVertex(p.X, p.Y));
+
+								return new List<List<DrawnVertex>> { dv };
 							}
 						}
 					}
@@ -457,7 +475,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			throw new Exception("No space left for control sectors");
 		}
 
-		public Point GetNewControlSectorPosition(Vector2D pos, Vector2D vector, out Vector2D slopethingpos)
+		public List<List<DrawnVertex>> GetNewControlSectorPosition(Vector2D pos, Vector2D vector, out Vector2D slopethingpos)
 		{
 			Line2D line = new Line2D(pos, pos + vector);
 			Vector2D perpendicular = line.GetPerpendicular();
@@ -506,9 +524,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				// no elements in the area yet
 				if (blocks.Count == 0)
 				{
+					Point p = new Point((int)(x - half), (int)(y + half));
+					List<DrawnVertex> dv = new List<DrawnVertex>();
+
 					slopethingpos = new Vector2D(x, y);
 
-					return new Point((int)(x - half), (int)(y + half));
+					dv.Add(SectorVertex(p.X, p.Y));
+					dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
+					dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+					dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+					dv.Add(SectorVertex(p.X, p.Y));
+
+					return new List<List<DrawnVertex>> { dv };
 				}
 				else
 				{
@@ -516,13 +543,154 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					{
 						if (be.Sectors.Count == 0)
 						{
+							Point p = new Point((int)(x - half), (int)(y + half));
+							List<DrawnVertex> dv = new List<DrawnVertex>();
+
 							slopethingpos = new Vector2D(x, y);
 
-							return new Point((int)(x - half), (int)(y + half));
+							dv.Add(SectorVertex(p.X, p.Y));
+							dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
+							dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+							dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
+							dv.Add(SectorVertex(p.X, p.Y));
+
+							return new List<List<DrawnVertex>> { dv };
 						}
 					}
 				}
 			}
+
+			throw new Exception("No space left for control sectors");
+		}
+
+		public List<List<DrawnVertex>> GetNewControlSectorPosition(ThreeDFloor tdf, out Vector3D slopethingpos, out Line2D slopeline)
+		{
+			Line2D line = new Line2D(tdf.Slope.Origin, tdf.Slope.Origin + tdf.Slope.Direction);
+			Vector2D perpendicular = line.GetPerpendicular();
+			float half = sectorsize / 2;
+			List<Vector2D> verts = new List<Vector2D>(4);
+			List<int> vals = new List<int>
+			{
+				Math.Abs(Math.Abs(tdf.TopHeight - tdf.Slope.TopHeight)), // difference between top heights on start and end of slope
+				Math.Abs(Math.Abs(tdf.BottomHeight - tdf.Slope.BottomHeight)), // difference between bottom heights on start and end of slope
+				Math.Abs((int)tdf.Slope.Direction.x), // difference between start and end of slope on the x axis
+				Math.Abs((int)tdf.Slope.Direction.y) // difference between start and end of slope on the y axis
+			};
+
+			float xstep;
+			float ystep;
+
+			CreateBlockmap();
+
+			if (perpendicular.x == 0)
+			{
+				xstep = 0;
+				ystep = 1;
+			}
+			else
+			{
+				xstep = 1;
+				ystep = perpendicular.y / perpendicular.x;
+			}
+
+			int gcd = GCD(vals.OrderBy(o=>o).ToArray());
+
+			verts.Add(new Vector2D(0, 0));
+			verts.Add(tdf.Slope.Direction * 2);
+			verts.Add((tdf.Slope.Direction + perpendicular) * 2);
+			verts.Add(perpendicular * 2);
+			verts.Add(tdf.Slope.Direction + perpendicular); // Position of the slope things
+			verts.Add(new Vector2D(vals[0], vals[1]));
+
+			/*
+			for (int i = 0; i < verts.Count; i++)
+			{
+				verts[i] /= gcd;
+			}
+			*/
+
+			/*
+			while (new Line2D(verts[0], verts[1]).GetLength() < sectorsize)
+			{
+				for (int i = 0; i < verts.Count; i++)
+				{
+					verts[i] *= 2;
+				}
+			}
+			*/
+
+			while (new Line2D(verts[0], verts[1]).GetLength() > sectorsize)
+			{
+				for (int i = 0; i < verts.Count; i++)
+				{
+					verts[i] /= 2;
+				}
+			}
+
+			if (tdf.BottomHeight > tdf.Slope.BottomHeight)
+				verts[5] = new Vector2D(verts[5].x * -1, verts[5].y);
+
+			if (tdf.TopHeight > tdf.Slope.TopHeight)
+				verts[5] = new Vector2D(verts[5].x, verts[5].y * -1);
+
+			for (int i = 0; i < int.MaxValue; i++)
+			{
+				float x = i * xstep + tdf.Slope.Origin.x;
+				float y = i * ystep + tdf.Slope.Origin.y;
+
+				if (!(x % 1 < float.Epsilon || y % 1 < float.Epsilon))
+					continue;
+
+				Vector2D tl = new Vector2D(x - half, y + half);
+				Vector2D br = new Vector2D(x + half, y - half);
+
+				if (!(Inside(tl.x, tl.y) && Inside(tl.x, br.y) && Inside(br.x, tl.y) && Inside(br.x, br.y)))
+					continue;
+
+				List<BlockEntry> blocks = blockmap.GetLineBlocks(
+					new Vector2D(x - half + 1, y + half - 1),
+					new Vector2D(x + half - 1, y - half - 1)
+				);
+
+				// no elements in the area yet
+				if (blocks.Count == 0)
+				{
+					List<DrawnVertex> dv = new List<DrawnVertex>();
+
+					dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
+					dv.Add(SectorVertex(verts[1].x + x, verts[1].y + y));
+					dv.Add(SectorVertex(verts[2].x + x, verts[2].y + y));
+					dv.Add(SectorVertex(verts[3].x + x, verts[3].y + y));
+					dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
+
+					slopethingpos = new Vector3D(verts[4].x, verts[4].y, verts[5].x);
+					slopeline = new Line2D(verts[0], verts[1]);
+
+					return new List<List<DrawnVertex>> { dv };
+				}
+				else
+				{
+					foreach (BlockEntry be in blocks)
+					{
+						if (be.Sectors.Count == 0)
+						{
+							List<DrawnVertex> dv = new List<DrawnVertex>();
+
+							dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
+							dv.Add(SectorVertex(verts[1].x + x, verts[1].y + y));
+							dv.Add(SectorVertex(verts[2].x + x, verts[2].y + y));
+							dv.Add(SectorVertex(verts[3].x + x, verts[3].y + y));
+							dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
+
+							slopethingpos = new Vector3D(verts[4].x + x, verts[4].y + y, verts[5].x);
+							slopeline = new Line2D(new Vector2D(verts[0].x + x, verts[0].y + y), new Vector2D(verts[3].x + x, verts[3].y + y));
+
+							return new List<List<DrawnVertex>> { dv };
+						}
+					}
+				}
+			}
+
 
 			throw new Exception("No space left for control sectors");
 		}
@@ -640,7 +808,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			UpdateLinesAndPoints();
 		}
 
-		public int GetNewTag()
+		public int GetNewSectorTag()
 		{
 			if (usecustomtagrange)
 			{
@@ -654,6 +822,38 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			return General.Map.Map.GetNewTag();
+		}
+
+		public int GetNewLineID()
+		{
+			return General.Map.Map.GetNewTag();
+		}
+
+		// Turns a position into a DrawnVertex and returns it
+		private DrawnVertex SectorVertex(float x, float y)
+		{
+			DrawnVertex v = new DrawnVertex();
+
+			v.stitch = true;
+			v.stitchline = true;
+			v.pos = new Vector2D((float)Math.Round(x, General.Map.FormatInterface.VertexDecimals), (float)Math.Round(y, General.Map.FormatInterface.VertexDecimals));
+
+			return v;
+		}
+
+		private DrawnVertex SectorVertex(Vector2D v)
+		{
+			return SectorVertex(v.x, v.y);
+		}
+
+		static int GCD(int[] numbers)
+		{
+			return numbers.Aggregate(GCD);
+		}
+
+		static int GCD(int a, int b)
+		{
+			return b == 0 ? a : GCD(b, a % b);
 		}
 
 		#endregion

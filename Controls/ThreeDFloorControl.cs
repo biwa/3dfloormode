@@ -139,7 +139,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			threeDFloor.IsNew = isnew;
 
-			sector.CopyPropertiesTo(threeDFloor.Sector);
+			if(threeDFloor.Sector != null)
+				sector.CopyPropertiesTo(threeDFloor.Sector);
 
 			si = threeDFloor.Slope;
 			si.BottomSloped = bottomSlope.Checked;
