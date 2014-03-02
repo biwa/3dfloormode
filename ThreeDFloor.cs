@@ -303,9 +303,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (slope.BottomSloped || slope.TopSloped)
 			{
-				Line2D l = new Line2D(slope.Origin, slope.Origin + slope.Direction);
-				int az = (int)Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle());
-				int axy = Angle2D.RealToDoom(l.GetAngle());
 				Thing t = null;
 				int lineid = BuilderPlug.Me.ControlSectorArea.GetNewLineID();
 
@@ -319,15 +316,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					}
 				}
 
-				// MessageBox.Show(Angle2D.RadToDeg(new Line2D(0.0f, sector.CeilHeight, l.GetLength(), slope.TopHeight).GetAngle()).ToString());
-
 				// Ceiling slope
 				if (slope.TopSloped)
 				{
 					t = General.Map.Map.CreateThing();
 					General.Settings.ApplyDefaultThingSettings(t);
 					t.Move(slopetopthingpos);
-					//t.Rotate(axy);
 					t.Type = 9501;
 					t.Args[0] = lineid;
 
@@ -342,7 +336,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					t = General.Map.Map.CreateThing();
 					General.Settings.ApplyDefaultThingSettings(t);
 					t.Move(slopebottomthingpos);
-					// t.Rotate(axy);
 					t.Type = 9500;
 					t.Args[0] = lineid;
 

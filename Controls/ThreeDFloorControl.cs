@@ -27,6 +27,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public Linedef linedef;
 		private bool isnew;
 		private Sector sector;
+		private bool settingup;
 
 		public ThreeDFloor ThreeDFloor { get { return threeDFloor; } }
 		public bool IsNew { get { return isnew; } }
@@ -38,6 +39,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			InitializeComponent();
 
 			isnew = false;
+			settingup = true;
 
 			this.threeDFloor = threeDFloor;
 
@@ -67,11 +69,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (threeDFloor.Sector != null)
 				threeDFloor.Sector.CopyPropertiesTo(sector);
+
+			settingup = false;
 		}
 
 		// Create a duplicate of the given control
 		public ThreeDFloorHelperControl(ThreeDFloorHelperControl ctrl) : this()
 		{
+			settingup = true;
+
 			sectorBorderTexture.TextureName = threeDFloor.BorderTexture = ctrl.threeDFloor.BorderTexture;
 			sectorTopFlat.TextureName = threeDFloor.TopFlat = ctrl.threeDFloor.TopFlat;
 			sectorBottomFlat.TextureName = threeDFloor.BottomFlat = ctrl.threeDFloor.BottomFlat;
@@ -87,6 +93,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, ctrl.checkedListBoxSectors.GetItemChecked(i));
+
+			settingup = false;
 		}
 
 		// Create a blank control for a new 3D floor
@@ -95,6 +103,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			InitializeComponent();
 
 			isnew = true;
+			settingup = true;
 
 			threeDFloor = new ThreeDFloor();
 
@@ -120,6 +129,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				checkedListBoxSectors.SetItemChecked(i, true);
 
 			sector = General.Map.Map.CreateSector();
+
+			settingup = false;
 		}
 
 		public void ApplyToThreeDFloor()
@@ -156,7 +167,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 			{
 				string text = checkedListBoxSectors.Items[i].ToString();
-				bool ischecked = checkedListBoxSectors.GetItemCheckState(i) == CheckState.Checked;
+				bool ischecked = !(checkedListBoxSectors.GetItemCheckState(i) == CheckState.Unchecked);
 
 				if (ischecked)
 				{
@@ -214,13 +225,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void bottomSlope_CheckedChanged(object sender, EventArgs e)
 		{
 			bottomSlopeHeight.Enabled = bottomSlope.Checked;
-			threeDFloor.Rebuild = true;
+
+			if (!settingup)
+			{
+				threeDFloor.Rebuild = true;
+			}
 		}
 
 		private void topSlope_CheckedChanged(object sender, EventArgs e)
 		{
 			topSlopeHeight.Enabled = topSlope.Checked;
-			threeDFloor.Rebuild = true;
+
+			if (!settingup)
+			{
+				threeDFloor.Rebuild = true;
+			}
 		}
 
 		private void buttonEditSector_Click(object sender, EventArgs e)
