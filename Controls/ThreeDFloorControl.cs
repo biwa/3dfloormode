@@ -87,6 +87,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			threeDFloor.TopHeight = ctrl.threeDFloor.TopHeight;
 			threeDFloor.BottomHeight = ctrl.threeDFloor.BottomHeight;
 
+			topSlope.Checked = threeDFloor.Slope.TopSloped = ctrl.threeDFloor.Slope.TopSloped;
+			threeDFloor.Slope.TopHeight = ctrl.threeDFloor.Slope.TopHeight;
+			topSlopeHeight.Text = threeDFloor.Slope.TopHeight.ToString();
+
+			bottomSlope.Checked = threeDFloor.Slope.BottomSloped = ctrl.threeDFloor.Slope.BottomSloped;
+			threeDFloor.Slope.BottomHeight = ctrl.threeDFloor.Slope.BottomHeight;
+			bottomSlopeHeight.Text = threeDFloor.Slope.BottomHeight.ToString();
+
+			// threeDFloor.Slope.Direction = ctrl.threeDFloor.Slope.Direction;
+			// threeDFloor.Slope.Origin = ctrl.threeDFloor.Slope.Origin;
+
 			typeArgument.SetValue(ctrl.threeDFloor.Type);
 			flagsArgument.SetValue(ctrl.threeDFloor.Flags);
 			alphaArgument.SetValue(ctrl.threeDFloor.Alpha);
@@ -137,6 +148,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			Regex r = new Regex(@"\d+");
 			SlopeInfo si;
+			bool guessslope = false;
 
 			threeDFloor.TopHeight = sectorCeilingHeight.GetResult(threeDFloor.TopHeight);
 			threeDFloor.BottomHeight = sectorFloorHeight.GetResult(threeDFloor.BottomHeight);
@@ -154,6 +166,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				sector.CopyPropertiesTo(threeDFloor.Sector);
 
 			si = threeDFloor.Slope;
+
+			if((!si.BottomSloped && bottomSlope.Checked) || (!si.TopSloped && topSlope.Checked)) {
+				guessslope = true;
+			}
+
+			if (isnew && (bottomSlope.Checked || topSlope.Checked))
+			{
+				guessslope = true;
+			}
+
 			si.BottomSloped = bottomSlope.Checked;
 			si.TopSloped = topSlope.Checked;
 
@@ -175,6 +197,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					Sector s = General.Map.Map.GetSectorByIndex(int.Parse(matches[0].ToString()));
 					threeDFloor.TaggedSectors.Add(s);
 				}
+			}
+
+			if (guessslope)
+			{
+				threeDFloor.GuessSlopeVector();
 			}
 		}
 
@@ -264,5 +291,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			if (e.CurrentValue == CheckState.Indeterminate) e.NewValue = CheckState.Indeterminate;
 		}
+
+        private void bottomSlopeHeight_WhenTextChanged(object sender, EventArgs e)
+        {
+            if (!settingup)
+            {
+                threeDFloor.Rebuild = true;
+            }
+        }
+
+        private void topSlopeHeight_WhenTextChanged(object sender, EventArgs e)
+        {
+            if (!settingup)
+            {
+                threeDFloor.Rebuild = true;
+            }
+        }
 	}
 }

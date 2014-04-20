@@ -494,6 +494,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			CreateBlockmap();
 
+			int gcd = GCD((int)perpendicular.x, (int)perpendicular.y);
+
+			float xincrement = perpendicular.x / gcd;
+			float yincrement = perpendicular.y / gcd;
+
 			if (perpendicular.x == 0)
 			{
 				xstep = 0;
@@ -501,21 +506,53 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 			else
 			{
+				/*
 				xstep = 1;
 				ystep = perpendicular.y / perpendicular.x;
+
+				// Everything should be aligned to the grid, so make sure the steps are (very close to) whole numbers
+				while (ystep % 1 > float.Epsilon)
+				{
+					xstep++;
+					ystep += perpendicular.y / perpendicular.x;
+				}
+
+				int gcd = GCD((int)xstep, (int)ystep);
+
+				xstep /= gcd;
+				ystep /= gcd;
+				*/
+				xstep = xincrement;
+				ystep = yincrement;
+
+				while (ystep % 1 > float.Epsilon || xstep % 1 > float.Epsilon)
+				{
+					xstep += xincrement;
+					ystep += yincrement;
+				}
+
+				gcd = GCD((int)xstep, (int)ystep);
+
+				xstep /= gcd;
+				ystep /= gcd;
 			}
 
 			// Create vertices of the control sector. This would create a huge sector (a square sector with an edge length of the direction vector).
 			// It will be shrunk later
+			float llength = line.GetLength();
+			Vector2D norm = tdf.Slope.Direction.GetNormal();
 			verts.Add(new Vector2D(0, 0));
-			verts.Add(tdf.Slope.Direction * 2);
-			verts.Add((tdf.Slope.Direction + perpendicular) * 2);
-			verts.Add(perpendicular * 2);
+			verts.Add(tdf.Slope.Direction);
+			verts.Add(tdf.Slope.Direction + perpendicular);
+			verts.Add(perpendicular);
+			// verts.Add((tdf.Slope.Direction + (perpendicular.GetNormal() * llength)) * 2);
+			// verts.Add((perpendicular.GetNormal() * llength) * 2);
 
 			// X, y and z positions of the slope things. They are stored in this list to easily shrink them with the control sector size, so that
 			// all valuse keep the same aspect ratio
-			verts.Add(tdf.Slope.Direction + perpendicular); // Position of the slope things
-			verts.Add(new Vector2D(vals[0], vals[1])); // z position of the things (top = x; bottom = y)
+			verts.Add(new Vector2D(verts[2]/2));
+			// verts.Add(perpendicular.GetNormal() * llength + tdf.Slope.Direction); // Position of the slope things
+			verts.Add(new Vector2D(vals[0]/2, vals[1]/2)); // z position of the things (top = x; bottom = y)
 
 			// Shrink the control sector size until it is close to the size of the defined control sector size
 			while (new Line2D(verts[0], verts[1]).GetLength() > sectorsize)
@@ -539,8 +576,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				float x = i * xstep + tdf.Slope.Origin.x;
 				float y = i * ystep + tdf.Slope.Origin.y;
 
-				if (!(x % 1 < float.Epsilon || y % 1 < float.Epsilon))
-					continue;
+			//	if (!(Math.Abs(x % 1) < float.Epsilon || Math.Abs(y % 1) < float.Epsilon))
+			//		continue;
 
 				// Get the relative bounding box of the vertices
 				Vector2D tl = new Vector2D(float.MaxValue, float.MinValue);
@@ -560,13 +597,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				br.x += x;
 				br.y += y;
 
+				if(OutsideOuterBounds(tl.x, tl.y) || OutsideOuterBounds(tl.x, br.y) || OutsideOuterBounds(br.x, tl.y) || OutsideOuterBounds(br.x, br.y))
+					throw new Exception("No space left for control sectors");
+
 				// Check if all vertices will be inside the CSA
 				if (!(Inside(tl.x, tl.y) && Inside(tl.x, br.y) && Inside(br.x, tl.y) && Inside(br.x, br.y)))
 					continue;
 
 				List<BlockEntry> blocks = blockmap.GetLineBlocks(
-					new Vector2D(tl.x + 1, tl.y - 1),
-					new Vector2D(br.x - 1, br.y - 1)
+					new Vector2D(tl.x , tl.y),
+					new Vector2D(br.x, br.y)
 
 				);
 
@@ -589,24 +629,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 				else
 				{
+					bool isclear = true;
+
 					foreach (BlockEntry be in blocks)
 					{
-						if (be.Sectors.Count == 0)
+						if (be.Sectors.Count != 0)
 						{
-							List<DrawnVertex> dv = new List<DrawnVertex>();
-
-							dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
-							dv.Add(SectorVertex(verts[1].x + x, verts[1].y + y));
-							dv.Add(SectorVertex(verts[2].x + x, verts[2].y + y));
-							dv.Add(SectorVertex(verts[3].x + x, verts[3].y + y));
-							dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
-
-							slopetopthingpos = new Vector3D(verts[4].x + x, verts[4].y + y, verts[5].x);
-							slopebottomthingpos = new Vector3D(verts[4].x + x, verts[4].y + y, verts[5].y);
-							slopeline = new Line2D(new Vector2D(verts[0].x + x, verts[0].y + y), new Vector2D(verts[3].x + x, verts[3].y + y));
-
-							return new List<List<DrawnVertex>> { dv };
+							isclear = false;
 						}
+					}
+
+					if(isclear)
+					{
+						List<DrawnVertex> dv = new List<DrawnVertex>();
+
+						dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
+						dv.Add(SectorVertex(verts[1].x + x, verts[1].y + y));
+						dv.Add(SectorVertex(verts[2].x + x, verts[2].y + y));
+						dv.Add(SectorVertex(verts[3].x + x, verts[3].y + y));
+						dv.Add(SectorVertex(verts[0].x + x, verts[0].y + y));
+
+						slopetopthingpos = new Vector3D(verts[4].x + x, verts[4].y + y, verts[5].x);
+						slopebottomthingpos = new Vector3D(verts[4].x + x, verts[4].y + y, verts[5].y);
+						slopeline = new Line2D(new Vector2D(verts[0].x + x, verts[0].y + y), new Vector2D(verts[3].x + x, verts[3].y + y));
+
+						return new List<List<DrawnVertex>> { dv };
 					}
 				}
 			}
@@ -626,6 +673,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				(pos.x > outerleft && pos.x < outerright && pos.y < outertop && pos.y > outerbottom) &&
 				!(pos.x > innerleft && pos.x < innerright && pos.y < innertop && pos.y > innerbottom)
 			)
+				return true;
+
+			return false;
+		}
+
+		public bool OutsideOuterBounds(float x, float y)
+		{
+			return OutsideOuterBounds(new Vector2D(x, y));
+		}
+
+		public bool OutsideOuterBounds(Vector2D pos)
+		{
+			if(pos.x < outerleft || pos.x > outerright || pos.y > outertop || pos.y < outerbottom)
 				return true;
 
 			return false;

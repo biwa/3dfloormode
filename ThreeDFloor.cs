@@ -33,7 +33,7 @@ using CodeImp.DoomBuilder.Data;
 
 namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
-	public struct SlopeInfo
+	public class SlopeInfo
 	{
 		private bool topsloped;
 		private bool bottomsloped;
@@ -54,6 +54,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	{
 		private Sector sector;
 		private List<Sector> taggedsectors;
+        private List<Sector> sectorstotag;
+        private List<Sector> sectorstountag;
 		private string bordertexture;
 		private string topflat;
 		private string bottomflat;
@@ -70,6 +72,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public Sector Sector { get { return sector; } }
 		public List<Sector> TaggedSectors { get { return taggedsectors; } set { taggedsectors = value; } }
+        public List<Sector> SectorsToTag { get { return sectorstotag; } set { sectorstotag = value; } }
+        public List<Sector> SectorsToUntag { get { return sectorstountag; } set { sectorstountag = value; } }
 		public string BorderTexture { get { return bordertexture; } set { bordertexture = value; } }
 		public string TopFlat { get { return topflat; } set { topflat = value; } }
 		public string BottomFlat { get { return bottomflat; } set { bottomflat = value; } }
@@ -126,6 +130,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					}
 				}
 			}
+
+            slope = new SlopeInfo();
 
 			slope.TopSloped = sector.Fields.GetValue("tdfh_slope_top", false);
 			slope.BottomSloped = sector.Fields.GetValue("tdfh_slope_bottom", false);
@@ -217,6 +223,44 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
+		public void GuessSlopeVector()
+		{
+			List<Linedef> lds = new List<Linedef>();
+			Linedef ld1 = null;
+			Linedef ld2 = null;
+			float length = 0;
+
+			foreach (Sector s in taggedsectors)
+			{
+				foreach (Sidedef sd in s.Sidedefs)
+				{
+					if (!lds.Contains(sd.Line)) lds.Add(sd.Line);
+				}
+			}
+
+			foreach (Linedef l1 in lds)
+			{
+				foreach (Linedef l2 in lds)
+				{
+					if (l1 == l2) continue;
+
+					Vector2D v1 = l1.Line.GetCoordinatesAt(0.5f);
+					Vector2D v2 = l2.Line.GetCoordinatesAt(0.5f);
+					float l = new Line2D(v1, v2).GetLength();
+
+					if (l > length)
+					{
+						length = l;
+						ld1 = l1;
+						ld2 = l2;
+					}
+				}
+			}
+
+			slope.Origin = ld1.Line.GetCoordinatesAt(0.5f);
+			slope.Direction = ld2.Line.GetCoordinatesAt(0.5f) - slope.Origin;
+		}
+
 		public bool CreateGeometry()
 		{
 			List<List<DrawnVertex>> drawnvertices = new List<List<DrawnVertex>>();
@@ -228,41 +272,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (slope.BottomSloped || slope.TopSloped)
 			{
-				List<Linedef> lds = new List<Linedef>();
-				Linedef ld1 = null;
-				Linedef ld2 = null;
-				float length = 0;
-
-				foreach (Sector s in taggedsectors)
-				{
-					foreach (Sidedef sd in s.Sidedefs)
-					{
-						if (!lds.Contains(sd.Line)) lds.Add(sd.Line);
-					}
-				}
-
-				foreach (Linedef l1 in lds)
-				{
-					foreach (Linedef l2 in lds)
-					{
-						if (l1 == l2) continue;
-
-						Vector2D v1 = l1.Line.GetCoordinatesAt(0.5f);
-						Vector2D v2 = l2.Line.GetCoordinatesAt(0.5f);
-						float l = new Line2D(v1, v2).GetLength();
-
-						if (l > length)
-						{
-							length = l;
-							ld1 = l1;
-							ld2 = l2;
-						}
-					}
-				}
-
-				slope.Origin = ld1.Line.GetCoordinatesAt(0.5f);
-				slope.Direction = ld2.Line.GetCoordinatesAt(0.5f) - slope.Origin;
-
 				drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition(this, out slopetopthingpos, out slopebottomthingpos, out slopeline);
 			}
 			else
@@ -407,8 +416,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Mark slope things in the sector to be deleted
 			foreach (Thing t in General.Map.Map.Things)
 			{
-				if ((t.Type == 9500 || t.Type == 9501) && t.Sector == sector)
-					deletethings.Add(t);
+				if ((t.Type == 9500 || t.Type == 9501))
+				{
+					t.DetermineSector();
+
+					if(t.Sector == sector)
+						deletethings.Add(t);
+				}
 			}
 
 			General.Map.Map.BeginAddRemove(); //mxd
@@ -421,6 +435,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			//mxd. Get all the linedefs
 			List<Linedef> lines = new List<Linedef>(sector.Sidedefs.Count);
 			foreach (Sidedef side in sector.Sidedefs) lines.Add(side.Line);
+
 
 			// Dispose the sector
 			sector.Dispose();

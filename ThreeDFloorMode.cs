@@ -48,7 +48,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	[EditMode(DisplayName = "3D Floor Editing Mode",
 			  SwitchAction = "threedfloorhelpermode",		// Action name used to switch to this mode
 			  ButtonImage = "ThreeDFloorIcon.png",	// Image resource name for the button
-			  ButtonOrder = int.MinValue + 500,	// Position of the button (lower is more to the left)
+			  ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
 			  ButtonGroup = "000_editing",
 			  UseByDefault = true,
 			  SafeStartMode = false,
@@ -204,6 +204,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				foreach (ThreeDFloor tdf in threedfloors)
 				{
+                    if (!tdf.Slope.TopSloped || !tdf.Slope.BottomSloped)
+                        continue;
+
 					Vector3D v1 = new Vector3D(tdf.Slope.Origin);
 					Vector3D v2 = new Vector3D(tdf.Slope.Origin + tdf.Slope.Direction);
 					byte a = 64;
@@ -533,8 +536,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			UpdateSelectedLabels();
 			updateOverlaySurfaces();
 			UpdateOverlay();
-
-			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 		}
 
 		// Mode disengages

@@ -65,6 +65,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool usehighlight;
 		private bool viewselectionnumbers;
 		private ControlSectorArea controlsectorarea;
+        private float highlightsloperange;
 
 		#endregion
 
@@ -88,6 +89,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 		public ControlSectorArea ControlSectorArea { get { return controlsectorarea; } }
+        public float HighlightSlopeRange { get { return highlightsloperange; } }
 
 		#endregion
 
@@ -116,7 +118,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			LoadSettings();
 
-			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
+			//controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
 
 			// This binds the methods in this class that have the BeginAction
 			// and EndAction attributes with their actions. Without this, the
@@ -140,6 +142,22 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// This must be called to remove bound methods for actions.
             General.Actions.UnbindMethods(this);
         }
+
+		public override void OnMapNewEnd()
+		{
+			base.OnMapNewEnd();
+
+			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
+			BuilderPlug.Me.ControlSectorArea.LoadConfig();
+		}
+
+		public override void OnMapOpenEnd()
+		{
+			base.OnMapOpenEnd();
+
+			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
+			BuilderPlug.Me.ControlSectorArea.LoadConfig();
+		}
 
         #region ================== Actions
 		
@@ -167,6 +185,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
 			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
+            highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
 		}
 
 		public static List<ThreeDFloor> GetThreeDFloors(List<Sector> sectors)
@@ -199,6 +218,23 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			var sectorGroups = new List<List<Sector>>();
 			var tmpSelectedSectors = new List<Sector>(selectedSectors);
 
+			// selectedSectors = new List<Sector>(General.Map.Map.Sectors.ToList());
+			selectedSectors = new List<Sector>();
+			
+
+			foreach (ThreeDFloor tdf in threedfloors)
+			{
+				foreach (Sector s in tdf.TaggedSectors)
+				{
+					if (!selectedSectors.Contains(s))
+					{
+						selectedSectors.Add(s);
+					}
+				}
+			}
+
+			tmpSelectedSectors = new List<Sector>(selectedSectors);
+
 			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
 
 			//try
@@ -219,7 +255,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				MessageBox.Show(e.Message + "\nPlease increase the size of the control sector area.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				General.Map.UndoRedo.WithdrawUndo();
 				return;
-			}*/
+			} */
 
 			// Fill the sectorsToThreeDFloors dictionary, with a selected sector as key
 			// and a list of all 3D floors, that should be applied to to this sector, as value
