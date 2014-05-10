@@ -763,10 +763,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							General.Interface.RedrawDisplay();
 						}
 					}
-
-					// Make text labels for sectors
-					SetupLabels();
-					UpdateSelectedLabels();
 				}
 			}
 

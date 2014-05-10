@@ -28,10 +28,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool isnew;
 		private Sector sector;
 		private bool settingup;
+		private List<int> checkedsectors;
 
 		public ThreeDFloor ThreeDFloor { get { return threeDFloor; } }
 		public bool IsNew { get { return isnew; } }
 		public Sector Sector { get { return sector; } }
+		public List<int> CheckedSectors { get { return checkedsectors; } }
 
 		// Create the control from an existing linedef
 		public ThreeDFloorHelperControl(ThreeDFloor threeDFloor)
@@ -179,8 +181,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			si.BottomSloped = bottomSlope.Checked;
 			si.TopSloped = topSlope.Checked;
 
-			si.BottomHeight = bottomSlopeHeight.GetResult(0);
-			si.TopHeight = topSlopeHeight.GetResult(0);
+			si.BottomHeight = bottomSlopeHeight.GetResult(si.BottomHeight);
+			si.TopHeight = topSlopeHeight.GetResult(si.TopHeight);
 
 			threeDFloor.Slope = si;
 
@@ -207,7 +209,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void AddSectorCheckboxes()
 		{
-			List<Sector> sectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+			List<Sector> sectors = new List<Sector>(BuilderPlug.TDFEW.SelectedSectors);
+
+			checkedsectors = new List<int>();
 
 			foreach (Sector s in ThreeDFloor.TaggedSectors)
 			{
@@ -222,7 +226,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				int i = checkedListBoxSectors.Items.Add("Sector " + s.Index.ToString(), ThreeDFloor.TaggedSectors.Contains(s));
 
-				if(!General.Map.Map.GetSelectedSectors(true).Contains(s))
+				checkedsectors.Add(s.Index);
+
+				if (!BuilderPlug.TDFEW.SelectedSectors.Contains(s))
 					checkedListBoxSectors.SetItemCheckState(i, CheckState.Indeterminate);
 			}
 		}
@@ -289,7 +295,26 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void checkedListBoxSectors_ItemCheck(object sender, ItemCheckEventArgs e)
 		{
-			if (e.CurrentValue == CheckState.Indeterminate) e.NewValue = CheckState.Indeterminate;
+			if (e.CurrentValue == CheckState.Indeterminate)
+			{
+				e.NewValue = CheckState.Indeterminate;
+			}
+			else
+			{
+				Regex r = new Regex(@"\d+");
+
+				if (((ListBox)sender).SelectedItem == null)
+					return;
+
+				var matches = r.Matches(((ListBox)sender).SelectedItem.ToString());
+
+				int sectornum = int.Parse(matches[0].ToString());
+
+				if (e.NewValue == CheckState.Checked)
+					checkedsectors.Add(sectornum);
+				else
+					checkedsectors.Remove(sectornum);
+			}
 		}
 
         private void bottomSlopeHeight_WhenTextChanged(object sender, EventArgs e)

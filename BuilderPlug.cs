@@ -212,24 +212,37 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public static void ProcessThreeDFloors(List<ThreeDFloor> threedfloors)
 		{
-			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+			ProcessThreeDFloors(threedfloors, null);
+		}
+
+		public static void ProcessThreeDFloors(List<ThreeDFloor> threedfloors, List<Sector> selectedSectors)
+		{
+			// List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
 			var sectorsByTag = new Dictionary<int, List<Sector>>();
 			var sectorsToThreeDFloors = new Dictionary<Sector, List<ThreeDFloor>>();
 			var sectorGroups = new List<List<Sector>>();
+
+			if(selectedSectors == null)
+				selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+
 			var tmpSelectedSectors = new List<Sector>(selectedSectors);
 
-			// selectedSectors = new List<Sector>(General.Map.Map.Sectors.ToList());
-			selectedSectors = new List<Sector>();
-			
-
-			foreach (ThreeDFloor tdf in threedfloors)
+			foreach (ThreeDFloor tdf in GetThreeDFloors(selectedSectors))
 			{
-				foreach (Sector s in tdf.TaggedSectors)
+				bool add = true;
+
+				foreach (ThreeDFloor tdf2 in threedfloors)
 				{
-					if (!selectedSectors.Contains(s))
+					if (tdf.Sector == tdf2.Sector)
 					{
-						selectedSectors.Add(s);
+						add = false;
+						break;
 					}
+				}
+
+				if (add)
+				{
+					threedfloors.Add(tdf);
 				}
 			}
 
@@ -237,7 +250,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
 
-			//try
+			try
 			{
 				foreach (ThreeDFloor tdf in threedfloors)
 				{
@@ -250,12 +263,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					tdf.UpdateGeometry();
 				}
 			}
-			/*catch (Exception e)
+			catch (Exception e)
 			{
 				MessageBox.Show(e.Message + "\nPlease increase the size of the control sector area.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				General.Map.UndoRedo.WithdrawUndo();
 				return;
-			} */
+			}
 
 			// Fill the sectorsToThreeDFloors dictionary, with a selected sector as key
 			// and a list of all 3D floors, that should be applied to to this sector, as value

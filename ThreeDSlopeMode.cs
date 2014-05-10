@@ -503,7 +503,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				highlightedslope.ThreeDFloor.Rebuild = true;
 
-				BuilderPlug.ProcessThreeDFloors(new List<ThreeDFloor> { highlightedslope.ThreeDFloor });
+				BuilderPlug.ProcessThreeDFloors(new List<ThreeDFloor> { highlightedslope.ThreeDFloor }, highlightedslope.ThreeDFloor.TaggedSectors);
 
 				UpdateOverlay();
 				General.Interface.RedrawDisplay();
@@ -614,7 +614,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			highlightedslope.ThreeDFloor.Rebuild = true;
 
-			BuilderPlug.ProcessThreeDFloors(new List<ThreeDFloor> { highlightedslope.ThreeDFloor });
+			BuilderPlug.ProcessThreeDFloors(new List<ThreeDFloor> { highlightedslope.ThreeDFloor }, highlightedslope.ThreeDFloor.TaggedSectors);
 
 			UpdateSlopeObjects();
 
