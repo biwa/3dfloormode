@@ -19,9 +19,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
@@ -66,6 +68,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool viewselectionnumbers;
 		private ControlSectorArea controlsectorarea;
         private float highlightsloperange;
+		private SortedList<int, List<SlopeVertex>> slopevertices;
+		private float stitchrange;
 
 		#endregion
 
@@ -90,6 +94,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		}
 		public ControlSectorArea ControlSectorArea { get { return controlsectorarea; } }
         public float HighlightSlopeRange { get { return highlightsloperange; } }
+		public SortedList<int, List<SlopeVertex>> SlopeVertices { get { return slopevertices; } set { slopevertices = value; } }
+		public float StitchRange { get { return stitchrange; } }
 
 		#endregion
 
@@ -117,6 +123,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			usehighlight = true;
 
 			LoadSettings();
+
+			slopevertices = new SortedList<int, List<SlopeVertex>>();
 
 			//controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
 
@@ -149,14 +157,111 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
+
+			slopevertices.Clear();
 		}
 
 		public override void OnMapOpenEnd()
 		{
 			base.OnMapOpenEnd();
 
+			slopevertices.Clear();
+
+			Regex pointregex = new Regex(@"point(\d)\.(\w+)", RegexOptions.IgnoreCase);
+			Regex sloperegex = new Regex(@"slope(\d+)", RegexOptions.IgnoreCase);
+
 			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
+
+			ListDictionary slopedata = (ListDictionary)General.Map.Options.ReadPluginSetting("slopes", new ListDictionary());
+
+			foreach (DictionaryEntry slopeentry in slopedata)
+			{
+				float[] values = new float[12];
+				bool[] floorceiling = new bool[6] { false, false, false, false, false, false };
+				int counter = 0;
+
+				Match slopematch = sloperegex.Match((string)slopeentry.Key);
+
+				if (slopematch.Success)
+				{
+					int slopenum = Convert.ToInt32(slopematch.Groups[1].ToString());
+
+					foreach (DictionaryEntry entry in (ListDictionary)slopeentry.Value)
+					{
+						int voffset = 0;
+						int fcoffset = 0;
+
+						Match pointmatch = pointregex.Match((string)entry.Key);
+
+						if (pointmatch.Success)
+						{
+							int pointnum = Convert.ToInt32(pointmatch.Groups[1].ToString()) - 1;
+
+							if (pointnum > counter)
+								counter = pointnum;
+
+							voffset = pointnum * 4;
+							fcoffset = pointnum * 2;
+
+							if (pointmatch.Groups[2].ToString() == "y") voffset += 1;
+							if (pointmatch.Groups[2].ToString() == "fz")
+							{
+								voffset += 2;
+								floorceiling[fcoffset] = true;
+							}
+							if (pointmatch.Groups[2].ToString() == "cz")
+							{
+								voffset += 3;
+								fcoffset += 1;
+								floorceiling[fcoffset] = true;
+							}
+
+							values[voffset] = (float)entry.Value;
+						}
+					}
+
+					List<Vector3D> points = new List<Vector3D>();
+					List<SlopeVertex> vertices = new List<SlopeVertex>();
+
+					for (int i = 0; i <= counter; i++)
+					{
+						points.Add(new Vector3D(values[i * 3], values[i * 3 + 1], values[i * 3 + 2]));
+						vertices.Add(new SlopeVertex(new Vector2D(values[i * 4], values[i * 4 + 1]), floorceiling[i * 2], values[i * 4 + 2], floorceiling[i * 2 + 1], values[i * 4 + 3]));
+					}
+
+					slopevertices.Add(slopenum, vertices);
+				}
+			}
+		}
+
+		public override void OnMapSaveBegin(SavePurpose purpose)
+		{
+			base.OnMapSaveBegin(purpose);
+
+			ListDictionary slopedata = new ListDictionary();
+
+			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			{
+				ListDictionary data = new ListDictionary();
+
+				for (int i = 0; i < kvp.Value.Count; i++)
+				{
+					string name = String.Format("point{0}.", i+1);
+					data.Add(name + "x", kvp.Value[i].pos.x);
+					data.Add(name + "y", kvp.Value[i].pos.y);
+					
+					if(kvp.Value[i].floor)
+						data.Add(name + "fz", kvp.Value[i].floorz);
+
+					if (kvp.Value[i].ceiling)
+						data.Add(name + "cz", kvp.Value[i].ceilingz);
+				}
+
+				slopedata.Add("slope" + kvp.Key.ToString(), data);
+			}
+
+			General.Map.Options.WritePluginSetting("slopes", slopedata);
 		}
 
         #region ================== Actions
@@ -186,6 +291,65 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
 			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
             highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
+			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
+		}
+
+		public void UpdateSlopes()
+		{
+			string[] fieldnames = new string[] { "floorplane_id", "ceilingplane_id" };
+
+			foreach (Sector s in General.Map.Map.Sectors)
+			{
+				foreach (string fn in fieldnames)
+				{
+					int id = s.Fields.GetValue(fn, -1);
+
+					if (id == -1) continue;
+
+					List<Vector3D> sp = new List<Vector3D>();
+
+					if (fn == "floorplane_id")
+					{
+						for (int i = 0; i < slopevertices[id].Count; i++)
+						{
+							sp.Add(new Vector3D(slopevertices[id][i].pos.x, slopevertices[id][i].pos.y, slopevertices[id][i].floorz));
+						}
+					}
+					else
+					{
+						for (int i = 0; i < slopevertices[id].Count; i++)
+						{
+							sp.Add(new Vector3D(slopevertices[id][i].pos.x, slopevertices[id][i].pos.y, slopevertices[id][i].ceilingz));
+						}
+					}
+
+					if (slopevertices[id].Count == 2)
+					{
+						float z = sp[0].z;
+						Line2D line = new Line2D(sp[0], sp[1]);
+						Vector3D perpendicular = line.GetPerpendicular();
+
+						Vector2D v = sp[0] + perpendicular;
+
+						sp.Add(new Vector3D(v.x, v.y, z));
+					}
+
+					if (fn == "floorplane_id")
+					{
+						Plane p = new Plane(sp[0], sp[1], sp[2], true);
+
+						s.FloorSlope = new Vector3D(p.a, p.b, p.c);
+						s.FloorSlopeOffset = p.d;
+					}
+					else
+					{
+						Plane p = new Plane(sp[0], sp[1], sp[2], false);
+
+						s.CeilingSlope = new Vector3D(p.a, p.b, p.c);
+						s.CeilingSlopeOffset = p.d;
+					}
+				}
+			}
 		}
 
 		public static List<ThreeDFloor> GetThreeDFloors(List<Sector> sectors)
@@ -378,6 +542,35 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					return false;
 
 			return true;
+		}
+
+		// Taken from http://stackoverflow.com/questions/10816803/finding-next-available-key-in-a-dictionary-or-related-collection
+		// Add item to sortedList (numeric key) to next available key item, and return key
+		public static int AddNext<T>(this SortedList<int, T> sortedList, T item)
+		{
+			int key = 1; // Make it 0 to start from Zero based index
+			int count = sortedList.Count;
+
+			int counter = 0;
+			do
+			{
+				if (count == 0) break;
+				int nextKeyInList = sortedList.Keys[counter++];
+
+				if (key != nextKeyInList) break;
+
+				key = nextKeyInList + 1;
+
+				if (count == 1 || counter == count) break;
+
+
+				if (key != sortedList.Keys[counter])
+					break;
+
+			} while (true);
+
+			sortedList.Add(key, item);
+			return key;
 		}
 	}
 }

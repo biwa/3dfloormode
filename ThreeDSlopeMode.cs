@@ -48,14 +48,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
     {
         private ThreeDFloor threedfloor;
         private Vector2D position;
-		private bool isorigin;
+		private int v;
 
         public ThreeDFloor ThreeDFloor { get { return threedfloor; } set { threedfloor = value; } }
         public Vector2D Position { get { return position; } set { position = value; } }
-		public bool IsOrigin { get { return isorigin; } set { isorigin = value; } }
+		public int V { get { return v; } set { v = value; } }
     }
-    
-    [EditMode(DisplayName = "3D Slope Mode",
+
+    [EditMode(DisplayName = "Slope Mode",
               SwitchAction = "threedslopemode",		// Action name used to switch to this mode
               ButtonImage = "ThreeDFloorIcon.png",	// Image resource name for the button
               ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
@@ -74,6 +74,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// Highlighted item
 		private Thing highlighted;
         private SlopeObject highlightedslope;
+		private int[] hightlightedslopepoint = new int[] { -1, -1 };
 		private Association[] association = new Association[Thing.NUM_ARGS];
 		private Association highlightasso = new Association();
 
@@ -84,6 +85,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
         private List<ThreeDFloor> threedfloors;
         private List<SlopeObject> slopeobjects;
 		bool dragging = false;
+
+		private List<TextLabel> labels;
+		private FlatVertex[] overlayGeometry;
 		
 		#endregion
 
@@ -125,6 +129,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
             // Get all 3D floors in the map
             threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
+
+			SetupLabels();
 
 			UpdateSlopeObjects();
 		}
@@ -212,20 +218,91 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (ThreeDFloor tdf in threedfloors)
 			{
-				if (!tdf.Slope.TopSloped || !tdf.Slope.BottomSloped)
+				if (!tdf.TopSloped || !tdf.BottomSloped)
 					continue;
 
 				SlopeObject so = new SlopeObject();
 				so.ThreeDFloor = tdf;
-				so.Position = tdf.Slope.Origin;
-				so.IsOrigin = true;
+				so.Position = tdf.BottomSlope.V1;
+				so.V = 1;
 				slopeobjects.Add(so);
 
 				so = new SlopeObject();
 				so.ThreeDFloor = tdf;
-				so.Position = tdf.Slope.Origin + tdf.Slope.Direction;
-				so.IsOrigin = false;
+				so.Position = tdf.BottomSlope.V2;
+				so.V = 2;
 				slopeobjects.Add(so);
+
+				if (!tdf.BottomSlope.IsSimple)
+				{
+					so = new SlopeObject();
+					so.ThreeDFloor = tdf;
+					so.Position = tdf.BottomSlope.V3;
+					so.V = 3;
+					slopeobjects.Add(so);
+				}
+
+			}
+		}
+
+		private void SetupLabels()
+		{
+			labels = new List<TextLabel>();
+
+			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			{
+				for(int i=0; i < kvp.Value.Count; i++) {
+					float x = kvp.Value[i].pos.x;
+					float y = kvp.Value[i].pos.y - 14f * (1 / renderer.Scale);
+
+					SlopeVertex sv = kvp.Value[i];
+
+					/*
+					if (i == 0)
+					{
+						Line2D line = new Line2D(kvp.Value[0].pos, kvp.Value[1].pos);
+
+						Vector2D v = -line.GetDelta().GetNormal();
+						v *= 14 * (1 / renderer.Scale);
+
+						x = v.x + kvp.Value[0].pos.x;
+						y = v.y + kvp.Value[0].pos.y;
+					}
+					if (i == 1)
+					{
+						Line2D line = new Line2D(kvp.Value[0].pos, kvp.Value[1].pos);
+
+						Vector2D v = -line.GetDelta().GetNormal();
+						v *= -14 * (1 / renderer.Scale);
+
+						x = v.x + kvp.Value[1].pos.x;
+						y = v.y + kvp.Value[1].pos.y;
+					}
+					*/
+
+					TextLabel label = new TextLabel(20);
+					label.TransformCoords = true;
+					label.Rectangle = new RectangleF(x, y, 0.0f, 0.0f);
+					label.AlignX = TextAlignmentX.Center;
+					label.AlignY = TextAlignmentY.Middle;
+					label.Scale = 14f;
+					label.Color = General.Colors.Highlight.WithAlpha(255);
+					label.Backcolor = General.Colors.Background.WithAlpha(255);
+					label.Text = "";
+
+					if (sv.ceiling)
+					{
+						label.Text += String.Format("C: {0}", sv.ceilingz);
+
+						if (sv.floor)
+							label.Text += "; ";
+					}
+
+					if (sv.floor)
+						label.Text += String.Format("F: {0}", sv.floorz);
+
+					labels.Add(label);
+				}
 			}
 		}
 
@@ -233,43 +310,66 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
         private void UpdateOverlay()
         {
             float size = 9 / renderer.Scale;
+
+			SetupLabels();
+
             if (renderer.StartOverlay(true))
             {
-                foreach (ThreeDFloor tdf in threedfloors)
-                {
-                    if (!tdf.Slope.TopSloped || !tdf.Slope.BottomSloped)
-                        continue;
+				if(overlayGeometry != null)
+					renderer.RenderHighlight(overlayGeometry, General.Colors.Selection.WithAlpha(64).ToInt());
 
-                    Vector3D v1 = new Vector3D(tdf.Slope.Origin);
-                    Vector3D v2 = new Vector3D(tdf.Slope.Origin + tdf.Slope.Direction);
-                    byte a = 64;
-
-                    //if (tdf.TaggedSectors.Contains(highlighted))
-                    //a = 192;
-
-                    renderer.RenderArrow(new Line3D(v1, v2), new PixelColor(255, 255, 255, 255));
-                }
-
-                foreach (SlopeObject so in slopeobjects)
-                {
-                    renderer.RenderRectangleFilled(new RectangleF(so.Position.x - size / 2, so.Position.y - size / 2, size, size), General.Colors.Background, true);
-					renderer.RenderRectangle(new RectangleF(so.Position.x - size / 2, so.Position.y - size / 2, size, size), 2, General.Colors.Indication, true);
-                }
-
-				if (highlightedslope != null)
+				foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
 				{
-					Vector3D v1 = new Vector3D(highlightedslope.ThreeDFloor.Slope.Origin);
-					Vector3D v2 = new Vector3D(highlightedslope.ThreeDFloor.Slope.Origin + highlightedslope.ThreeDFloor.Slope.Direction);
+					for (int i = 1; i < kvp.Value.Count; i++)
+					{
+						renderer.RenderLine(kvp.Value[0].pos, kvp.Value[i].pos, 1, new PixelColor(255, 255, 255, 255), true);
+					}
 
-					renderer.RenderArrow(new Line3D(v1, v2), General.Colors.Indication);
+					for (int i = 0; i < kvp.Value.Count; i++)
+					{
+						PixelColor c = General.Colors.Indication;
+						Vector3D v = kvp.Value[i].pos;
 
-					renderer.RenderRectangleFilled(new RectangleF(highlightedslope.Position.x - size / 2, highlightedslope.Position.y - size / 2, size, size), General.Colors.Background, true);
-					renderer.RenderRectangle(new RectangleF(highlightedslope.Position.x - size / 2, highlightedslope.Position.y - size / 2, size, size), 2, General.Colors.Highlight, true);
+						if (kvp.Key == hightlightedslopepoint[0] && i == hightlightedslopepoint[1])
+							c = General.Colors.Highlight;
+
+						renderer.RenderRectangleFilled(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), General.Colors.Background, true);
+						renderer.RenderRectangle(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), 2, c, true);
+					}
 				}
+
+				foreach (TextLabel l in labels)
+					renderer.RenderText(l);
 
                 renderer.Finish();
             }           
         }
+
+		private void updateOverlaySurfaces()
+		{
+			int s = hightlightedslopepoint[0];
+			string[] fieldnames = new string[] { "floorplane_id", "ceilingplane_id" };
+			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
+			List<FlatVertex> vertsList = new List<FlatVertex>();
+
+			if (s != -1)
+			{
+				foreach (Sector sector in General.Map.Map.Sectors)
+				{
+					foreach (string fn in fieldnames)
+					{
+						int id = sector.Fields.GetValue(fn, -1);
+
+						if (id == -1 || id != s) continue;
+
+						// Go for all selected sectors
+						vertsList.AddRange(sector.FlatVertices);
+					}
+				}
+			}
+
+			overlayGeometry = vertsList.ToArray();
+		}
 		
 		// This highlights a new item
 		protected void Highlight(Thing t)
@@ -417,6 +517,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		protected override void OnEditEnd()
 		{
 			base.OnEditEnd();
+
+			if (dragging) return;
+
+			int s = hightlightedslopepoint[0];
+			int p = hightlightedslopepoint[1];
+
+			if (s == -1) return;
+
+			SlopeVertexEditForm svef = new SlopeVertexEditForm(BuilderPlug.Me.SlopeVertices[s][p]);
+
+			DialogResult result = svef.ShowDialog((Form)General.Interface);
+
+			if (result == DialogResult.OK)
+			{
+				SlopeVertex old = BuilderPlug.Me.SlopeVertices[s][p];
+				float floorz = svef.floorz.GetResultFloat(old.floorz);
+				float ceilingz = svef.ceilingz.GetResultFloat(old.ceilingz);
+				float x = svef.positionx.GetResultFloat(old.pos.x);
+				float y = svef.positiony.GetResultFloat(old.pos.y);
+
+				BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(new Vector2D(x, y), old.floor, floorz, old.ceiling, ceilingz);
+
+				BuilderPlug.Me.UpdateSlopes();
+			}
 		}
 
 		// Mouse moves
@@ -435,7 +559,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
                 float distance = float.MaxValue;
                 float d;
+
 				SlopeObject hso = null;
+
+				int s = -1;
+				int p = -1;
+
+				foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+				{
+					for (int i = 0; i < kvp.Value.Count; i++)
+					{
+						d = Vector2D.Distance(kvp.Value[i].pos, mousemappos);
+
+						if (d <= BuilderModes.BuilderPlug.Me.HighlightRange / renderer.Scale && d < distance)
+						{
+							distance = d;
+							s = kvp.Key;
+							p = i;
+						}
+					}
+				}
+
+				if (s != hightlightedslopepoint[0] && p != hightlightedslopepoint[1])
+				{
+					hightlightedslopepoint[0] = s;
+					hightlightedslopepoint[1] = p;
+
+					UpdateOverlay();
+					updateOverlaySurfaces();
+					General.Interface.RedrawDisplay();
+				}
 
                 foreach (SlopeObject so in slopeobjects)
                 {
@@ -455,9 +608,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					General.Interface.RedrawDisplay();
 				}
 			}
-			else if (dragging && highlightedslope != null)
+			else if (dragging && hightlightedslopepoint[0] != -1)
 			{
-				highlightedslope.Position = GridSetup.SnappedToGrid(mousemappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
+				int s = hightlightedslopepoint[0];
+				int p = hightlightedslopepoint[1];
+
+				Vector2D newpos = GridSetup.SnappedToGrid(mousemappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
+
+				BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(newpos, BuilderPlug.Me.SlopeVertices[s][p].floor, BuilderPlug.Me.SlopeVertices[s][p].floorz, BuilderPlug.Me.SlopeVertices[s][p].ceiling, BuilderPlug.Me.SlopeVertices[s][p].ceilingz);
 
 				UpdateOverlay();
 				General.Interface.RedrawDisplay();
@@ -487,18 +645,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnDragStop(e);
 
+			BuilderPlug.Me.UpdateSlopes();
+
 			if (highlightedslope != null)
 			{
-				if (highlightedslope.IsOrigin)
+				if (highlightedslope.V == 1)
 				{
-					Vector2D v = highlightedslope.ThreeDFloor.Slope.Origin + highlightedslope.ThreeDFloor.Slope.Direction;
-
-					highlightedslope.ThreeDFloor.Slope.Origin = highlightedslope.Position;
-					highlightedslope.ThreeDFloor.Slope.Direction = v - highlightedslope.Position;
+					highlightedslope.ThreeDFloor.BottomSlope.V1 = highlightedslope.Position;
 				}
-				else
+				else if (highlightedslope.V == 2)
 				{
-					highlightedslope.ThreeDFloor.Slope.Direction = highlightedslope.Position - highlightedslope.ThreeDFloor.Slope.Origin;
+					highlightedslope.ThreeDFloor.BottomSlope.V2 = highlightedslope.Position;
+				}
+				else if (highlightedslope.V == 3)
+				{
+					highlightedslope.ThreeDFloor.BottomSlope.V3 = highlightedslope.Position;
 				}
 
 				highlightedslope.ThreeDFloor.Rebuild = true;
@@ -507,8 +668,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				UpdateOverlay();
 				General.Interface.RedrawDisplay();
-
-	
 			}
 
 			dragging = false;
@@ -598,6 +757,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			Vector2D origin;
 			Vector2D direction;
 
+			MessageBox.Show("Flipping temporarily removed");
+
+			/*
 			if (highlightedslope.IsOrigin)
 			{
 				origin = highlightedslope.ThreeDFloor.Slope.Origin + highlightedslope.ThreeDFloor.Slope.Direction;
@@ -620,6 +782,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			// Redraw
 			General.Interface.RedrawDisplay();
+			*/
 		}
 
 		// This clears the selection
