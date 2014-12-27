@@ -248,14 +248,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				for (int i = 0; i < kvp.Value.Count; i++)
 				{
 					string name = String.Format("point{0}.", i+1);
-					data.Add(name + "x", kvp.Value[i].pos.x);
-					data.Add(name + "y", kvp.Value[i].pos.y);
+					data.Add(name + "x", kvp.Value[i].Pos.x);
+					data.Add(name + "y", kvp.Value[i].Pos.y);
 					
-					if(kvp.Value[i].floor)
-						data.Add(name + "fz", kvp.Value[i].floorz);
+					if(kvp.Value[i].Floor)
+						data.Add(name + "fz", kvp.Value[i].FloorZ);
 
-					if (kvp.Value[i].ceiling)
-						data.Add(name + "cz", kvp.Value[i].ceilingz);
+					if (kvp.Value[i].Ceiling)
+						data.Add(name + "cz", kvp.Value[i].CeilingZ);
 				}
 
 				slopedata.Add("slope" + kvp.Key.ToString(), data);
@@ -312,14 +312,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					{
 						for (int i = 0; i < slopevertices[id].Count; i++)
 						{
-							sp.Add(new Vector3D(slopevertices[id][i].pos.x, slopevertices[id][i].pos.y, slopevertices[id][i].floorz));
+							sp.Add(new Vector3D(slopevertices[id][i].Pos.x, slopevertices[id][i].Pos.y, slopevertices[id][i].FloorZ));
 						}
 					}
 					else
 					{
 						for (int i = 0; i < slopevertices[id].Count; i++)
 						{
-							sp.Add(new Vector3D(slopevertices[id][i].pos.x, slopevertices[id][i].pos.y, slopevertices[id][i].ceilingz));
+							sp.Add(new Vector3D(slopevertices[id][i].Pos.x, slopevertices[id][i].Pos.y, slopevertices[id][i].CeilingZ));
 						}
 					}
 

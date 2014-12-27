@@ -15,14 +15,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			InitializeComponent();
 
-			positionx.Text = sv.pos.x.ToString();
-			positiony.Text = sv.pos.y.ToString();
+			positionx.Text = sv.Pos.x.ToString();
+			positiony.Text = sv.Pos.y.ToString();
 
-			if (sv.floor)
-				floorz.Text = sv.floorz.ToString();
+			if (sv.Floor)
+				floorz.Text = sv.FloorZ.ToString();
 
-			if (sv.ceiling)
-				ceilingz.Text = sv.ceilingz.ToString();
+			if (sv.Ceiling)
+				ceilingz.Text = sv.CeilingZ.ToString();
 		}
 
 		private void apply_Click(object sender, EventArgs e)

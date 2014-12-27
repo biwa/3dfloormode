@@ -6,15 +6,16 @@ using CodeImp.DoomBuilder.Geometry;
 
 namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
-	public struct SlopeVertex
+	public class SlopeVertex
 	{
 		#region ================== Variables
 
-		public Vector2D pos;
-		public float floorz;
-		public float ceilingz;
-		public bool floor;
-		public bool ceiling;
+		private Vector2D pos;
+		private float floorz;
+		private float ceilingz;
+		private bool floor;
+		private bool ceiling;
+		private bool selected;
 
 		#endregion
 
@@ -27,7 +28,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			this.ceilingz = cz;
 			this.floor = f;
 			this.ceiling = c;
+			this.selected = false;
 		}
+
+		#endregion
+
+		#region ================== Properties
+
+		public Vector2D Pos { get { return pos; } set { pos = value; } }
+		public float FloorZ { get { return floorz; } set { floorz = value; } }
+		public float CeilingZ { get { return ceilingz; } set { ceilingz = value; } }
+		public bool Floor { get { return floor; } set { floor = value; } }
+		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
+		public bool Selected { get { return selected; } set { selected = value; } }
 
 		#endregion
 	}

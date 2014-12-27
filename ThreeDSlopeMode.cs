@@ -88,6 +88,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private List<TextLabel> labels;
 		private FlatVertex[] overlayGeometry;
+
+		private Vector2D dragstartmappos;
+		private List<Vector2D> oldpositions;
 		
 		#endregion
 
@@ -252,8 +255,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
 			{
 				for(int i=0; i < kvp.Value.Count; i++) {
-					float x = kvp.Value[i].pos.x;
-					float y = kvp.Value[i].pos.y - 14f * (1 / renderer.Scale);
+					float x = kvp.Value[i].Pos.x;
+					float y = kvp.Value[i].Pos.y - 14f * (1 / renderer.Scale);
 
 					SlopeVertex sv = kvp.Value[i];
 
@@ -290,16 +293,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					label.Backcolor = General.Colors.Background.WithAlpha(255);
 					label.Text = "";
 
-					if (sv.ceiling)
+					if (sv.Ceiling)
 					{
-						label.Text += String.Format("C: {0}", sv.ceilingz);
+						label.Text += String.Format("C: {0}", sv.CeilingZ);
 
-						if (sv.floor)
+						if (sv.Floor)
 							label.Text += "; ";
 					}
 
-					if (sv.floor)
-						label.Text += String.Format("F: {0}", sv.floorz);
+					if (sv.Floor)
+						label.Text += String.Format("F: {0}", sv.FloorZ);
 
 					labels.Add(label);
 				}
@@ -322,16 +325,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					for (int i = 1; i < kvp.Value.Count; i++)
 					{
-						renderer.RenderLine(kvp.Value[0].pos, kvp.Value[i].pos, 1, new PixelColor(255, 255, 255, 255), true);
+						renderer.RenderLine(kvp.Value[0].Pos, kvp.Value[i].Pos, 1, new PixelColor(255, 255, 255, 255), true);
 					}
 
 					for (int i = 0; i < kvp.Value.Count; i++)
 					{
 						PixelColor c = General.Colors.Indication;
-						Vector3D v = kvp.Value[i].pos;
+						Vector3D v = kvp.Value[i].Pos;
 
 						if (kvp.Key == hightlightedslopepoint[0] && i == hightlightedslopepoint[1])
 							c = General.Colors.Highlight;
+						else if (kvp.Value[i].Selected)
+							c = General.Colors.Selection;
 
 						renderer.RenderRectangleFilled(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), General.Colors.Background, true);
 						renderer.RenderRectangle(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), 2, c, true);
@@ -532,12 +537,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (result == DialogResult.OK)
 			{
 				SlopeVertex old = BuilderPlug.Me.SlopeVertices[s][p];
-				float floorz = svef.floorz.GetResultFloat(old.floorz);
-				float ceilingz = svef.ceilingz.GetResultFloat(old.ceilingz);
-				float x = svef.positionx.GetResultFloat(old.pos.x);
-				float y = svef.positiony.GetResultFloat(old.pos.y);
+				float floorz = svef.floorz.GetResultFloat(old.FloorZ);
+				float ceilingz = svef.ceilingz.GetResultFloat(old.CeilingZ);
+				float x = svef.positionx.GetResultFloat(old.Pos.x);
+				float y = svef.positiony.GetResultFloat(old.Pos.y);
 
-				BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(new Vector2D(x, y), old.floor, floorz, old.ceiling, ceilingz);
+				BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(new Vector2D(x, y), old.Floor, floorz, old.Ceiling, ceilingz);
 
 				BuilderPlug.Me.UpdateSlopes();
 			}
@@ -569,7 +574,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					for (int i = 0; i < kvp.Value.Count; i++)
 					{
-						d = Vector2D.Distance(kvp.Value[i].pos, mousemappos);
+						d = Vector2D.Distance(kvp.Value[i].Pos, mousemappos);
 
 						if (d <= BuilderModes.BuilderPlug.Me.HighlightRange / renderer.Scale && d < distance)
 						{
@@ -612,13 +617,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				int s = hightlightedslopepoint[0];
 				int p = hightlightedslopepoint[1];
+				int i = 0;
 
 				Vector2D newpos = GridSetup.SnappedToGrid(mousemappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
+				Vector2D snappedstartpos = GridSetup.SnappedToGrid(dragstartmappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
 
-				BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(newpos, BuilderPlug.Me.SlopeVertices[s][p].floor, BuilderPlug.Me.SlopeVertices[s][p].floorz, BuilderPlug.Me.SlopeVertices[s][p].ceiling, BuilderPlug.Me.SlopeVertices[s][p].ceilingz);
+				// BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(newpos, BuilderPlug.Me.SlopeVertices[s][p].Floor, BuilderPlug.Me.SlopeVertices[s][p].FloorZ, BuilderPlug.Me.SlopeVertices[s][p].Ceiling, BuilderPlug.Me.SlopeVertices[s][p].CeilingZ);
+
+				foreach (SlopeVertex sl in GetSelectedSlopeVertices())
+				{
+					sl.Pos = oldpositions[i] + newpos - snappedstartpos;
+					i++;
+				}
+
+				BuilderPlug.Me.SlopeVertices[s][p].Pos = oldpositions[i] + newpos - snappedstartpos;
 
 				UpdateOverlay();
+				updateOverlaySurfaces();
 				General.Interface.RedrawDisplay();
+			}
+			else if (selecting)
+			{
+				//UpdateOverlay();
+				//updateOverlaySurfaces();
+				//RenderMultiSelection();
+				//General.Interface.RedrawDisplay();
 			}
 		}
 
@@ -637,7 +660,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			base.OnDragStart(e);
 
 			if (e.Button == MouseButtons.Right)
+			{
 				dragging = true;
+				dragstartmappos = mousemappos;
+
+				oldpositions = new List<Vector2D>();
+
+				foreach(SlopeVertex sl in GetSelectedSlopeVertices())
+					if(sl.Selected)
+						oldpositions.Add(sl.Pos);
+
+
+				int s = hightlightedslopepoint[0];
+				int p = hightlightedslopepoint[1];
+				oldpositions.Add(BuilderPlug.Me.SlopeVertices[s][p].Pos);
+			}
 		}
 
 		// Mouse wants to drag
@@ -686,24 +723,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				if(General.Interface.ShiftState ^ BuilderPlug.Me.AdditiveSelect)
 				{
-					// Go for all things
-					foreach(Thing t in General.Map.ThingsFilter.VisibleThings)
+					// Go for all slope vertices
+					foreach (SlopeVertex sl in GetAllSlopeVertices())
 					{
-						t.Selected |= ((t.Position.x >= selectionrect.Left) &&
-									   (t.Position.y >= selectionrect.Top) &&
-									   (t.Position.x <= selectionrect.Right) &&
-									   (t.Position.y <= selectionrect.Bottom));
+						sl.Selected |= ((sl.Pos.x >= selectionrect.Left) &&
+										(sl.Pos.y >= selectionrect.Top) &&
+										(sl.Pos.x <= selectionrect.Right) &&
+										(sl.Pos.y <= selectionrect.Bottom));
 					}
 				}
 				else
 				{
-					// Go for all things
-					foreach(Thing t in General.Map.ThingsFilter.VisibleThings)
+					// Go for all slope vertices
+					foreach (SlopeVertex sl in GetAllSlopeVertices())
 					{
-						t.Selected = ((t.Position.x >= selectionrect.Left) &&
-									  (t.Position.y >= selectionrect.Top) &&
-									  (t.Position.x <= selectionrect.Right) &&
-									  (t.Position.y <= selectionrect.Bottom));
+						sl.Selected |= ((sl.Pos.x >= selectionrect.Left) &&
+										(sl.Pos.y >= selectionrect.Top) &&
+										(sl.Pos.x <= selectionrect.Right) &&
+										(sl.Pos.y <= selectionrect.Bottom));
 					}
 				}
 			}
@@ -742,6 +779,37 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			return base.OnCopyBegin();
+		}
+
+		public List<SlopeVertex> GetSelectedSlopeVertices()
+		{
+			List<SlopeVertex> selected = new List<SlopeVertex>();
+
+			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			{
+				for (int i = 0; i < kvp.Value.Count; i++)
+				{
+					if (kvp.Value[i].Selected)
+						selected.Add(kvp.Value[i]);
+				}
+			}
+
+			return selected;
+		}
+
+		public List<SlopeVertex> GetAllSlopeVertices()
+		{
+			List<SlopeVertex> selected = new List<SlopeVertex>();
+
+			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			{
+				for (int i = 0; i < kvp.Value.Count; i++)
+				{
+					selected.Add(kvp.Value[i]);
+				}
+			}
+
+			return selected;
 		}
 
 		#endregion
@@ -790,7 +858,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void ClearSelection()
 		{
 			// Clear selection
-			General.Map.Map.ClearAllSelected();
+			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			{
+				for (int i = 0; i < kvp.Value.Count; i++)
+				{
+					kvp.Value[i].Selected = false;
+				}
+			}
 
 			// Redraw
 			General.Interface.RedrawDisplay();
