@@ -589,8 +589,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						sp.Add(new SlopeVertex(points[i].pos, true, fz, true, cz));
 				}
 
-				int id = BuilderPlug.Me.SlopeVertices.AddNext(sp);
-
+				int id = -1;
+				SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sp, out id);
+				
 				foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 				{
 					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)

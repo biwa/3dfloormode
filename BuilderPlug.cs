@@ -68,7 +68,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool viewselectionnumbers;
 		private ControlSectorArea controlsectorarea;
         private float highlightsloperange;
-		private SortedList<int, List<SlopeVertex>> slopevertices;
+		private List<SlopeVertexGroup> slopevertexgroups;
 		private float stitchrange;
 
 		#endregion
@@ -94,7 +94,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		}
 		public ControlSectorArea ControlSectorArea { get { return controlsectorarea; } }
         public float HighlightSlopeRange { get { return highlightsloperange; } }
-		public SortedList<int, List<SlopeVertex>> SlopeVertices { get { return slopevertices; } set { slopevertices = value; } }
+		public List<SlopeVertexGroup> SlopeVertexGroups { get { return slopevertexgroups; } set { slopevertexgroups = value; } }
 		public float StitchRange { get { return stitchrange; } }
 
 		#endregion
@@ -124,7 +124,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			LoadSettings();
 
-			slopevertices = new SortedList<int, List<SlopeVertex>>();
+			slopevertexgroups = new List<SlopeVertexGroup>();
 
 			//controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
 
@@ -158,14 +158,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 
-			slopevertices.Clear();
+			slopevertexgroups.Clear();
 		}
 
 		public override void OnMapOpenEnd()
 		{
 			base.OnMapOpenEnd();
 
-			slopevertices.Clear();
+			slopevertexgroups.Clear();
 
 			Regex pointregex = new Regex(@"point(\d)\.(\w+)", RegexOptions.IgnoreCase);
 			Regex sloperegex = new Regex(@"slope(\d+)", RegexOptions.IgnoreCase);
@@ -230,7 +230,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						vertices.Add(new SlopeVertex(new Vector2D(values[i * 4], values[i * 4 + 1]), floorceiling[i * 2], values[i * 4 + 2], floorceiling[i * 2 + 1], values[i * 4 + 3]));
 					}
 
-					slopevertices.Add(slopenum, vertices);
+					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices));
 				}
 			}
 		}
@@ -241,24 +241,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			ListDictionary slopedata = new ListDictionary();
 
-			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
 				ListDictionary data = new ListDictionary();
 
-				for (int i = 0; i < kvp.Value.Count; i++)
+				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					string name = String.Format("point{0}.", i+1);
-					data.Add(name + "x", kvp.Value[i].Pos.x);
-					data.Add(name + "y", kvp.Value[i].Pos.y);
-					
-					if(kvp.Value[i].Floor)
-						data.Add(name + "fz", kvp.Value[i].FloorZ);
+					data.Add(name + "x", svg.Vertices[i].Pos.x);
+					data.Add(name + "y", svg.Vertices[i].Pos.y);
 
-					if (kvp.Value[i].Ceiling)
-						data.Add(name + "cz", kvp.Value[i].CeilingZ);
+					if (svg.Vertices[i].Floor)
+						data.Add(name + "fz", svg.Vertices[i].FloorZ);
+
+					if (svg.Vertices[i].Ceiling)
+						data.Add(name + "cz", svg.Vertices[i].CeilingZ);
 				}
 
-				slopedata.Add("slope" + kvp.Key.ToString(), data);
+				slopedata.Add("slope" + svg.Id.ToString(), data);
 			}
 
 			General.Map.Options.WritePluginSetting("slopes", slopedata);
@@ -307,23 +307,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					if (id == -1) continue;
 
 					List<Vector3D> sp = new List<Vector3D>();
+					SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
 					if (fn == "floorplane_id")
 					{
-						for (int i = 0; i < slopevertices[id].Count; i++)
+						for (int i = 0; i < svg.Vertices.Count; i++)
 						{
-							sp.Add(new Vector3D(slopevertices[id][i].Pos.x, slopevertices[id][i].Pos.y, slopevertices[id][i].FloorZ));
+							sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].FloorZ));
 						}
 					}
 					else
 					{
-						for (int i = 0; i < slopevertices[id].Count; i++)
+						for (int i = 0; i < svg.Vertices.Count; i++)
 						{
-							sp.Add(new Vector3D(slopevertices[id][i].Pos.x, slopevertices[id][i].Pos.y, slopevertices[id][i].CeilingZ));
+							sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].CeilingZ));
 						}
 					}
 
-					if (slopevertices[id].Count == 2)
+					if (svg.Vertices.Count == 2)
 					{
 						float z = sp[0].z;
 						Line2D line = new Line2D(sp[0], sp[1]);
@@ -345,8 +346,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					{
 						Plane p = new Plane(sp[0], sp[1], sp[2], false);
 
-						s.CeilingSlope = new Vector3D(p.a, p.b, p.c);
-						s.CeilingSlopeOffset = p.d;
+						s.CeilSlope = new Vector3D(p.a, p.b, p.c);
+						s.CeilSlopeOffset = p.d;
 					}
 				}
 			}
@@ -514,6 +515,47 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Remove unused tags from the 3D floors
 			foreach (ThreeDFloor tdf in threedfloors)
 				tdf.Cleanup();
+		}
+
+		public SlopeVertexGroup AddSlopeVertexGroup(List<SlopeVertex> vertices, out int id)
+		{
+			for (int i = 1; i < int.MaxValue; i++)
+			{
+				if (!slopevertexgroups.Exists(x => x.Id == i))
+				{
+					SlopeVertexGroup svg = new SlopeVertexGroup(i, (List<SlopeVertex>)vertices);
+					
+					slopevertexgroups.Add(svg);
+
+					id = i;
+
+					return svg;
+				}
+			}
+
+			throw new Exception("No free slope vertex group ids");
+		}
+
+		public SlopeVertexGroup GetSlopeVertexGroup(SlopeVertex sv)
+		{
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				if (svg.Vertices.Contains(sv))
+					return svg;
+			}
+
+			throw new Exception("SlopeVertex does not belong to a SlopeVertexGroup");
+		}
+
+		public SlopeVertexGroup GetSlopeVertexGroup(int id)
+		{
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				if (svg.Id == id)
+					return svg;
+			}
+
+			throw new Exception("SlopeVertexGroup with id " + id.ToString() + " does not exist");
 		}
 
 		#endregion

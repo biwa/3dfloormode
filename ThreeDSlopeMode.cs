@@ -73,8 +73,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		// Highlighted item
 		private Thing highlighted;
-        private SlopeObject highlightedslope;
-		private int[] hightlightedslopepoint = new int[] { -1, -1 };
+        private SlopeVertex highlightedslope;
 		private Association[] association = new Association[Thing.NUM_ARGS];
 		private Association highlightasso = new Association();
 
@@ -174,11 +173,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				renderer.PlotLinedefSet(General.Map.Map.Linedefs);
 				renderer.PlotVerticesSet(General.Map.Map.Vertices);
 
+				/*
 				if (highlightedslope != null)
 				{
 					foreach(Sector s in highlightedslope.ThreeDFloor.TaggedSectors)
 						renderer.PlotSector(s, General.Colors.Highlight);
 				}
+				*/
 
 				//for(int i = 0; i < Thing.NUM_ARGS; i++) BuilderPlug.Me.PlotAssociations(renderer, association[i]);
 				//if((highlighted != null) && !highlighted.IsDisposed) BuilderPlug.Me.PlotReverseAssociations(renderer, highlightasso);
@@ -252,6 +253,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			labels = new List<TextLabel>();
 
+			/*
 			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
 			{
 				for(int i=0; i < kvp.Value.Count; i++) {
@@ -259,27 +261,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					float y = kvp.Value[i].Pos.y - 14f * (1 / renderer.Scale);
 
 					SlopeVertex sv = kvp.Value[i];
+			*/
+
+			foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			{
+				for (int i = 0; i < svg.Vertices.Count; i++)
+				{
+					SlopeVertex sv = svg.Vertices[i];
+					float x = sv.Pos.x;
+					float y = sv.Pos.y - 14 * (1 / renderer.Scale);
 
 					/*
 					if (i == 0)
 					{
-						Line2D line = new Line2D(kvp.Value[0].pos, kvp.Value[1].pos);
+						Line2D line = new Line2D(svg.Vertices[0].Pos, svg.Vertices[1].Pos);
 
 						Vector2D v = -line.GetDelta().GetNormal();
 						v *= 14 * (1 / renderer.Scale);
 
-						x = v.x + kvp.Value[0].pos.x;
-						y = v.y + kvp.Value[0].pos.y;
+						x = v.x + svg.Vertices[i].Pos.x;
+						y = v.y + svg.Vertices[i].Pos.y;
 					}
 					if (i == 1)
 					{
-						Line2D line = new Line2D(kvp.Value[0].pos, kvp.Value[1].pos);
+						Line2D line = new Line2D(svg.Vertices[0].Pos, svg.Vertices[1].Pos);
 
 						Vector2D v = -line.GetDelta().GetNormal();
 						v *= -14 * (1 / renderer.Scale);
 
-						x = v.x + kvp.Value[1].pos.x;
-						y = v.y + kvp.Value[1].pos.y;
+						x = v.x + svg.Vertices[i].Pos.x;
+						y = v.y + svg.Vertices[i].Pos.y;
 					}
 					*/
 
@@ -321,25 +332,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if(overlayGeometry != null)
 					renderer.RenderHighlight(overlayGeometry, General.Colors.Selection.WithAlpha(64).ToInt());
 
-				foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+				foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 				{
-					for (int i = 1; i < kvp.Value.Count; i++)
+					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
-						renderer.RenderLine(kvp.Value[0].Pos, kvp.Value[i].Pos, 1, new PixelColor(255, 255, 255, 255), true);
-					}
+						if (i < svg.Vertices.Count - 1)
+							renderer.RenderLine(svg.Vertices[i].Pos, svg.Vertices[i+1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
 
-					for (int i = 0; i < kvp.Value.Count; i++)
-					{
 						PixelColor c = General.Colors.Indication;
-						Vector3D v = kvp.Value[i].Pos;
+						Vector3D v = svg.Vertices[i].Pos;
 
-						if (kvp.Key == hightlightedslopepoint[0] && i == hightlightedslopepoint[1])
+						if (highlightedslope == svg.Vertices[i])
 							c = General.Colors.Highlight;
-						else if (kvp.Value[i].Selected)
+						else if (svg.Vertices[i].Selected)
 							c = General.Colors.Selection;
 
 						renderer.RenderRectangleFilled(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), General.Colors.Background, true);
 						renderer.RenderRectangle(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), 2, c, true);
+
 					}
 				}
 
@@ -352,11 +362,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void updateOverlaySurfaces()
 		{
-			int s = hightlightedslopepoint[0];
+			// int s = hightlightedslopepoint[0];
 			string[] fieldnames = new string[] { "floorplane_id", "ceilingplane_id" };
 			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
 			List<FlatVertex> vertsList = new List<FlatVertex>();
 
+			/*
 			if (s != -1)
 			{
 				foreach (Sector sector in General.Map.Map.Sectors)
@@ -372,6 +383,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					}
 				}
 			}
+			*/
 
 			overlayGeometry = vertsList.ToArray();
 		}
@@ -523,26 +535,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnEditEnd();
 
-			if (dragging) return;
+			if (dragging || highlightedslope == null) return;
 
-			int s = hightlightedslopepoint[0];
-			int p = hightlightedslopepoint[1];
-
-			if (s == -1) return;
-
-			SlopeVertexEditForm svef = new SlopeVertexEditForm(BuilderPlug.Me.SlopeVertices[s][p]);
+			SlopeVertexEditForm svef = new SlopeVertexEditForm(highlightedslope);
 
 			DialogResult result = svef.ShowDialog((Form)General.Interface);
 
 			if (result == DialogResult.OK)
 			{
-				SlopeVertex old = BuilderPlug.Me.SlopeVertices[s][p];
+				SlopeVertex old = highlightedslope;
 				float floorz = svef.floorz.GetResultFloat(old.FloorZ);
 				float ceilingz = svef.ceilingz.GetResultFloat(old.CeilingZ);
 				float x = svef.positionx.GetResultFloat(old.Pos.x);
 				float y = svef.positiony.GetResultFloat(old.Pos.y);
 
-				BuilderPlug.Me.SlopeVertices[s][p] = new SlopeVertex(new Vector2D(x, y), old.Floor, floorz, old.Ceiling, ceilingz);
+				highlightedslope = new SlopeVertex(new Vector2D(x, y), old.Floor, floorz, old.Ceiling, ceilingz);
 
 				BuilderPlug.Me.UpdateSlopes();
 			}
@@ -556,6 +563,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Not holding any buttons?
 			if(e.Button == MouseButtons.None)
 			{
+				SlopeVertex oldhighlight = highlightedslope;
+
 				// Find the nearest thing within highlight range
 				Thing t = MapSet.NearestThingSquareRange(General.Map.ThingsFilter.VisibleThings, mousemappos, BuilderPlug.Me.HighlightSlopeRange / renderer.Scale);
 
@@ -565,58 +574,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
                 float distance = float.MaxValue;
                 float d;
 
-				SlopeObject hso = null;
+				highlightedslope = null;
 
-				int s = -1;
-				int p = -1;
-
-				foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
-				{
-					for (int i = 0; i < kvp.Value.Count; i++)
+				foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups) {
+					foreach(SlopeVertex sv in svg.Vertices)
 					{
-						d = Vector2D.Distance(kvp.Value[i].Pos, mousemappos);
+						d = Vector2D.Distance(sv.Pos, mousemappos);
 
 						if (d <= BuilderModes.BuilderPlug.Me.HighlightRange / renderer.Scale && d < distance)
 						{
 							distance = d;
-							s = kvp.Key;
-							p = i;
+							highlightedslope = sv;
 						}
 					}
 				}
 
-				if (s != hightlightedslopepoint[0] && p != hightlightedslopepoint[1])
+				if (highlightedslope != oldhighlight)
 				{
-					hightlightedslopepoint[0] = s;
-					hightlightedslopepoint[1] = p;
-
 					UpdateOverlay();
 					updateOverlaySurfaces();
 					General.Interface.RedrawDisplay();
 				}
-
-                foreach (SlopeObject so in slopeobjects)
-                {
-                    d = Vector2D.Distance(so.Position, mousemappos);
-
-                    if (d <= BuilderModes.BuilderPlug.Me.HighlightRange / renderer.Scale && d < distance)
-                    {
-                        distance = d;
-                        hso = so;
-                    }
-                }
-
-				if (hso != highlightedslope)
-				{
-					highlightedslope = hso;
-					UpdateOverlay();
-					General.Interface.RedrawDisplay();
-				}
 			}
-			else if (dragging && hightlightedslopepoint[0] != -1)
+			else if (dragging && highlightedslope != null)
 			{
-				int s = hightlightedslopepoint[0];
-				int p = hightlightedslopepoint[1];
 				int i = 0;
 
 				Vector2D newpos = GridSetup.SnappedToGrid(mousemappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
@@ -630,7 +611,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					i++;
 				}
 
-				BuilderPlug.Me.SlopeVertices[s][p].Pos = oldpositions[i] + newpos - snappedstartpos;
+				highlightedslope.Pos = oldpositions[i] + newpos - snappedstartpos;
 
 				UpdateOverlay();
 				updateOverlaySurfaces();
@@ -671,9 +652,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						oldpositions.Add(sl.Pos);
 
 
-				int s = hightlightedslopepoint[0];
-				int p = hightlightedslopepoint[1];
-				oldpositions.Add(BuilderPlug.Me.SlopeVertices[s][p].Pos);
+				if(highlightedslope != null)
+					oldpositions.Add(highlightedslope.Pos);
 			}
 		}
 
@@ -683,29 +663,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			base.OnDragStop(e);
 
 			BuilderPlug.Me.UpdateSlopes();
-
-			if (highlightedslope != null)
-			{
-				if (highlightedslope.V == 1)
-				{
-					highlightedslope.ThreeDFloor.BottomSlope.V1 = highlightedslope.Position;
-				}
-				else if (highlightedslope.V == 2)
-				{
-					highlightedslope.ThreeDFloor.BottomSlope.V2 = highlightedslope.Position;
-				}
-				else if (highlightedslope.V == 3)
-				{
-					highlightedslope.ThreeDFloor.BottomSlope.V3 = highlightedslope.Position;
-				}
-
-				highlightedslope.ThreeDFloor.Rebuild = true;
-
-				BuilderPlug.ProcessThreeDFloors(new List<ThreeDFloor> { highlightedslope.ThreeDFloor }, highlightedslope.ThreeDFloor.TaggedSectors);
-
-				UpdateOverlay();
-				General.Interface.RedrawDisplay();
-			}
 
 			dragging = false;
 		}
@@ -785,12 +742,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			List<SlopeVertex> selected = new List<SlopeVertex>();
 
-			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
-				for (int i = 0; i < kvp.Value.Count; i++)
+				foreach (SlopeVertex sv in svg.Vertices)
 				{
-					if (kvp.Value[i].Selected)
-						selected.Add(kvp.Value[i]);
+					if (sv.Selected)
+						selected.Add(sv);
 				}
 			}
 
@@ -801,11 +758,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			List<SlopeVertex> selected = new List<SlopeVertex>();
 
-			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
-				for (int i = 0; i < kvp.Value.Count; i++)
+				foreach (SlopeVertex sv in svg.Vertices)
 				{
-					selected.Add(kvp.Value[i]);
+					selected.Add(sv);
 				}
 			}
 
@@ -858,14 +815,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void ClearSelection()
 		{
 			// Clear selection
-			foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
-				for (int i = 0; i < kvp.Value.Count; i++)
+				foreach (SlopeVertex sv in svg.Vertices)
 				{
-					kvp.Value[i].Selected = false;
+					sv.Selected = false;
 				}
 			}
-
+			
 			// Redraw
 			General.Interface.RedrawDisplay();
 		}
@@ -913,13 +870,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void DeleteItem()
 		{
 			// Make list of selected things
-			List<Thing> selected = new List<Thing>(General.Map.Map.GetSelectedThings(true));
-			if((selected.Count == 0) && (highlighted != null) && !highlighted.IsDisposed) selected.Add(highlighted);
+			List<SlopeVertex> selected = new List<SlopeVertex>(GetSelectedSlopeVertices());
+
+			if(highlightedslope != null)
+			{
+				selected.Add(highlightedslope);
+			}
 			
 			// Anything to do?
 			if(selected.Count > 0)
 			{
+				/*
+				List<int> delete = new List<int>();
+
+				foreach (KeyValuePair<int, List<SlopeVertex>> kvp in BuilderPlug.Me.SlopeVertices)
+				{
+					for (int i = 0; i < kvp.Value.Count; i++)
+					{
+						if (selected.Contains(kvp.Value[i]) && !delete.Contains(kvp.Key))
+							delete.Add(kvp.Key);
+					}
+				}
+
+				foreach(int i in delete.OrderByDescending(v => v).ToList())
+				{
+					BuilderPlug.Me.SlopeVertices.Remove(i);
+				}
+				*/
+
 				// Make undo
+				/*
 				if(selected.Count > 1)
 				{
 					General.Map.UndoRedo.CreateUndo("Delete " + selected.Count + " things");
@@ -930,13 +910,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					General.Map.UndoRedo.CreateUndo("Delete thing");
 					General.Interface.DisplayStatus(StatusType.Action, "Deleted a thing.");
 				}
-
-				// Dispose selected things
-				foreach(Thing t in selected) t.Dispose();
-				
+			
 				// Update cache values
 				General.Map.IsChanged = true;
 				General.Map.ThingsFilter.Update();
+				*/
 
 				// Invoke a new mousemove so that the highlighted item updates
 				MouseEventArgs e = new MouseEventArgs(MouseButtons.None, 0, (int)mousepos.x, (int)mousepos.y, 0);

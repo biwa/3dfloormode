@@ -86,6 +86,7 @@
       <DependentUpon>ThreeDFloorControl.cs</DependentUpon>
     </Compile>
     <Compile Include="SlopeVertex.cs" />
+    <Compile Include="SlopeVertexGroup.cs" />
     <Compile Include="ThreeDFloor.cs" />
     <Compile Include="ThreeDFloorMode.cs" />
     <Compile Include="ThreeDSlopeMode.cs" />
