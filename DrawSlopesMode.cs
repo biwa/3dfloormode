@@ -591,6 +591,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				int id = -1;
 				SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sp, out id);
+
+				svg.Sectors.Clear();
 				
 				foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 				{
@@ -609,6 +611,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 						s.Fields.Add("ceilingplane_id", new UniValue(UniversalType.Integer, id));
 					}
+
+					svg.Sectors.Add(s);
 				}
 
 				BuilderPlug.Me.UpdateSlopes();

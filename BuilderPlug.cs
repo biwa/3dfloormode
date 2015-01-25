@@ -233,6 +233,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices));
 				}
 			}
+
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				foreach (Sector s in General.Map.Map.Sectors)
+				{
+					if (s.Fields.GetValue("floorplane_id", -1) != -1 || s.Fields.GetValue("ceilingplane_id", -1) != -1)
+						svg.Sectors.Add(s);
+				}
+			}
 		}
 
 		public override void OnMapSaveBegin(SavePurpose purpose)

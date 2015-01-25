@@ -367,6 +367,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
 			List<FlatVertex> vertsList = new List<FlatVertex>();
 
+			if (highlightedslope != null)
+			{
+				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(highlightedslope);
+
+				foreach (Sector s in svg.Sectors)
+				{
+					if (s != null && !s.IsDisposed)
+					{
+						vertsList.AddRange(s.FlatVertices);
+					}
+					
+				}
+			}
 			/*
 			if (s != -1)
 			{
@@ -549,7 +562,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				float x = svef.positionx.GetResultFloat(old.Pos.x);
 				float y = svef.positiony.GetResultFloat(old.Pos.y);
 
-				highlightedslope = new SlopeVertex(new Vector2D(x, y), old.Floor, floorz, old.Ceiling, ceilingz);
+				// highlightedslope = new SlopeVertex(new Vector2D(x, y), old.Floor, floorz, old.Ceiling, ceilingz);
+				highlightedslope.Pos = new Vector2D(x, y);
+				highlightedslope.Floor = old.Floor;
+				highlightedslope.FloorZ = floorz;
+				highlightedslope.Ceiling = old.Ceiling;
+				highlightedslope.CeilingZ = ceilingz;
+
 
 				BuilderPlug.Me.UpdateSlopes();
 			}
@@ -591,8 +610,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				if (highlightedslope != oldhighlight)
 				{
-					UpdateOverlay();
 					updateOverlaySurfaces();
+					UpdateOverlay();
 					General.Interface.RedrawDisplay();
 				}
 			}
@@ -613,8 +632,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				highlightedslope.Pos = oldpositions[i] + newpos - snappedstartpos;
 
-				UpdateOverlay();
 				updateOverlaySurfaces();
+				UpdateOverlay();
 				General.Interface.RedrawDisplay();
 			}
 			else if (selecting)
