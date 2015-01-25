@@ -544,6 +544,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// When points have been drawn
 			if (points.Count > 1)
 			{
+				bool floor = false;
+				bool ceiling = false;
+
 				// Make undo for the draw
 				General.Map.UndoRedo.CreateUndo("Slope draw");
 
@@ -581,16 +584,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						}
 					}
 
-					if (slopedrawingmode == SlopeDrawingMode.Floor)
-						sp.Add(new SlopeVertex(points[i].pos, true, fz, false, cz));
-					else if(slopedrawingmode == SlopeDrawingMode.Ceiling)
-						sp.Add(new SlopeVertex(points[i].pos, false, fz, true, cz));
-					else
-						sp.Add(new SlopeVertex(points[i].pos, true, fz, true, cz));
+					sp.Add(new SlopeVertex(points[i].pos, fz, cz));
+
+					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
+						floor = true;
+					else if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
+						ceiling = true;
 				}
 
 				int id = -1;
-				SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sp, out id);
+				SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sp, out id, floor, ceiling);
 
 				svg.Sectors.Clear();
 				

@@ -167,7 +167,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			slopevertexgroups.Clear();
 
-			Regex pointregex = new Regex(@"point(\d)\.(\w+)", RegexOptions.IgnoreCase);
+			Regex vertexregex = new Regex(@"vertex(\d)\.(\w+)", RegexOptions.IgnoreCase);
 			Regex sloperegex = new Regex(@"slope(\d+)", RegexOptions.IgnoreCase);
 
 			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
@@ -178,7 +178,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (DictionaryEntry slopeentry in slopedata)
 			{
 				float[] values = new float[12];
-				bool[] floorceiling = new bool[6] { false, false, false, false, false, false };
 				int counter = 0;
 
 				Match slopematch = sloperegex.Match((string)slopeentry.Key);
@@ -186,13 +185,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (slopematch.Success)
 				{
 					int slopenum = Convert.ToInt32(slopematch.Groups[1].ToString());
+					bool floor = false;
+					bool ceiling = false;
 
 					foreach (DictionaryEntry entry in (ListDictionary)slopeentry.Value)
 					{
 						int voffset = 0;
 						int fcoffset = 0;
 
-						Match pointmatch = pointregex.Match((string)entry.Key);
+						Match pointmatch = vertexregex.Match((string)entry.Key);
 
 						if (pointmatch.Success)
 						{
@@ -208,29 +209,27 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							if (pointmatch.Groups[2].ToString() == "fz")
 							{
 								voffset += 2;
-								floorceiling[fcoffset] = true;
+								floor = true;
 							}
 							if (pointmatch.Groups[2].ToString() == "cz")
 							{
 								voffset += 3;
 								fcoffset += 1;
-								floorceiling[fcoffset] = true;
+								ceiling = true;
 							}
 
 							values[voffset] = (float)entry.Value;
 						}
 					}
 
-					List<Vector3D> points = new List<Vector3D>();
 					List<SlopeVertex> vertices = new List<SlopeVertex>();
 
 					for (int i = 0; i <= counter; i++)
 					{
-						points.Add(new Vector3D(values[i * 3], values[i * 3 + 1], values[i * 3 + 2]));
-						vertices.Add(new SlopeVertex(new Vector2D(values[i * 4], values[i * 4 + 1]), floorceiling[i * 2], values[i * 4 + 2], floorceiling[i * 2 + 1], values[i * 4 + 3]));
+						vertices.Add(new SlopeVertex(new Vector2D(values[i * 4], values[i * 4 + 1]), values[i * 4 + 2], values[i * 4 + 3]));
 					}
 
-					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices));
+					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices, floor, ceiling));
 				}
 			}
 
@@ -256,14 +255,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
-					string name = String.Format("point{0}.", i+1);
+					string name = String.Format("vertex{0}.", i+1);
 					data.Add(name + "x", svg.Vertices[i].Pos.x);
 					data.Add(name + "y", svg.Vertices[i].Pos.y);
 
-					if (svg.Vertices[i].Floor)
+					if (svg.Floor)
 						data.Add(name + "fz", svg.Vertices[i].FloorZ);
 
-					if (svg.Vertices[i].Ceiling)
+					if (svg.Ceiling)
 						data.Add(name + "cz", svg.Vertices[i].CeilingZ);
 				}
 
@@ -526,13 +525,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				tdf.Cleanup();
 		}
 
-		public SlopeVertexGroup AddSlopeVertexGroup(List<SlopeVertex> vertices, out int id)
+		public SlopeVertexGroup AddSlopeVertexGroup(List<SlopeVertex> vertices, out int id, bool floor, bool ceiling)
 		{
 			for (int i = 1; i < int.MaxValue; i++)
 			{
 				if (!slopevertexgroups.Exists(x => x.Id == i))
 				{
-					SlopeVertexGroup svg = new SlopeVertexGroup(i, (List<SlopeVertex>)vertices);
+					SlopeVertexGroup svg = new SlopeVertexGroup(i, (List<SlopeVertex>)vertices, floor, ceiling);
 					
 					slopevertexgroups.Add(svg);
 

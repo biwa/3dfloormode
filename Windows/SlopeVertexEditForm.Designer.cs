@@ -34,10 +34,10 @@
 			this.ceilingz = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
-			this.label4 = new System.Windows.Forms.Label();
 			this.apply = new System.Windows.Forms.Button();
 			this.cancel = new System.Windows.Forms.Button();
+			this.ceiling = new System.Windows.Forms.CheckBox();
+			this.floor = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// positionx
@@ -48,6 +48,7 @@
 			this.positionx.BackColor = System.Drawing.Color.Transparent;
 			this.positionx.ButtonStep = 8;
 			this.positionx.ButtonStepFloat = 1F;
+			this.positionx.ButtonStepsWrapAround = false;
 			this.positionx.Location = new System.Drawing.Point(87, 19);
 			this.positionx.Name = "positionx";
 			this.positionx.Size = new System.Drawing.Size(115, 24);
@@ -62,6 +63,7 @@
 			this.positiony.BackColor = System.Drawing.Color.Transparent;
 			this.positiony.ButtonStep = 8;
 			this.positiony.ButtonStepFloat = 1F;
+			this.positiony.ButtonStepsWrapAround = false;
 			this.positiony.Location = new System.Drawing.Point(87, 51);
 			this.positiony.Name = "positiony";
 			this.positiony.Size = new System.Drawing.Size(115, 24);
@@ -76,6 +78,7 @@
 			this.floorz.BackColor = System.Drawing.Color.Transparent;
 			this.floorz.ButtonStep = 8;
 			this.floorz.ButtonStepFloat = 1F;
+			this.floorz.ButtonStepsWrapAround = false;
 			this.floorz.Location = new System.Drawing.Point(87, 111);
 			this.floorz.Name = "floorz";
 			this.floorz.Size = new System.Drawing.Size(115, 24);
@@ -90,6 +93,7 @@
 			this.ceilingz.BackColor = System.Drawing.Color.Transparent;
 			this.ceilingz.ButtonStep = 8;
 			this.ceilingz.ButtonStepFloat = 1F;
+			this.ceilingz.ButtonStepsWrapAround = false;
 			this.ceilingz.Location = new System.Drawing.Point(87, 81);
 			this.ceilingz.Name = "ceilingz";
 			this.ceilingz.Size = new System.Drawing.Size(115, 24);
@@ -116,26 +120,6 @@
 			this.label2.TabIndex = 7;
 			this.label2.Text = "Y:";
 			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label3.Location = new System.Drawing.Point(37, 116);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(44, 14);
-			this.label3.TabIndex = 8;
-			this.label3.Text = "Floor Z:";
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label4.Location = new System.Drawing.Point(30, 86);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(51, 14);
-			this.label4.TabIndex = 9;
-			this.label4.Text = "Ceiling Z:";
-			// 
 			// apply
 			// 
 			this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -160,6 +144,28 @@
 			this.cancel.UseVisualStyleBackColor = true;
 			this.cancel.Click += new System.EventHandler(this.cancel_Click);
 			// 
+			// ceiling
+			// 
+			this.ceiling.AutoSize = true;
+			this.ceiling.Location = new System.Drawing.Point(11, 85);
+			this.ceiling.Name = "ceiling";
+			this.ceiling.Size = new System.Drawing.Size(70, 18);
+			this.ceiling.TabIndex = 10;
+			this.ceiling.Text = "Ceiling Z:";
+			this.ceiling.UseVisualStyleBackColor = true;
+			this.ceiling.CheckedChanged += new System.EventHandler(this.ceiling_CheckedChanged);
+			// 
+			// floor
+			// 
+			this.floor.Location = new System.Drawing.Point(11, 115);
+			this.floor.Name = "floor";
+			this.floor.Size = new System.Drawing.Size(70, 18);
+			this.floor.TabIndex = 11;
+			this.floor.Text = "Floor Z:";
+			this.floor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.floor.UseVisualStyleBackColor = true;
+			this.floor.CheckedChanged += new System.EventHandler(this.floor_CheckedChanged);
+			// 
 			// SlopeVertexEditForm
 			// 
 			this.AcceptButton = this.apply;
@@ -167,10 +173,10 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancel;
 			this.ClientSize = new System.Drawing.Size(267, 215);
+			this.Controls.Add(this.floor);
+			this.Controls.Add(this.ceiling);
 			this.Controls.Add(this.cancel);
 			this.Controls.Add(this.apply);
-			this.Controls.Add(this.label4);
-			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.ceilingz);
@@ -195,9 +201,9 @@
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox ceilingz;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Button apply;
 		private System.Windows.Forms.Button cancel;
+		private System.Windows.Forms.CheckBox ceiling;
+		private System.Windows.Forms.CheckBox floor;
 	}
 }

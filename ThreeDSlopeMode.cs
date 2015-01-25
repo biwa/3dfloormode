@@ -224,15 +224,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					label.Backcolor = General.Colors.Background.WithAlpha(255);
 					label.Text = "";
 
-					if (sv.Ceiling)
+					if (svg.Ceiling)
 					{
 						label.Text += String.Format("C: {0}", sv.CeilingZ);
 
-						if (sv.Floor)
+						if (svg.Floor)
 							label.Text += "; ";
 					}
 
-					if (sv.Floor)
+					if (svg.Floor)
 						label.Text += String.Format("F: {0}", sv.FloorZ);
 
 					labels.Add(label);
@@ -357,28 +357,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (dragging || highlightedslope == null) return;
 
-			SlopeVertexEditForm svef = new SlopeVertexEditForm(highlightedslope);
+			SlopeVertex sv = highlightedslope;
+
+			List<SlopeVertex> vertices = GetSelectedSlopeVertices();
+
+			if(!vertices.Contains(highlightedslope))
+				vertices.Add(highlightedslope);
+
+			SlopeVertexEditForm svef = new SlopeVertexEditForm();
+			svef.Setup(vertices);
 
 			DialogResult result = svef.ShowDialog((Form)General.Interface);
 
 			if (result == DialogResult.OK)
 			{
-				SlopeVertex old = highlightedslope;
-				float floorz = svef.floorz.GetResultFloat(old.FloorZ);
-				float ceilingz = svef.ceilingz.GetResultFloat(old.CeilingZ);
-				float x = svef.positionx.GetResultFloat(old.Pos.x);
-				float y = svef.positiony.GetResultFloat(old.Pos.y);
-
-				highlightedslope.Pos = new Vector2D(x, y);
-				highlightedslope.Floor = old.Floor;
-				highlightedslope.FloorZ = floorz;
-				highlightedslope.Ceiling = old.Ceiling;
-				highlightedslope.CeilingZ = ceilingz;
-
 				General.Map.IsChanged = true;
 
 				BuilderPlug.Me.UpdateSlopes();
 			}
+
+			highlightedslope = null;
+
+			updateOverlaySurfaces();
+			UpdateOverlay();
+
+			General.Interface.RedrawDisplay();
 		}
 
 		// Mouse moves
