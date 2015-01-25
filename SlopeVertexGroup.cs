@@ -36,5 +36,23 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public int Id { get { return id; } }
 
 		#endregion
+
+		#region ================== Methods
+
+		public void RemoveFromSectors()
+		{
+			foreach (Sector s in sectors)
+			{
+				s.CeilSlope = new Vector3D();
+				s.CeilSlopeOffset = 0;
+				s.FloorSlope = new Vector3D();
+				s.FloorSlopeOffset = 0;
+
+				s.Fields.Remove("floorplane_id");
+				s.Fields.Remove("ceilingplane_id");
+			}
+		}
+
+		#endregion
 	}
 }
