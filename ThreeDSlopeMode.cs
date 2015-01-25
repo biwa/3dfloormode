@@ -200,17 +200,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				renderer.Finish();
 			}
 
-			// Selecting?
-			if(selecting)
-			{
-				// Render selection
-				if(renderer.StartOverlay(true))
-				{
-					RenderMultiSelection();
-					renderer.Finish();
-				}
-			}
-
             UpdateOverlay();
 
 			renderer.Present();
@@ -356,6 +345,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				foreach (TextLabel l in labels)
 					renderer.RenderText(l);
 
+				if (selecting)
+					RenderMultiSelection();
+
                 renderer.Finish();
             }           
         }
@@ -491,19 +483,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		protected override void OnSelectBegin()
 		{
 			// Item highlighted?
-			if((highlighted != null) && !highlighted.IsDisposed)
+			if(highlightedslope != null)
 			{
 				// Flip selection
-				highlighted.Selected = !highlighted.Selected;
+				highlightedslope.Selected = !highlightedslope.Selected;
 
-				// Update display
-				if(renderer.StartThings(false))
-				{
-					// Redraw highlight to show selection
-					renderer.RenderThing(highlighted, renderer.DetermineThingColor(highlighted), 1.0f);
-					renderer.Finish();
-					renderer.Present();
-				}
+				updateOverlaySurfaces();
+				UpdateOverlay();
 			}
 			else
 			{
@@ -521,16 +507,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if(!selecting)
 			{
 				// Item highlighted?
-				if((highlighted != null) && !highlighted.IsDisposed)
+				if (highlightedslope != null)
 				{
-					// Update display
-					if(renderer.StartThings(false))
-					{
-						// Render highlighted item
-						renderer.RenderThing(highlighted, General.Colors.Highlight, 1.0f);
-						renderer.Finish();
-						renderer.Present();
-					}
+					updateOverlaySurfaces();
+					UpdateOverlay();
 				}
 			}
 
@@ -638,10 +618,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 			else if (selecting)
 			{
-				//UpdateOverlay();
-				//updateOverlaySurfaces();
-				//RenderMultiSelection();
-				//General.Interface.RedrawDisplay();
+				UpdateOverlay();
+				General.Interface.RedrawDisplay();
 			}
 		}
 
@@ -735,13 +713,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnUpdateMultiSelection();
 
-			// Render selection
-			if(renderer.StartOverlay(true))
-			{
-				RenderMultiSelection();
-				renderer.Finish();
-				renderer.Present();
-			}
+			UpdateOverlay();
 		}
 
 		// When copying

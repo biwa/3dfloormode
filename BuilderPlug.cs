@@ -238,7 +238,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				foreach (Sector s in General.Map.Map.Sectors)
 				{
-					if (s.Fields.GetValue("floorplane_id", -1) != -1 || s.Fields.GetValue("ceilingplane_id", -1) != -1)
+					if (s.Fields.GetValue("floorplane_id", -1) == svg.Id || s.Fields.GetValue("ceilingplane_id", -1) == svg.Id)
 						svg.Sectors.Add(s);
 				}
 			}
