@@ -29,14 +29,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			positionx.Text = fv.Pos.x.ToString();
 			positiony.Text = fv.Pos.y.ToString();
 
-			floor.Checked = fsvg.Floor;
-			ceiling.Checked = fsvg.Ceiling;
+			positionz.Text = fv.Z.ToString();
 
 			if (fsvg.Floor)
-				floorz.Text = fv.FloorZ.ToString();
-
-			if (fsvg.Ceiling)
-				ceilingz.Text = fv.CeilingZ.ToString();
+				planetype.Text = "Floor";
+			else
+				planetype.Text = "Ceiling";
 
 			if (vertices.Count > 1)
 			{
@@ -52,22 +50,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					if (sv.Pos.y.ToString() != positiony.Text)
 						positiony.Text = "";
 
-					if (sv.FloorZ.ToString() != floorz.Text)
-						floorz.Text = "";
-
-					if (sv.CeilingZ.ToString() != ceilingz.Text)
-						ceilingz.Text = "";
-
-					if (svg.Floor != floor.Checked)
-						floor.CheckState = CheckState.Indeterminate;
-
-					if (svg.Ceiling != ceiling.Checked)
-						ceiling.CheckState = CheckState.Indeterminate;
+					if (sv.Z.ToString() != positionz.Text)
+						positionz.Text = "";
 				}
 			}
-
-			floorz.Enabled = floor.Checked;
-			ceilingz.Enabled = ceiling.Checked;
 		}		
 
 		private void apply_Click(object sender, EventArgs e)
@@ -82,20 +68,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				sv.Pos = new Vector2D(x, y);
 
-				if (floor.CheckState != CheckState.Indeterminate)
+				if (planetype.Text != "")
 				{
-					svg.Floor = floor.Checked;
+					svg.Floor = planetype.Text == "Floor" ? true : false;
+					svg.Ceiling = !svg.Floor;
 
-					if (svg.Floor)
-						sv.FloorZ = floorz.GetResultFloat(sv.FloorZ);
-				}
-
-				if (ceiling.CheckState != CheckState.Indeterminate)
-				{
-					svg.Ceiling = ceiling.Checked;
-
-					if (svg.Ceiling)
-						sv.CeilingZ = ceilingz.GetResultFloat(sv.CeilingZ);
+					sv.Z = positionz.GetResultFloat(sv.Z);
 				}
 
 				if (!groups.Contains(svg))
@@ -111,16 +89,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void cancel_Click(object sender, EventArgs e)
 		{
 			this.DialogResult = DialogResult.Cancel;
-		}
-
-		private void ceiling_CheckedChanged(object sender, EventArgs e)
-		{
-			ceilingz.Enabled = ceiling.Checked;
-		}
-
-		private void floor_CheckedChanged(object sender, EventArgs e)
-		{
-			floorz.Enabled = floor.Checked;
 		}
 	}
 }

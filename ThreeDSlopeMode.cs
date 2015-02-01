@@ -57,7 +57,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
     [EditMode(DisplayName = "Slope Mode",
               SwitchAction = "threedslopemode",		// Action name used to switch to this mode
-              ButtonImage = "ThreeDFloorIcon.png",	// Image resource name for the button
+              ButtonImage = "SlopeModeIcon.png",	// Image resource name for the button
               ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
               ButtonGroup = "000_editing",
               UseByDefault = true,
@@ -128,6 +128,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
             threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
 
 			SetupLabels();
+
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			{
+				svg.FindSectors();
+			}
 
 			UpdateSlopeObjects();
 		}
@@ -205,6 +210,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void SetupLabels()
 		{
 			labels = new List<TextLabel>();
+			PixelColor white = new PixelColor(255, 255, 255, 255);
 
 			foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
@@ -220,20 +226,32 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					label.AlignX = TextAlignmentX.Center;
 					label.AlignY = TextAlignmentY.Middle;
 					label.Scale = 14f;
-					label.Color = General.Colors.Highlight.WithAlpha(255);
 					label.Backcolor = General.Colors.Background.WithAlpha(255);
 					label.Text = "";
 
+					// Rearrange labels if they'd be (exactly) on each other
+					// TODO: do something like that also for overlapping labels
+					foreach (TextLabel l in labels)
+					{
+						if (l.Rectangle.X == label.Rectangle.X && l.Rectangle.Y == label.Rectangle.Y)
+							label.Rectangle = new RectangleF(x, l.Rectangle.Y - 14.0f * (1 / renderer.Scale), 0.0f, 0.0f);
+					}
+
+					if(svg.Vertices.Contains(highlightedslope))
+						label.Color = General.Colors.Highlight.WithAlpha(255);
+					else
+						label.Color = white;
+
 					if (svg.Ceiling)
 					{
-						label.Text += String.Format("C: {0}", sv.CeilingZ);
+						label.Text += String.Format("C: {0}", sv.Z);
 
 						if (svg.Floor)
 							label.Text += "; ";
 					}
 
 					if (svg.Floor)
-						label.Text += String.Format("F: {0}", sv.FloorZ);
+						label.Text += String.Format("F: {0}", sv.Z);
 
 					labels.Add(label);
 				}
@@ -252,25 +270,38 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if(overlayGeometry != null)
 					renderer.RenderHighlight(overlayGeometry, General.Colors.Selection.WithAlpha(64).ToInt());
 
+				List<SlopeVertex> vertices = new List<SlopeVertex>();
+
+				// Store all slope vertices and draw the lines between them
 				foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 				{
 					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
+						vertices.Add(svg.Vertices[i]);
+
 						if (i < svg.Vertices.Count - 1)
 							renderer.RenderLine(svg.Vertices[i].Pos, svg.Vertices[i+1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
-
-						PixelColor c = General.Colors.Indication;
-						Vector3D v = svg.Vertices[i].Pos;
-
-						if (highlightedslope == svg.Vertices[i])
-							c = General.Colors.Highlight;
-						else if (svg.Vertices[i].Selected)
-							c = General.Colors.Selection;
-
-						renderer.RenderRectangleFilled(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), General.Colors.Background, true);
-						renderer.RenderRectangle(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), 2, c, true);
-
 					}
+				}
+
+				// Sort the slope vertex list and draw them. The sorting ensures that selected vertices are always drawn on top
+				foreach(SlopeVertex sv in vertices.OrderBy(o=>o.Selected))
+				{
+					PixelColor c = General.Colors.Indication;
+					Vector3D v = sv.Pos;
+
+					if (sv.Selected)
+						c = General.Colors.Selection;
+
+					renderer.RenderRectangleFilled(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), General.Colors.Background, true);
+					renderer.RenderRectangle(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), 2, c, true);
+				}
+
+				// Draw highlighted slope vertex
+				if (highlightedslope != null)
+				{
+					renderer.RenderRectangleFilled(new RectangleF(highlightedslope.Pos.x - size / 2, highlightedslope.Pos.y - size / 2, size, size), General.Colors.Background, true);
+					renderer.RenderRectangle(new RectangleF(highlightedslope.Pos.x - size / 2, highlightedslope.Pos.y - size / 2, size, size), 2, General.Colors.Highlight, true);
 				}
 
 				foreach (TextLabel l in labels)

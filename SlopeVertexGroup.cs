@@ -46,6 +46,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		#region ================== Methods
 
+		public void FindSectors()
+		{
+			sectors.Clear();
+
+			foreach (Sector s in General.Map.Map.Sectors)
+			{
+				if (s.Fields.GetValue("floorplane_id", -1) == id || s.Fields.GetValue("ceilingplane_id", -1) == id)
+					sectors.Add(s);
+			}
+		}
+
 		public void RemoveFromSectors()
 		{
 			foreach (Sector s in sectors)
@@ -68,78 +79,75 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void ApplyToSectors()
 		{
-			List<Vector3D> floorvertices = new List<Vector3D>();
-			List<Vector3D> ceilingvertices = new List<Vector3D>();
+			List<Vector3D> planevertices = new List<Vector3D>();
+			List<Sector> removesectors = new List<Sector>();
 
 			foreach (SlopeVertex sv in vertices)
 			{
-				floorvertices.Add(new Vector3D(sv.Pos, sv.FloorZ));
-				ceilingvertices.Add(new Vector3D(sv.Pos, sv.CeilingZ));
+				planevertices.Add(new Vector3D(sv.Pos, sv.Z));
 			}
 
 			// Only 2 vertices, so create the 3rd one we need for the plane
-			if (floorvertices.Count == 2)
+			if (planevertices.Count == 2)
 			{
-				float floorz = floorvertices[0].z;
-				float ceilingz = ceilingvertices[0].z;
+				float z = planevertices[0].z;
 
 				// Create a line between the two points we got...
-				Line2D line = new Line2D(floorvertices[0], floorvertices[1]);
+				Line2D line = new Line2D(planevertices[0], planevertices[1]);
 
 				// ... and the the perpendicular
 				Vector3D perpendicular = line.GetPerpendicular();
 
 				// Adding the perpendicular to one of the original points will result
 				// in the third point we need
-				Vector2D v = floorvertices[0] + perpendicular;
+				Vector2D v = planevertices[0] + perpendicular;
 
-				floorvertices.Add(new Vector3D(v, floorz));
-				ceilingvertices.Add(new Vector3D(v, ceilingz));
+				planevertices.Add(new Vector3D(v, z));
 			}
 
-			Plane floorplane = new Plane(floorvertices[0], floorvertices[1], floorvertices[2], true);
-			Plane ceilingplane = new Plane(ceilingvertices[0], ceilingvertices[1], ceilingvertices[2], false);
+			Plane floorplane = new Plane(planevertices[0], planevertices[1], planevertices[2], floor ? true : false);
 
 			foreach (Sector s in sectors)
 			{
-				if (s.Fields.GetValue("floorplane_id", -1) == id)
+				bool hasplane = false;
+
+				if (floor)
 				{
+					hasplane = true;
+
 					if (s.Fields.ContainsKey("floorplane_id"))
-						s.Fields.Remove("floorplane_id");
-
-					if (floor)
-					{
+						s.Fields["floorplane_id"] = new UniValue(UniversalType.Integer, id);
+					else
 						s.Fields.Add("floorplane_id", new UniValue(UniversalType.Integer, id));
-
-						s.FloorSlope = new Vector3D(floorplane.a, floorplane.b, floorplane.c);
-						s.FloorSlopeOffset = floorplane.d;
-					}
-					else
-					{
-						s.FloorSlope = new Vector3D();
-						s.FloorSlopeOffset = 0;
-					}
 				}
-
-				if (s.Fields.GetValue("ceilingplane_id", -1) == id)
+				else if (s.Fields.ContainsKey("floorplane_id") && s.Fields.GetValue("floorplane_id", -1) == id)
 				{
-					if (s.Fields.ContainsKey("ceilingplane_id"))
-						s.Fields.Remove("ceilingplane_id");
-
-					if (ceiling)
-					{
-						s.Fields.Add("ceilingplane_id", new UniValue(UniversalType.Integer, id));
-
-						s.CeilSlope = new Vector3D(ceilingplane.a, ceilingplane.b, ceilingplane.c);
-						s.CeilSlopeOffset = ceilingplane.d;
-					}
-					else
-					{
-						s.CeilSlope = new Vector3D();
-						s.CeilSlopeOffset = 0;
-					}
+					s.Fields.Remove("floorplane_id");
 				}
+
+				if (ceiling)
+				{
+					hasplane = true;
+
+					if (s.Fields.ContainsKey("ceilingplane_id"))
+						s.Fields["ceilingplane_id"] = new UniValue(UniversalType.Integer, id);
+					else
+						s.Fields.Add("ceilingplane_id", new UniValue(UniversalType.Integer, id));
+				}
+				else if (s.Fields.ContainsKey("ceilingplane_id") && s.Fields.GetValue("ceilingplane_id", -1) == id)
+				{
+					s.Fields.Remove("ceilingplane_id");
+				}
+
+				if (!hasplane)
+					removesectors.Add(s);
 			}
+
+			foreach (Sector s in removesectors)
+				sectors.Remove(s);
+
+			foreach (Sector s in sectors)
+				BuilderPlug.Me.UpdateSlopes(s);
 		}
 
 		#endregion

@@ -11,19 +11,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		#region ================== Variables
 
 		private Vector2D pos;
-		private float floorz;
-		private float ceilingz;
+		private float z;
 		private bool selected;
 
 		#endregion
 
 		#region ================== Constructors
 
-		public SlopeVertex(Vector2D p, float fz, float cz)
+		public SlopeVertex(Vector2D p, float z)
 		{
 			this.pos = new Vector2D(p);
-			this.floorz = fz;
-			this.ceilingz = cz;
+			this.z = z;
 			this.selected = false;
 		}
 
@@ -32,8 +30,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		#region ================== Properties
 
 		public Vector2D Pos { get { return pos; } set { pos = value; } }
-		public float FloorZ { get { return floorz; } set { floorz = value; } }
-		public float CeilingZ { get { return ceilingz; } set { ceilingz = value; } }
+		public float Z { get { return z; } set { z = value; } }
 		public bool Selected { get { return selected; } set { selected = value; } }
 
 		#endregion

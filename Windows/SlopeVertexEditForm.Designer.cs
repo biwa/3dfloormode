@@ -30,14 +30,13 @@
 		{
 			this.positionx = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.positiony = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-			this.floorz = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-			this.ceilingz = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
+			this.positionz = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.apply = new System.Windows.Forms.Button();
 			this.cancel = new System.Windows.Forms.Button();
-			this.ceiling = new System.Windows.Forms.CheckBox();
-			this.floor = new System.Windows.Forms.CheckBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.planetype = new System.Windows.Forms.ComboBox();
 			this.SuspendLayout();
 			// 
 			// positionx
@@ -70,35 +69,20 @@
 			this.positiony.StepValues = null;
 			this.positiony.TabIndex = 1;
 			// 
-			// floorz
+			// positionz
 			// 
-			this.floorz.AllowDecimal = false;
-			this.floorz.AllowNegative = true;
-			this.floorz.AllowRelative = true;
-			this.floorz.BackColor = System.Drawing.Color.Transparent;
-			this.floorz.ButtonStep = 8;
-			this.floorz.ButtonStepFloat = 1F;
-			this.floorz.ButtonStepsWrapAround = false;
-			this.floorz.Location = new System.Drawing.Point(87, 111);
-			this.floorz.Name = "floorz";
-			this.floorz.Size = new System.Drawing.Size(115, 24);
-			this.floorz.StepValues = null;
-			this.floorz.TabIndex = 3;
-			// 
-			// ceilingz
-			// 
-			this.ceilingz.AllowDecimal = false;
-			this.ceilingz.AllowNegative = true;
-			this.ceilingz.AllowRelative = true;
-			this.ceilingz.BackColor = System.Drawing.Color.Transparent;
-			this.ceilingz.ButtonStep = 8;
-			this.ceilingz.ButtonStepFloat = 1F;
-			this.ceilingz.ButtonStepsWrapAround = false;
-			this.ceilingz.Location = new System.Drawing.Point(87, 81);
-			this.ceilingz.Name = "ceilingz";
-			this.ceilingz.Size = new System.Drawing.Size(115, 24);
-			this.ceilingz.StepValues = null;
-			this.ceilingz.TabIndex = 2;
+			this.positionz.AllowDecimal = false;
+			this.positionz.AllowNegative = true;
+			this.positionz.AllowRelative = true;
+			this.positionz.BackColor = System.Drawing.Color.Transparent;
+			this.positionz.ButtonStep = 8;
+			this.positionz.ButtonStepFloat = 1F;
+			this.positionz.ButtonStepsWrapAround = false;
+			this.positionz.Location = new System.Drawing.Point(87, 81);
+			this.positionz.Name = "positionz";
+			this.positionz.Size = new System.Drawing.Size(115, 24);
+			this.positionz.StepValues = null;
+			this.positionz.TabIndex = 2;
 			// 
 			// label1
 			// 
@@ -144,27 +128,27 @@
 			this.cancel.UseVisualStyleBackColor = true;
 			this.cancel.Click += new System.EventHandler(this.cancel_Click);
 			// 
-			// ceiling
+			// label3
 			// 
-			this.ceiling.AutoSize = true;
-			this.ceiling.Location = new System.Drawing.Point(11, 85);
-			this.ceiling.Name = "ceiling";
-			this.ceiling.Size = new System.Drawing.Size(70, 18);
-			this.ceiling.TabIndex = 10;
-			this.ceiling.Text = "Ceiling Z:";
-			this.ceiling.UseVisualStyleBackColor = true;
-			this.ceiling.CheckedChanged += new System.EventHandler(this.ceiling_CheckedChanged);
+			this.label3.AutoSize = true;
+			this.label3.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label3.Location = new System.Drawing.Point(64, 86);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(17, 14);
+			this.label3.TabIndex = 8;
+			this.label3.Text = "Z:";
 			// 
-			// floor
+			// planetype
 			// 
-			this.floor.Location = new System.Drawing.Point(11, 115);
-			this.floor.Name = "floor";
-			this.floor.Size = new System.Drawing.Size(70, 18);
-			this.floor.TabIndex = 11;
-			this.floor.Text = "Floor Z:";
-			this.floor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.floor.UseVisualStyleBackColor = true;
-			this.floor.CheckedChanged += new System.EventHandler(this.floor_CheckedChanged);
+			this.planetype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.planetype.FormattingEnabled = true;
+			this.planetype.Items.AddRange(new object[] {
+            "Ceiling",
+            "Floor"});
+			this.planetype.Location = new System.Drawing.Point(87, 112);
+			this.planetype.Name = "planetype";
+			this.planetype.Size = new System.Drawing.Size(95, 22);
+			this.planetype.TabIndex = 9;
 			// 
 			// SlopeVertexEditForm
 			// 
@@ -173,14 +157,13 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancel;
 			this.ClientSize = new System.Drawing.Size(267, 215);
-			this.Controls.Add(this.floor);
-			this.Controls.Add(this.ceiling);
+			this.Controls.Add(this.planetype);
+			this.Controls.Add(this.label3);
 			this.Controls.Add(this.cancel);
 			this.Controls.Add(this.apply);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
-			this.Controls.Add(this.ceilingz);
-			this.Controls.Add(this.floorz);
+			this.Controls.Add(this.positionz);
 			this.Controls.Add(this.positiony);
 			this.Controls.Add(this.positionx);
 			this.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -197,13 +180,12 @@
 
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox positionx;
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox positiony;
-		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox floorz;
-		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox ceilingz;
+		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox positionz;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Button apply;
 		private System.Windows.Forms.Button cancel;
-		private System.Windows.Forms.CheckBox ceiling;
-		private System.Windows.Forms.CheckBox floor;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.ComboBox planetype;
 	}
 }

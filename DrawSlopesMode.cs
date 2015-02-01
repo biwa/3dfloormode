@@ -42,7 +42,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 	[EditMode(DisplayName = "Draw Slopes Mode",
 			  SwitchAction = "drawslopesmode",
-			  ButtonImage = "ThreeDFloorIcon.png",	// Image resource name for the button
+			  ButtonImage = "DrawSlopeModeIcon.png",	// Image resource name for the button
 			  ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
 			  ButtonGroup = "000_editing",
 			  AllowCopyPaste = false,
@@ -555,14 +555,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				for (int i = 0; i < points.Count; i++)
 				{
-					float fz = 0;
-					float cz = 0;
+					float z = 0;
 					Sector s = General.Map.Map.GetSectorByCoordinates(points[i].pos);
 
 					if (s == null)
 					{
-						fz = 0;
-						cz = 0;
+						z = 0;
 					}
 					else
 					{
@@ -572,19 +570,23 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							{
 								if (sd.Line.Back != null && !General.Map.Map.GetSelectedSectors(true).Contains(sd.Line.Back.Sector))
 								{
-									fz = sd.Line.Back.Sector.FloorHeight;
-									cz = sd.Line.Back.Sector.CeilHeight;
+									if(slopedrawingmode == SlopeDrawingMode.Floor)
+										z = sd.Line.Back.Sector.FloorHeight;
+									else
+										z = sd.Line.Back.Sector.CeilHeight;
 								}
 								else
 								{
-									fz = sd.Line.Front.Sector.FloorHeight;
-									cz = sd.Line.Front.Sector.CeilHeight;
+									if (slopedrawingmode == SlopeDrawingMode.Floor)
+										z = sd.Line.Front.Sector.FloorHeight;
+									else
+										z = sd.Line.Front.Sector.CeilHeight;
 								}
 							}
 						}
 					}
 
-					sp.Add(new SlopeVertex(points[i].pos, fz, cz));
+					sp.Add(new SlopeVertex(points[i].pos, z));
 
 					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 						floor = true;
@@ -602,7 +604,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 					{
 						if (s.Fields.ContainsKey("floorplane_id"))
+						{
 							s.Fields.Remove("floorplane_id");
+
+							//BuilderPlug.Me.SlopeVertexGroups.ForEach(g => { if(g.Sectors.Contains(s) == true) { g.Sectors.Remove(s); }});
+						}
 
 						s.Fields.Add("floorplane_id", new UniValue(UniversalType.Integer, id));
 					}
@@ -610,7 +616,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 					{
 						if (s.Fields.ContainsKey("ceilingplane_id"))
+						{
 							s.Fields.Remove("ceilingplane_id");
+
+							//BuilderPlug.Me.SlopeVertexGroups.ForEach(g => { if (g.Sectors.Contains(s) == true) { g.Sectors.Remove(s); } });
+						}
 
 						s.Fields.Add("ceilingplane_id", new UniValue(UniversalType.Integer, id));
 					}

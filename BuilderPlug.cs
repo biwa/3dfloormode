@@ -177,7 +177,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (DictionaryEntry slopeentry in slopedata)
 			{
-				float[] values = new float[12];
+				float[] values = new float[9];
 				int counter = 0;
 
 				Match slopematch = sloperegex.Match((string)slopeentry.Key);
@@ -193,32 +193,29 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						int voffset = 0;
 						int fcoffset = 0;
 
-						Match pointmatch = vertexregex.Match((string)entry.Key);
+						Match vertexmatch = vertexregex.Match((string)entry.Key);
 
-						if (pointmatch.Success)
+						if (vertexmatch.Success)
 						{
-							int pointnum = Convert.ToInt32(pointmatch.Groups[1].ToString()) - 1;
+							int pointnum = Convert.ToInt32(vertexmatch.Groups[1].ToString()) - 1;
 
 							if (pointnum > counter)
 								counter = pointnum;
 
-							voffset = pointnum * 4;
+							voffset = pointnum * 3;
 							fcoffset = pointnum * 2;
 
-							if (pointmatch.Groups[2].ToString() == "y") voffset += 1;
-							if (pointmatch.Groups[2].ToString() == "fz")
-							{
-								voffset += 2;
-								floor = true;
-							}
-							if (pointmatch.Groups[2].ToString() == "cz")
-							{
-								voffset += 3;
-								fcoffset += 1;
-								ceiling = true;
-							}
+							if (vertexmatch.Groups[2].ToString() == "y") voffset += 1;
+							if (vertexmatch.Groups[2].ToString() == "z") voffset += 2;
 
 							values[voffset] = (float)entry.Value;
+						}
+						else if ((string)entry.Key == "planetype")
+						{
+							if ((string)entry.Value == "floor")
+								floor = true;
+							else if ((string)entry.Value == "ceiling")
+								ceiling = true;
 						}
 					}
 
@@ -226,7 +223,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					for (int i = 0; i <= counter; i++)
 					{
-						vertices.Add(new SlopeVertex(new Vector2D(values[i * 4], values[i * 4 + 1]), values[i * 4 + 2], values[i * 4 + 3]));
+						vertices.Add(new SlopeVertex(new Vector2D(values[i * 3], values[i * 3 + 1]), values[i * 3 + 2]));
 					}
 
 					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices, floor, ceiling));
@@ -235,11 +232,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (SlopeVertexGroup svg in slopevertexgroups)
 			{
-				foreach (Sector s in General.Map.Map.Sectors)
-				{
-					if (s.Fields.GetValue("floorplane_id", -1) == svg.Id || s.Fields.GetValue("ceilingplane_id", -1) == svg.Id)
-						svg.Sectors.Add(s);
-				}
+				svg.FindSectors();
 			}
 		}
 
@@ -253,17 +246,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				ListDictionary data = new ListDictionary();
 
+				if (svg.Floor)
+					data.Add("planetype", "floor");
+				else
+					data.Add("planetype", "ceiling");
+
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					string name = String.Format("vertex{0}.", i+1);
 					data.Add(name + "x", svg.Vertices[i].Pos.x);
 					data.Add(name + "y", svg.Vertices[i].Pos.y);
-
-					if (svg.Floor)
-						data.Add(name + "fz", svg.Vertices[i].FloorZ);
-
-					if (svg.Ceiling)
-						data.Add(name + "cz", svg.Vertices[i].CeilingZ);
+					data.Add(name + "z", svg.Vertices[i].Z);
 				}
 
 				slopedata.Add("slope" + svg.Id.ToString(), data);
@@ -304,59 +297,76 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void UpdateSlopes()
 		{
+			foreach (Sector s in General.Map.Map.Sectors)
+				UpdateSlopes(s);
+		}
+
+		public void UpdateSlopes(Sector s)
+		{
 			string[] fieldnames = new string[] { "floorplane_id", "ceilingplane_id" };
 
-			foreach (Sector s in General.Map.Map.Sectors)
+			foreach (string fn in fieldnames)
 			{
-				foreach (string fn in fieldnames)
+				int id = s.Fields.GetValue(fn, -1);
+
+				if (id == -1)
 				{
-					int id = s.Fields.GetValue(fn, -1);
-
-					if (id == -1) continue;
-
-					List<Vector3D> sp = new List<Vector3D>();
-					SlopeVertexGroup svg = GetSlopeVertexGroup(id);
-
 					if (fn == "floorplane_id")
 					{
-						for (int i = 0; i < svg.Vertices.Count; i++)
-						{
-							sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].FloorZ));
-						}
+						s.FloorSlope = new Vector3D();
+						s.FloorSlopeOffset = 0;
 					}
 					else
 					{
-						for (int i = 0; i < svg.Vertices.Count; i++)
-						{
-							sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].CeilingZ));
-						}
+						s.CeilSlope = new Vector3D();
+						s.CeilSlopeOffset = 0;
 					}
 
-					if (svg.Vertices.Count == 2)
+					continue;
+				}
+
+				List<Vector3D> sp = new List<Vector3D>();
+				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
+
+				if (fn == "floorplane_id")
+				{
+					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
-						float z = sp[0].z;
-						Line2D line = new Line2D(sp[0], sp[1]);
-						Vector3D perpendicular = line.GetPerpendicular();
-
-						Vector2D v = sp[0] + perpendicular;
-
-						sp.Add(new Vector3D(v.x, v.y, z));
+						sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
 					}
-
-					if (fn == "floorplane_id")
+				}
+				else
+				{
+					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
-						Plane p = new Plane(sp[0], sp[1], sp[2], true);
-
-						s.FloorSlope = new Vector3D(p.a, p.b, p.c);
-						s.FloorSlopeOffset = p.d;
+						sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
 					}
-					else
-					{
-						Plane p = new Plane(sp[0], sp[1], sp[2], false);
+				}
 
-						s.CeilSlope = new Vector3D(p.a, p.b, p.c);
-						s.CeilSlopeOffset = p.d;
-					}
+				if (svg.Vertices.Count == 2)
+				{
+					float z = sp[0].z;
+					Line2D line = new Line2D(sp[0], sp[1]);
+					Vector3D perpendicular = line.GetPerpendicular();
+
+					Vector2D v = sp[0] + perpendicular;
+
+					sp.Add(new Vector3D(v.x, v.y, z));
+				}
+
+				if (fn == "floorplane_id")
+				{
+					Plane p = new Plane(sp[0], sp[1], sp[2], true);
+
+					s.FloorSlope = new Vector3D(p.a, p.b, p.c);
+					s.FloorSlopeOffset = p.d;
+				}
+				else
+				{
+					Plane p = new Plane(sp[0], sp[1], sp[2], false);
+
+					s.CeilSlope = new Vector3D(p.a, p.b, p.c);
+					s.CeilSlopeOffset = p.d;
 				}
 			}
 		}
