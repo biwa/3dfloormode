@@ -514,7 +514,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnDragStop(e);
 
-			General.Map.UndoRedo.CreateUndo("Drag slope vertex");			
+			General.Map.UndoRedo.CreateUndo("Drag slope vertex");
 
 			BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
 			General.Map.Map.Update();

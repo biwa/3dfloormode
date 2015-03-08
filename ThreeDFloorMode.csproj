@@ -85,11 +85,11 @@
     <Compile Include="Controls\ThreeDFloorControl.Designer.cs">
       <DependentUpon>ThreeDFloorControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="SlopeMode.cs" />
     <Compile Include="SlopeVertex.cs" />
     <Compile Include="SlopeVertexGroup.cs" />
     <Compile Include="ThreeDFloor.cs" />
     <Compile Include="ThreeDFloorMode.cs" />
-    <Compile Include="ThreeDSlopeMode.cs" />
     <Compile Include="Windows\ControlSectorAreaConfig.cs">
       <SubType>Form</SubType>
     </Compile>

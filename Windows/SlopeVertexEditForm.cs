@@ -26,6 +26,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			SlopeVertex fv = vertices[0];
 			SlopeVertexGroup fsvg = BuilderPlug.Me.GetSlopeVertexGroup(fv);
 
+			string desc = "slope vertex";
+			if (vertices.Count > 1) desc = vertices.Count + " slope vertices";
+			General.Map.UndoRedo.CreateUndo("Edit " + desc);
+
 			positionx.Text = fv.Pos.x.ToString();
 			positiony.Text = fv.Pos.y.ToString();
 
@@ -83,11 +87,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (SlopeVertexGroup svg in groups)
 				svg.ApplyToSectors();
 
+			BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
+
 			this.DialogResult = DialogResult.OK;
 		}
 
 		private void cancel_Click(object sender, EventArgs e)
 		{
+			General.Map.UndoRedo.WithdrawUndo();
+
 			this.DialogResult = DialogResult.Cancel;
 		}
 	}
