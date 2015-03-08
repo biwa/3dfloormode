@@ -70,6 +70,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
         private float highlightsloperange;
 		private List<SlopeVertexGroup> slopevertexgroups;
 		private float stitchrange;
+		private Sector dummysector;
 
 		#endregion
 
@@ -96,6 +97,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
         public float HighlightSlopeRange { get { return highlightsloperange; } }
 		public List<SlopeVertexGroup> SlopeVertexGroups { get { return slopevertexgroups; } set { slopevertexgroups = value; } }
 		public float StitchRange { get { return stitchrange; } }
+
+		public Sector DummySector { get { return dummysector; } set { dummysector = value; } }
 
 		#endregion
 
@@ -165,13 +168,101 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnMapOpenEnd();
 
+			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
+			BuilderPlug.Me.ControlSectorArea.LoadConfig();
+
+			LoadSlopesFromDBS();
+
+			// Create the dummy sector used to store the slope vertex group info
+			dummysector = General.Map.Map.CreateSector();
+			General.Map.Map.Update();
+
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+				svg.StoreInSector(dummysector);
+		}
+
+		// Write the slope data to the .dbs file when the map is saved
+		public override void OnMapSaveBegin(SavePurpose purpose)
+		{
+			base.OnMapSaveBegin(purpose);
+
+			ListDictionary slopedata = new ListDictionary();
+
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			{
+				ListDictionary data = new ListDictionary();
+
+				if (svg.Floor)
+					data.Add("planetype", "floor");
+				else
+					data.Add("planetype", "ceiling");
+
+				for (int i = 0; i < svg.Vertices.Count; i++)
+				{
+					string name = String.Format("vertex{0}.", i+1);
+					data.Add(name + "x", svg.Vertices[i].Pos.x);
+					data.Add(name + "y", svg.Vertices[i].Pos.y);
+					data.Add(name + "z", svg.Vertices[i].Z);
+				}
+
+				slopedata.Add("slope" + svg.Id.ToString(), data);
+			}
+
+			General.Map.Options.WritePluginSetting("slopes", slopedata);
+		}
+
+		public override void OnUndoEnd()
+		{
+			base.OnUndoEnd();
+
+			// Load slope vertex data from the dummy sector
+			LoadSlopeVertexGroupsFromSector();
+		}
+
+		public override void OnRedoEnd()
+		{
+			base.OnRedoEnd();
+
+			// Load slope vertex data from the dummy sector
+			LoadSlopeVertexGroupsFromSector();
+		}
+
+        #region ================== Actions
+		
+        #endregion
+
+		#region ================== Methods
+
+		public DialogResult ThreeDFloorEditor()
+		{
+			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+
+			if (selectedSectors.Count <= 0 && General.Editing.Mode.HighlightedObject is Sector)
+				selectedSectors.Add((Sector)General.Editing.Mode.HighlightedObject);
+
+			tdfew.ThreeDFloors = GetThreeDFloors(selectedSectors);
+
+			DialogResult result = tdfew.ShowDialog((Form)General.Interface);
+
+			return result;
+		}
+
+		// Use the same settings as the BuilderModes plugin
+		private void LoadSettings()
+		{
+			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
+			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
+			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
+            highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
+			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
+		}
+
+		private void LoadSlopesFromDBS()
+		{
 			slopevertexgroups.Clear();
 
 			Regex vertexregex = new Regex(@"vertex(\d)\.(\w+)", RegexOptions.IgnoreCase);
 			Regex sloperegex = new Regex(@"slope(\d+)", RegexOptions.IgnoreCase);
-
-			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
-			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 
 			ListDictionary slopedata = (ListDictionary)General.Map.Options.ReadPluginSetting("slopes", new ListDictionary());
 
@@ -236,63 +327,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
-		public override void OnMapSaveBegin(SavePurpose purpose)
+		public void StoreSlopeVertexGroupsInSector()
 		{
-			base.OnMapSaveBegin(purpose);
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+				svg.StoreInSector(dummysector);
+		}
 
-			ListDictionary slopedata = new ListDictionary();
+		public void LoadSlopeVertexGroupsFromSector()
+		{
+			Regex svgregex = new Regex(@"user_svg(\d+)_v0_x", RegexOptions.IgnoreCase);
 
-			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			slopevertexgroups.Clear();
+
+			foreach (KeyValuePair<string, UniValue> kvp in dummysector.Fields)
 			{
-				ListDictionary data = new ListDictionary();
+				Match svgmatch = svgregex.Match((string)kvp.Key);
 
-				if (svg.Floor)
-					data.Add("planetype", "floor");
-				else
-					data.Add("planetype", "ceiling");
-
-				for (int i = 0; i < svg.Vertices.Count; i++)
+				if (svgmatch.Success)
 				{
-					string name = String.Format("vertex{0}.", i+1);
-					data.Add(name + "x", svg.Vertices[i].Pos.x);
-					data.Add(name + "y", svg.Vertices[i].Pos.y);
-					data.Add(name + "z", svg.Vertices[i].Z);
-				}
+					int svgid = Convert.ToInt32(svgmatch.Groups[1].ToString());
 
-				slopedata.Add("slope" + svg.Id.ToString(), data);
+					slopevertexgroups.Add(new SlopeVertexGroup(svgid, dummysector));
+				}
 			}
 
-			General.Map.Options.WritePluginSetting("slopes", slopedata);
-		}
-
-        #region ================== Actions
-		
-        #endregion
-
-		#region ================== Methods
-
-		public DialogResult ThreeDFloorEditor()
-		{
-			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
-
-			if (selectedSectors.Count <= 0 && General.Editing.Mode.HighlightedObject is Sector)
-				selectedSectors.Add((Sector)General.Editing.Mode.HighlightedObject);
-
-			tdfew.ThreeDFloors = GetThreeDFloors(selectedSectors);
-
-			DialogResult result = tdfew.ShowDialog((Form)General.Interface);
-
-			return result;
-		}
-
-		// Use the same settings as the BuilderModes plugin
-		private void LoadSettings()
-		{
-			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
-			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
-			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
-            highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
-			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
+			General.Map.Map.Update();
 		}
 
 		public void UpdateSlopes()
@@ -303,7 +362,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void UpdateSlopes(Sector s)
 		{
-			string[] fieldnames = new string[] { "floorplane_id", "ceilingplane_id" };
+			string[] fieldnames = new string[] { "user_floorplane_id", "user_ceilingplane_id" };
 
 			foreach (string fn in fieldnames)
 			{
@@ -311,7 +370,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				if (id == -1)
 				{
-					if (fn == "floorplane_id")
+					if (fn == "user_floorplane_id")
 					{
 						s.FloorSlope = new Vector3D();
 						s.FloorSlopeOffset = 0;
@@ -328,7 +387,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				List<Vector3D> sp = new List<Vector3D>();
 				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
-				if (fn == "floorplane_id")
+				if (fn == "user_floorplane_id")
 				{
 					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
@@ -354,7 +413,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					sp.Add(new Vector3D(v.x, v.y, z));
 				}
 
-				if (fn == "floorplane_id")
+				if (fn == "user_floorplane_id")
 				{
 					Plane p = new Plane(sp[0], sp[1], sp[2], true);
 

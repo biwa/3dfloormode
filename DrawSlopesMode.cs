@@ -548,7 +548,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				bool ceiling = false;
 
 				// Make undo for the draw
-				General.Map.UndoRedo.CreateUndo("Slope draw");
+				General.Map.UndoRedo.CreateUndo("Draw slope");
 
 				// DO SOMETHING HERE
 				List<SlopeVertex> sp = new List<SlopeVertex>();
@@ -603,30 +603,32 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 					{
-						if (s.Fields.ContainsKey("floorplane_id"))
+						if (s.Fields.ContainsKey("user_floorplane_id"))
 						{
-							s.Fields.Remove("floorplane_id");
+							s.Fields.Remove("user_floorplane_id");
 
 							//BuilderPlug.Me.SlopeVertexGroups.ForEach(g => { if(g.Sectors.Contains(s) == true) { g.Sectors.Remove(s); }});
 						}
 
-						s.Fields.Add("floorplane_id", new UniValue(UniversalType.Integer, id));
+						s.Fields.Add("user_floorplane_id", new UniValue(UniversalType.Integer, id));
 					}
 
 					if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 					{
-						if (s.Fields.ContainsKey("ceilingplane_id"))
+						if (s.Fields.ContainsKey("user_ceilingplane_id"))
 						{
-							s.Fields.Remove("ceilingplane_id");
+							s.Fields.Remove("user_ceilingplane_id");
 
 							//BuilderPlug.Me.SlopeVertexGroups.ForEach(g => { if (g.Sectors.Contains(s) == true) { g.Sectors.Remove(s); } });
 						}
 
-						s.Fields.Add("ceilingplane_id", new UniValue(UniversalType.Integer, id));
+						s.Fields.Add("user_ceilingplane_id", new UniValue(UniversalType.Integer, id));
 					}
 
 					svg.Sectors.Add(s);
 				}
+
+				BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
 
 				BuilderPlug.Me.UpdateSlopes();
 

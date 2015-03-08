@@ -63,7 +63,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
               UseByDefault = true,
               SafeStartMode = true)]
 
-    public class ThreeDSlopeMode : ClassicMode
+    public class SlopeMode : ClassicMode
 	{
 		#region ================== Constants
 
@@ -316,7 +316,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void updateOverlaySurfaces()
 		{
-			string[] fieldnames = new string[] { "floorplane_id", "ceilingplane_id" };
+			string[] fieldnames = new string[] { "user_floorplane_id", "user_ceilingplane_id" };
 			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
 			List<FlatVertex> vertsList = new List<FlatVertex>();
 
@@ -513,6 +513,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		protected override void OnDragStop(MouseEventArgs e)
 		{
 			base.OnDragStop(e);
+
+			General.Map.UndoRedo.CreateUndo("Drag slope vertex");			
+
+			BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
+			General.Map.Map.Update();
 
 			BuilderPlug.Me.UpdateSlopes();
 
