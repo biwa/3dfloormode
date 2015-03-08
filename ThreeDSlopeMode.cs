@@ -280,7 +280,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						vertices.Add(svg.Vertices[i]);
 
 						if (i < svg.Vertices.Count - 1)
-							renderer.RenderLine(svg.Vertices[i].Pos, svg.Vertices[i+1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
+							renderer.RenderLine(svg.Vertices[0].Pos, svg.Vertices[i+1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
 					}
 				}
 

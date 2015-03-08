@@ -162,6 +162,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 
 			slopevertexgroups.Clear();
+
+			// Create the dummy sector used to store the slope vertex group info
+			dummysector = General.Map.Map.CreateSector();
+			General.Map.Map.Update();
 		}
 
 		public override void OnMapOpenEnd()

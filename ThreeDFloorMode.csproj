@@ -89,7 +89,7 @@
     <Compile Include="SlopeVertexGroup.cs" />
     <Compile Include="ThreeDFloor.cs" />
     <Compile Include="ThreeDFloorMode.cs" />
-    <Compile Include="SlopeMode.cs" />
+    <Compile Include="ThreeDSlopeMode.cs" />
     <Compile Include="Windows\ControlSectorAreaConfig.cs">
       <SubType>Form</SubType>
     </Compile>
