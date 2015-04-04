@@ -18,10 +18,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		#region ================== Variables
 		private List<SlopeVertex> vertices;
 		private List<Sector> sectors;
+		private List<Sector> taggedsectors; // For highlighting 3D floors
 		private int id;
 		private bool ceiling;
 		private bool floor;
-		private SlopeVertex[] verticesArray;
 
 		#endregion
 
@@ -75,6 +75,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public List<SlopeVertex> Vertices { get { return vertices; } set { vertices = value; } }
 		public List<Sector> Sectors { get { return sectors; } set { sectors = value; } }
+		public List<Sector> TaggedSectors { get { return taggedsectors; } set { taggedsectors = value; } }
 		public int Id { get { return id; } }
 		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
 		public bool Floor { get { return floor; } set { floor = value; } }
@@ -83,24 +84,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		#region ================== Methods
 
-		public void LoadFromArray()
-		{
-			if (vertices == null)
-				vertices = new List<SlopeVertex>();
-			else
-				vertices.Clear();
-
-			foreach (SlopeVertex sv in verticesArray)
-			{
-				vertices.Add(sv);
-			}
-		}
-
-		public void ToArray()
-		{
-			verticesArray = vertices.ToArray();
-		}
-
 		public void FindSectors()
 		{
 			if (sectors == null)
@@ -108,10 +91,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			else
 				sectors.Clear();
 
+			if (taggedsectors == null)
+				taggedsectors = new List<Sector>();
+			else
+				taggedsectors.Clear();
+
 			foreach (Sector s in General.Map.Map.Sectors)
 			{
 				if (s.Fields.GetValue("user_floorplane_id", -1) == id || s.Fields.GetValue("user_ceilingplane_id", -1) == id)
+				{
 					sectors.Add(s);
+
+					// Check if the current sector is a 3D floor control sector. If that's the case also store the
+					// tagged sector(s). They will be used for highlighting in slope mode
+					foreach (Sidedef sd in s.Sidedefs)
+					{
+						if (sd.Line.Action == 160)
+						{
+							foreach (Sector ts in General.Map.Map.GetSectorsByTag(sd.Line.Args[0]))
+							{
+								if (!taggedsectors.Contains(ts))
+									taggedsectors.Add(ts);
+							}
+						}
+					}
+				}
 			}
 		}
 

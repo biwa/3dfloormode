@@ -52,7 +52,7 @@
 			this.positionx.Name = "positionx";
 			this.positionx.Size = new System.Drawing.Size(115, 24);
 			this.positionx.StepValues = null;
-			this.positionx.TabIndex = 0;
+			this.positionx.TabIndex = 4;
 			// 
 			// positiony
 			// 
@@ -67,7 +67,7 @@
 			this.positiony.Name = "positiony";
 			this.positiony.Size = new System.Drawing.Size(115, 24);
 			this.positiony.StepValues = null;
-			this.positiony.TabIndex = 1;
+			this.positiony.TabIndex = 5;
 			// 
 			// positionz
 			// 
@@ -82,7 +82,7 @@
 			this.positionz.Name = "positionz";
 			this.positionz.Size = new System.Drawing.Size(115, 24);
 			this.positionz.StepValues = null;
-			this.positionz.TabIndex = 2;
+			this.positionz.TabIndex = 0;
 			// 
 			// label1
 			// 
@@ -108,10 +108,10 @@
 			// 
 			this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.apply.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.apply.Location = new System.Drawing.Point(143, 178);
+			this.apply.Location = new System.Drawing.Point(17, 178);
 			this.apply.Name = "apply";
 			this.apply.Size = new System.Drawing.Size(112, 25);
-			this.apply.TabIndex = 5;
+			this.apply.TabIndex = 2;
 			this.apply.Text = "OK";
 			this.apply.UseVisualStyleBackColor = true;
 			this.apply.Click += new System.EventHandler(this.apply_Click);
@@ -120,10 +120,10 @@
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(25, 178);
+			this.cancel.Location = new System.Drawing.Point(137, 178);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(112, 25);
-			this.cancel.TabIndex = 4;
+			this.cancel.TabIndex = 3;
 			this.cancel.Text = "Cancel";
 			this.cancel.UseVisualStyleBackColor = true;
 			this.cancel.Click += new System.EventHandler(this.cancel_Click);
@@ -148,7 +148,7 @@
 			this.planetype.Location = new System.Drawing.Point(87, 112);
 			this.planetype.Name = "planetype";
 			this.planetype.Size = new System.Drawing.Size(95, 22);
-			this.planetype.TabIndex = 9;
+			this.planetype.TabIndex = 1;
 			// 
 			// SlopeVertexEditForm
 			// 

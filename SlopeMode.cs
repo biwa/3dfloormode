@@ -83,7 +83,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		bool dragging = false;
 
 		private List<TextLabel> labels;
-		private FlatVertex[] overlayGeometry;
+		private FlatVertex[] overlaygeometry;
+		private FlatVertex[] overlaytaggedgeometry;
+		private FlatVertex[] selectedsectorgeometry;
+		private FlatVertex[] selectedtaggedsectorgeometry;
 
 		private Vector2D dragstartmappos;
 		private List<Vector2D> oldpositions;
@@ -120,9 +123,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
             base.OnEngage();
             renderer.SetPresentation(Presentation.Things);
 
-            // Convert geometry selection to linedefs selection
-            General.Map.Map.ConvertSelection(SelectionType.Linedefs);
-            General.Map.Map.SelectionType = SelectionType.Things;
+            // Convert geometry selection to sectors
+            General.Map.Map.ConvertSelection(SelectionType.Sectors);
 
             // Get all 3D floors in the map
             threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
@@ -133,6 +135,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				svg.FindSectors();
 			}
+
+			// Update overlay surfaces, so that selected sectors are drawn correctly
+			updateOverlaySurfaces();
 
 			UpdateSlopeObjects();
 		}
@@ -267,8 +272,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
             if (renderer.StartOverlay(true))
             {
-				if(overlayGeometry != null)
-					renderer.RenderHighlight(overlayGeometry, General.Colors.Selection.WithAlpha(64).ToInt());
+				if(overlaygeometry != null)
+					renderer.RenderHighlight(overlaygeometry, General.Colors.ModelWireframe.WithAlpha(64).ToInt());
+
+				if (overlaytaggedgeometry != null)
+					renderer.RenderHighlight(overlaytaggedgeometry, General.Colors.Vertices.WithAlpha(64).ToInt());
+
+				if (selectedsectorgeometry != null)
+					renderer.RenderHighlight(selectedsectorgeometry, General.Colors.Selection.WithAlpha(64).ToInt());
 
 				List<SlopeVertex> vertices = new List<SlopeVertex>();
 
@@ -318,23 +329,55 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			string[] fieldnames = new string[] { "user_floorplane_id", "user_ceilingplane_id" };
 			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
-			List<FlatVertex> vertsList = new List<FlatVertex>();
+			List<FlatVertex> vertslist = new List<FlatVertex>();
+			List<Sector> highlightedsectors = new List<Sector>();
+			List<Sector> highlightedtaggedsectors = new List<Sector>();
 
+			// Highlighted slope
 			if (highlightedslope != null)
 			{
 				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(highlightedslope);
 
+				// All sectors the slope applies to
 				foreach (Sector s in svg.Sectors)
 				{
 					if (s != null && !s.IsDisposed)
 					{
-						vertsList.AddRange(s.FlatVertices);
+						vertslist.AddRange(s.FlatVertices);
+						highlightedsectors.Add(s);
 					}
-					
 				}
+
+				overlaygeometry = vertslist.ToArray();
+
+				// All sectors that are tagged because of 3D floors
+				vertslist = new List<FlatVertex>();
+
+				foreach (Sector s in svg.TaggedSectors)
+				{
+					if (s != null && !s.IsDisposed)
+					{
+						vertslist.AddRange(s.FlatVertices);
+						highlightedtaggedsectors.Add(s);
+					}
+				}
+
+				overlaytaggedgeometry = vertslist.ToArray();
+			}
+			else
+			{
+				overlaygeometry = new FlatVertex[0];
+				overlaytaggedgeometry = new FlatVertex[0];
 			}
 
-			overlayGeometry = vertsList.ToArray();
+			// Selected sectors
+			vertslist = new List<FlatVertex>();
+
+			foreach (Sector s in orderedselection)
+				if(!highlightedsectors.Contains(s))
+					vertslist.AddRange(s.FlatVertices);
+
+			selectedsectorgeometry = vertslist.ToArray();
 		}
 		
 		// Selection

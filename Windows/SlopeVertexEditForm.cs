@@ -56,6 +56,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					if (sv.Z.ToString() != positionz.Text)
 						positionz.Text = "";
+
+					if (svg.Floor != fsvg.Floor || svg.Ceiling != fsvg.Ceiling)
+						if ((string)planetype.Items[0] != "")
+						{
+							planetype.Items.Insert(0, "");
+							planetype.SelectedIndex = 0;
+						}
 				}
 			}
 		}		
@@ -66,18 +73,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (SlopeVertex sv in vertices)
 			{
+				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(sv);
 				float x = positionx.GetResultFloat(sv.Pos.x);
 				float y = positiony.GetResultFloat(sv.Pos.y);
-				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(sv);
 
 				sv.Pos = new Vector2D(x, y);
+
+				sv.Z = positionz.GetResultFloat(sv.Z);
 
 				if (planetype.Text != "")
 				{
 					svg.Floor = planetype.Text == "Floor" ? true : false;
 					svg.Ceiling = !svg.Floor;
-
-					sv.Z = positionz.GetResultFloat(sv.Z);
 				}
 
 				if (!groups.Contains(svg))
