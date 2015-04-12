@@ -507,6 +507,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Convert geometry selection to sectors only
 			General.Map.Map.ConvertSelection(SelectionType.Sectors);
 
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorSlope);
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.CeilingSlope);
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
+
+			if (slopedrawingmode == SlopeDrawingMode.Floor)
+				BuilderPlug.Me.MenusForm.FloorSlope.Checked = true;
+			else if (slopedrawingmode == SlopeDrawingMode.Ceiling)
+				BuilderPlug.Me.MenusForm.CeilingSlope.Checked = true;
+			else
+				BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = true;
+
 			// Make text labels for sectors
 			SetupLabels();
 			UpdateSelectedLabels();
@@ -521,6 +532,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public override void OnDisengage()
 		{
 			base.OnDisengage();
+
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FloorSlope);
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.CeilingSlope);
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
+
 			DisableAutoPanning();
 		}
 
@@ -550,19 +566,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				// Make undo for the draw
 				General.Map.UndoRedo.CreateUndo("Draw slope");
 
-				// DO SOMETHING HERE
-				List<SlopeVertex> sp = new List<SlopeVertex>();
+				List<SlopeVertex> sv_floor = new List<SlopeVertex>();
+				List<SlopeVertex> sv_ceiling = new List<SlopeVertex>();
 
+				// Fills the slope vertex list for both floor and ceiling slopes. Alos tried
+				// to determine the default z position of the vertex
 				for (int i = 0; i < points.Count; i++)
 				{
-					float z = 0;
+					float zf = 0;
+					float zc = 0;
 					Sector s = General.Map.Map.GetSectorByCoordinates(points[i].pos);
 
-					if (s == null)
-					{
-						z = 0;
-					}
-					else
+					if (s != null)
 					{
 						foreach (Sidedef sd in s.Sidedefs)
 						{
@@ -570,62 +585,58 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							{
 								if (sd.Line.Back != null && !General.Map.Map.GetSelectedSectors(true).Contains(sd.Line.Back.Sector))
 								{
-									if(slopedrawingmode == SlopeDrawingMode.Floor)
-										z = sd.Line.Back.Sector.FloorHeight;
-									else
-										z = sd.Line.Back.Sector.CeilHeight;
+									zf = sd.Line.Back.Sector.FloorHeight;
+									zc = sd.Line.Back.Sector.CeilHeight;
 								}
 								else
 								{
-									if (slopedrawingmode == SlopeDrawingMode.Floor)
-										z = sd.Line.Front.Sector.FloorHeight;
-									else
-										z = sd.Line.Front.Sector.CeilHeight;
+									zf = sd.Line.Front.Sector.FloorHeight;
+									zc = sd.Line.Front.Sector.CeilHeight;
 								}
 							}
 						}
 					}
 
-					sp.Add(new SlopeVertex(points[i].pos, z));
-
-					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
-						floor = true;
-					else if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
-						ceiling = true;
+					sv_floor.Add(new SlopeVertex(points[i].pos, zf));
+					sv_ceiling.Add(new SlopeVertex(points[i].pos, zc));
 				}
 
-				int id = -1;
-				SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sp, out id, floor, ceiling);
-
-				svg.Sectors.Clear();
-				
-				foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
+				// Create the floor slope vertex group and add it to all selected sectors
+				if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 				{
-					if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
+					int id = -1;
+					SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sv_floor, out id, true, false);
+
+					svg.Sectors.Clear();
+
+					foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 					{
 						if (s.Fields.ContainsKey("user_floorplane_id"))
-						{
 							s.Fields.Remove("user_floorplane_id");
 
-							//BuilderPlug.Me.SlopeVertexGroups.ForEach(g => { if(g.Sectors.Contains(s) == true) { g.Sectors.Remove(s); }});
-						}
-
 						s.Fields.Add("user_floorplane_id", new UniValue(UniversalType.Integer, id));
-					}
 
-					if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
+						svg.Sectors.Add(s);
+					}
+				}
+
+				// Create the ceiling slope vertex group and add it to all selected sectors
+				if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
+				{
+					int id = -1;
+					SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sv_ceiling, out id, false, true);
+
+					svg.Sectors.Clear();
+
+					foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 					{
 						if (s.Fields.ContainsKey("user_ceilingplane_id"))
-						{
 							s.Fields.Remove("user_ceilingplane_id");
 
-							//BuilderPlug.Me.SlopeVertexGroups.ForEach(g => { if (g.Sectors.Contains(s) == true) { g.Sectors.Remove(s); } });
-						}
-
 						s.Fields.Add("user_ceilingplane_id", new UniValue(UniversalType.Integer, id));
-					}
 
-					svg.Sectors.Add(s);
+						svg.Sectors.Add(s);
+					}
 				}
 
 				BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
@@ -706,21 +717,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void DrawFloorSlope()
 		{
 			slopedrawingmode = SlopeDrawingMode.Floor;
-			MessageBox.Show("floor");
+
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = true;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = false;
+
+			General.Interface.DisplayStatus(StatusType.Info, "Applying drawn slope to floor");
 		}
 
 		[BeginAction("drawceilingslope")]
 		public void DrawCeilingSlope()
 		{
 			slopedrawingmode = SlopeDrawingMode.Ceiling;
-			MessageBox.Show("ceiling");
+
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = true;
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = false;
+
+			General.Interface.DisplayStatus(StatusType.Info, "Applying drawn slope to ceiling");
 		}
 
 		[BeginAction("drawfloorandceilingslope")]
 		public void DrawFloorAndCeilingSlope()
 		{
 			slopedrawingmode = SlopeDrawingMode.FloorAndCeiling;
-			MessageBox.Show("floor and ceiling");
+
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = true;
+
+			General.Interface.DisplayStatus(StatusType.Info, "Applying drawn slope to floor and ceiling");
 		}
 
 		// Drawing a point

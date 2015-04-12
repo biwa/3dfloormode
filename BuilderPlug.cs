@@ -138,6 +138,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// editing mode is engaged.
             General.Actions.BindMethods(this);
 
+			menusform = new MenusForm();
+
   			// TODO: Add DB2 version check so that old DB2 versions won't crash
 			// General.ErrorLogger.Add(ErrorType.Error, "zomg!");
 

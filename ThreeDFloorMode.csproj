@@ -85,6 +85,11 @@
     <Compile Include="Controls\ThreeDFloorControl.Designer.cs">
       <DependentUpon>ThreeDFloorControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SlopeMode.cs" />
     <Compile Include="SlopeVertex.cs" />
     <Compile Include="SlopeVertexGroup.cs" />
@@ -95,6 +100,12 @@
     </Compile>
     <Compile Include="Windows\ControlSectorAreaConfig.Designer.cs">
       <DependentUpon>ControlSectorAreaConfig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\MenusForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\MenusForm.Designer.cs">
+      <DependentUpon>MenusForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\SlopeVertexEditForm.cs">
       <SubType>Form</SubType>
@@ -155,6 +166,18 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\DrawSlopeModeIcon.png" />
+    <EmbeddedResource Include="Windows\MenusForm.resx">
+      <DependentUpon>MenusForm.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Ceiling.png" />
+    <EmbeddedResource Include="Resources\Floor.png" />
+    <EmbeddedResource Include="Resources\FloorAndCeiling.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

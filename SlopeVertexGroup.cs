@@ -122,20 +122,23 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void RemoveFromSectors()
 		{
 			foreach (Sector s in sectors)
-			{
-				if (floor)
-				{
-					s.FloorSlope = new Vector3D();
-					s.FloorSlopeOffset = 0;
-					s.Fields.Remove("user_floorplane_id");
-				}
+				RemoveFromSector(s);
+		}
 
-				if (ceiling)
-				{
-					s.CeilSlope = new Vector3D();
-					s.CeilSlopeOffset = 0;
-					s.Fields.Remove("user_ceilingplane_id");
-				}
+		public void RemoveFromSector(Sector s)
+		{
+			if (floor)
+			{
+				s.FloorSlope = new Vector3D();
+				s.FloorSlopeOffset = 0;
+				s.Fields.Remove("user_floorplane_id");
+			}
+
+			if (ceiling)
+			{
+				s.CeilSlope = new Vector3D();
+				s.CeilSlopeOffset = 0;
+				s.Fields.Remove("user_ceilingplane_id");
 			}
 		}
 
