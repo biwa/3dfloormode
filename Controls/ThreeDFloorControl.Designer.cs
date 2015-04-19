@@ -50,12 +50,6 @@
 			this.buttonSplit = new System.Windows.Forms.Button();
 			this.buttonCheckAll = new System.Windows.Forms.Button();
 			this.buttonUncheckAll = new System.Windows.Forms.Button();
-			this.bottomSlope = new System.Windows.Forms.CheckBox();
-			this.bottomSlopeHeight1 = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-			this.topSlope = new System.Windows.Forms.CheckBox();
-			this.topSlopeHeight1 = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-			this.topSlopeHeight2 = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-			this.bottomSlopeHeight2 = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.buttonDrawSlope = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -63,31 +57,34 @@
 			// 
 			// sectorTopFlat
 			// 
-			this.sectorTopFlat.Location = new System.Drawing.Point(253, 108);
+			this.sectorTopFlat.Location = new System.Drawing.Point(251, 38);
 			this.sectorTopFlat.MultipleTextures = false;
 			this.sectorTopFlat.Name = "sectorTopFlat";
 			this.sectorTopFlat.Size = new System.Drawing.Size(115, 136);
 			this.sectorTopFlat.TabIndex = 4;
 			this.sectorTopFlat.TextureName = "";
+			this.sectorTopFlat.UsePreviews = true;
 			// 
 			// sectorBorderTexture
 			// 
-			this.sectorBorderTexture.Location = new System.Drawing.Point(132, 108);
+			this.sectorBorderTexture.Location = new System.Drawing.Point(130, 38);
 			this.sectorBorderTexture.MultipleTextures = false;
 			this.sectorBorderTexture.Name = "sectorBorderTexture";
 			this.sectorBorderTexture.Required = false;
 			this.sectorBorderTexture.Size = new System.Drawing.Size(115, 136);
 			this.sectorBorderTexture.TabIndex = 3;
 			this.sectorBorderTexture.TextureName = "";
+			this.sectorBorderTexture.UsePreviews = true;
 			// 
 			// sectorBottomFlat
 			// 
-			this.sectorBottomFlat.Location = new System.Drawing.Point(11, 108);
+			this.sectorBottomFlat.Location = new System.Drawing.Point(9, 38);
 			this.sectorBottomFlat.MultipleTextures = false;
 			this.sectorBottomFlat.Name = "sectorBottomFlat";
 			this.sectorBottomFlat.Size = new System.Drawing.Size(115, 136);
 			this.sectorBottomFlat.TabIndex = 2;
 			this.sectorBottomFlat.TextureName = "";
+			this.sectorBottomFlat.UsePreviews = true;
 			// 
 			// sectorCeilingHeight
 			// 
@@ -96,7 +93,11 @@
 			this.sectorCeilingHeight.AllowRelative = true;
 			this.sectorCeilingHeight.BackColor = System.Drawing.Color.Transparent;
 			this.sectorCeilingHeight.ButtonStep = 8;
+			this.sectorCeilingHeight.ButtonStepBig = 10F;
 			this.sectorCeilingHeight.ButtonStepFloat = 1F;
+			this.sectorCeilingHeight.ButtonStepSmall = 0.1F;
+			this.sectorCeilingHeight.ButtonStepsUseModifierKeys = false;
+			this.sectorCeilingHeight.ButtonStepsWrapAround = false;
 			this.sectorCeilingHeight.Location = new System.Drawing.Point(296, 8);
 			this.sectorCeilingHeight.Name = "sectorCeilingHeight";
 			this.sectorCeilingHeight.Size = new System.Drawing.Size(70, 24);
@@ -110,7 +111,11 @@
 			this.sectorFloorHeight.AllowRelative = true;
 			this.sectorFloorHeight.BackColor = System.Drawing.Color.Transparent;
 			this.sectorFloorHeight.ButtonStep = 8;
+			this.sectorFloorHeight.ButtonStepBig = 10F;
 			this.sectorFloorHeight.ButtonStepFloat = 1F;
+			this.sectorFloorHeight.ButtonStepSmall = 0.1F;
+			this.sectorFloorHeight.ButtonStepsUseModifierKeys = false;
+			this.sectorFloorHeight.ButtonStepsWrapAround = false;
 			this.sectorFloorHeight.Location = new System.Drawing.Point(54, 8);
 			this.sectorFloorHeight.Name = "sectorFloorHeight";
 			this.sectorFloorHeight.Size = new System.Drawing.Size(70, 24);
@@ -216,7 +221,7 @@
 			this.groupBox1.Controls.Add(this.label5);
 			this.groupBox1.Location = new System.Drawing.Point(372, 8);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(124, 236);
+			this.groupBox1.Size = new System.Drawing.Size(124, 166);
 			this.groupBox1.TabIndex = 5;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "3D floor properties";
@@ -237,7 +242,7 @@
 			this.groupBox2.Controls.Add(this.checkedListBoxSectors);
 			this.groupBox2.Location = new System.Drawing.Point(502, 8);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(124, 236);
+			this.groupBox2.Size = new System.Drawing.Size(124, 166);
 			this.groupBox2.TabIndex = 6;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Sectors";
@@ -248,7 +253,7 @@
 			this.checkedListBoxSectors.FormattingEnabled = true;
 			this.checkedListBoxSectors.Location = new System.Drawing.Point(6, 19);
 			this.checkedListBoxSectors.Name = "checkedListBoxSectors";
-			this.checkedListBoxSectors.Size = new System.Drawing.Size(110, 214);
+			this.checkedListBoxSectors.Size = new System.Drawing.Size(110, 139);
 			this.checkedListBoxSectors.TabIndex = 0;
 			this.checkedListBoxSectors.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBoxSectors_ItemCheck);
 			// 
@@ -292,99 +297,16 @@
 			this.buttonUncheckAll.UseVisualStyleBackColor = true;
 			this.buttonUncheckAll.Click += new System.EventHandler(this.buttonUncheckAll_Click);
 			// 
-			// bottomSlope
-			// 
-			this.bottomSlope.AutoSize = true;
-			this.bottomSlope.BackColor = System.Drawing.Color.Transparent;
-			this.bottomSlope.Location = new System.Drawing.Point(11, 42);
-			this.bottomSlope.Name = "bottomSlope";
-			this.bottomSlope.Size = new System.Drawing.Size(31, 17);
-			this.bottomSlope.TabIndex = 11;
-			this.bottomSlope.Text = "/";
-			this.bottomSlope.UseVisualStyleBackColor = false;
-			this.bottomSlope.CheckedChanged += new System.EventHandler(this.bottomSlope_CheckedChanged);
-			// 
-			// bottomSlopeHeight1
-			// 
-			this.bottomSlopeHeight1.AllowDecimal = false;
-			this.bottomSlopeHeight1.AllowNegative = true;
-			this.bottomSlopeHeight1.AllowRelative = true;
-			this.bottomSlopeHeight1.BackColor = System.Drawing.Color.Transparent;
-			this.bottomSlopeHeight1.ButtonStep = 8;
-			this.bottomSlopeHeight1.ButtonStepFloat = 1F;
-			this.bottomSlopeHeight1.Enabled = false;
-			this.bottomSlopeHeight1.Location = new System.Drawing.Point(54, 38);
-			this.bottomSlopeHeight1.Name = "bottomSlopeHeight1";
-			this.bottomSlopeHeight1.Size = new System.Drawing.Size(70, 24);
-			this.bottomSlopeHeight1.StepValues = null;
-			this.bottomSlopeHeight1.TabIndex = 12;
-			this.bottomSlopeHeight1.WhenTextChanged += new System.EventHandler(this.bottomSlopeHeight_WhenTextChanged);
-			// 
-			// topSlope
-			// 
-			this.topSlope.AutoSize = true;
-			this.topSlope.BackColor = System.Drawing.Color.Transparent;
-			this.topSlope.Location = new System.Drawing.Point(253, 42);
-			this.topSlope.Name = "topSlope";
-			this.topSlope.Size = new System.Drawing.Size(31, 17);
-			this.topSlope.TabIndex = 13;
-			this.topSlope.Text = "/";
-			this.topSlope.UseVisualStyleBackColor = false;
-			this.topSlope.CheckedChanged += new System.EventHandler(this.topSlope_CheckedChanged);
-			// 
-			// topSlopeHeight1
-			// 
-			this.topSlopeHeight1.AllowDecimal = false;
-			this.topSlopeHeight1.AllowNegative = true;
-			this.topSlopeHeight1.AllowRelative = true;
-			this.topSlopeHeight1.BackColor = System.Drawing.Color.Transparent;
-			this.topSlopeHeight1.ButtonStep = 8;
-			this.topSlopeHeight1.ButtonStepFloat = 1F;
-			this.topSlopeHeight1.Enabled = false;
-			this.topSlopeHeight1.Location = new System.Drawing.Point(296, 38);
-			this.topSlopeHeight1.Name = "topSlopeHeight1";
-			this.topSlopeHeight1.Size = new System.Drawing.Size(70, 24);
-			this.topSlopeHeight1.StepValues = null;
-			this.topSlopeHeight1.TabIndex = 14;
-			// 
-			// topSlopeHeight2
-			// 
-			this.topSlopeHeight2.AllowDecimal = false;
-			this.topSlopeHeight2.AllowNegative = true;
-			this.topSlopeHeight2.AllowRelative = true;
-			this.topSlopeHeight2.BackColor = System.Drawing.Color.Transparent;
-			this.topSlopeHeight2.ButtonStep = 8;
-			this.topSlopeHeight2.ButtonStepFloat = 1F;
-			this.topSlopeHeight2.Enabled = false;
-			this.topSlopeHeight2.Location = new System.Drawing.Point(296, 71);
-			this.topSlopeHeight2.Name = "topSlopeHeight2";
-			this.topSlopeHeight2.Size = new System.Drawing.Size(70, 24);
-			this.topSlopeHeight2.StepValues = null;
-			this.topSlopeHeight2.TabIndex = 18;
-			// 
-			// bottomSlopeHeight2
-			// 
-			this.bottomSlopeHeight2.AllowDecimal = false;
-			this.bottomSlopeHeight2.AllowNegative = true;
-			this.bottomSlopeHeight2.AllowRelative = true;
-			this.bottomSlopeHeight2.BackColor = System.Drawing.Color.Transparent;
-			this.bottomSlopeHeight2.ButtonStep = 8;
-			this.bottomSlopeHeight2.ButtonStepFloat = 1F;
-			this.bottomSlopeHeight2.Enabled = false;
-			this.bottomSlopeHeight2.Location = new System.Drawing.Point(54, 71);
-			this.bottomSlopeHeight2.Name = "bottomSlopeHeight2";
-			this.bottomSlopeHeight2.Size = new System.Drawing.Size(70, 24);
-			this.bottomSlopeHeight2.StepValues = null;
-			this.bottomSlopeHeight2.TabIndex = 16;
-			// 
 			// buttonDrawSlope
 			// 
-			this.buttonDrawSlope.Location = new System.Drawing.Point(133, 57);
+			this.buttonDrawSlope.Enabled = false;
+			this.buttonDrawSlope.Location = new System.Drawing.Point(632, 151);
 			this.buttonDrawSlope.Name = "buttonDrawSlope";
-			this.buttonDrawSlope.Size = new System.Drawing.Size(106, 23);
+			this.buttonDrawSlope.Size = new System.Drawing.Size(75, 23);
 			this.buttonDrawSlope.TabIndex = 16;
 			this.buttonDrawSlope.Text = "Draw slope";
 			this.buttonDrawSlope.UseVisualStyleBackColor = true;
+			this.buttonDrawSlope.Visible = false;
 			this.buttonDrawSlope.Click += new System.EventHandler(this.buttonDrawSlope_Click);
 			// 
 			// ThreeDFloorHelperControl
@@ -392,12 +314,6 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.buttonDrawSlope);
-			this.Controls.Add(this.topSlopeHeight2);
-			this.Controls.Add(this.bottomSlopeHeight2);
-			this.Controls.Add(this.topSlopeHeight1);
-			this.Controls.Add(this.topSlope);
-			this.Controls.Add(this.bottomSlopeHeight1);
-			this.Controls.Add(this.bottomSlope);
 			this.Controls.Add(this.buttonUncheckAll);
 			this.Controls.Add(this.buttonCheckAll);
 			this.Controls.Add(this.buttonSplit);
@@ -413,7 +329,7 @@
 			this.Controls.Add(this.sectorBorderTexture);
 			this.Controls.Add(this.sectorTopFlat);
 			this.Name = "ThreeDFloorHelperControl";
-			this.Size = new System.Drawing.Size(714, 256);
+			this.Size = new System.Drawing.Size(714, 186);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
@@ -445,13 +361,7 @@
 		private System.Windows.Forms.Button buttonSplit;
 		private System.Windows.Forms.Button buttonCheckAll;
 		private System.Windows.Forms.Button buttonUncheckAll;
-		private System.Windows.Forms.CheckBox bottomSlope;
-		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox bottomSlopeHeight1;
-		private System.Windows.Forms.CheckBox topSlope;
 		private System.Windows.Forms.Button buttonEditSector;
-		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox topSlopeHeight1;
-		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox topSlopeHeight2;
-		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox bottomSlopeHeight2;
 		private System.Windows.Forms.Button buttonDrawSlope;
 	}
 }

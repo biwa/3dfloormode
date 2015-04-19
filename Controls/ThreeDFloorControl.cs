@@ -59,12 +59,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			flagsArgument.SetValue(threeDFloor.Flags);
 			alphaArgument.SetValue(threeDFloor.Alpha);
 
-			bottomSlope.Checked = threeDFloor.BottomSloped;
-			topSlope.Checked = threeDFloor.TopSloped;
-
-			bottomSlopeHeight1.Text = threeDFloor.BottomHeight.ToString();
-			topSlopeHeight1.Text = threeDFloor.TopHeight.ToString();
-
 			AddSectorCheckboxes();
 
 			sector = General.Map.Map.CreateSector();
@@ -88,21 +82,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			threeDFloor.TopHeight = ctrl.threeDFloor.TopHeight;
 			threeDFloor.BottomHeight = ctrl.threeDFloor.BottomHeight;
-
-			topSlope.Checked = threeDFloor.TopSloped = ctrl.threeDFloor.TopSloped;
-			threeDFloor.TopSlope.HeightV2 = ctrl.threeDFloor.TopSlope.HeightV2;
-			threeDFloor.TopSlope.HeightV3 = ctrl.threeDFloor.TopSlope.HeightV3;
-			topSlopeHeight1.Text = threeDFloor.TopSlope.HeightV2.ToString();
-			topSlopeHeight2.Text = threeDFloor.TopSlope.HeightV3.ToString();
-
-			bottomSlope.Checked = threeDFloor.BottomSloped = ctrl.threeDFloor.BottomSloped;
-			threeDFloor.BottomSlope.HeightV2 = ctrl.threeDFloor.BottomSlope.HeightV2;
-			threeDFloor.BottomSlope.HeightV3 = ctrl.threeDFloor.BottomSlope.HeightV3;
-			bottomSlopeHeight1.Text = threeDFloor.BottomSlope.HeightV2.ToString();
-			bottomSlopeHeight2.Text = threeDFloor.BottomSlope.HeightV3.ToString();
-
-			// threeDFloor.Slope.Direction = ctrl.threeDFloor.Slope.Direction;
-			// threeDFloor.Slope.Origin = ctrl.threeDFloor.Slope.Origin;
 
 			typeArgument.SetValue(ctrl.threeDFloor.Type);
 			flagsArgument.SetValue(ctrl.threeDFloor.Flags);
@@ -169,27 +148,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if(threeDFloor.Sector != null)
 				sector.CopyPropertiesTo(threeDFloor.Sector);
-
-			if ((!threeDFloor.BottomSloped && bottomSlope.Checked) || (!threeDFloor.TopSloped && topSlope.Checked))
-			{
-				guessslope = true;
-			}
-
-			if (isnew && (bottomSlope.Checked || topSlope.Checked))
-			{
-				guessslope = true;
-			}
-
-			threeDFloor.BottomSloped = bottomSlope.Checked;
-			threeDFloor.TopSloped = topSlope.Checked;
-
-			threeDFloor.BottomSlope.HeightV1 = threeDFloor.BottomHeight;
-			threeDFloor.BottomSlope.HeightV2 = bottomSlopeHeight1.GetResult(threeDFloor.BottomSlope.HeightV2);
-			threeDFloor.BottomSlope.HeightV3 = bottomSlopeHeight2.GetResult(threeDFloor.BottomSlope.HeightV3);
-
-			threeDFloor.TopSlope.HeightV1 = threeDFloor.TopHeight;
-			threeDFloor.TopSlope.HeightV2 = topSlopeHeight1.GetResult(threeDFloor.TopSlope.HeightV2);
-			threeDFloor.TopSlope.HeightV3 = topSlopeHeight2.GetResult(threeDFloor.TopSlope.HeightV3);
 
 			threeDFloor.TaggedSectors = new List<Sector>();
 
@@ -258,26 +216,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, false);
-		}
-
-		private void bottomSlope_CheckedChanged(object sender, EventArgs e)
-		{
-			bottomSlopeHeight1.Enabled = bottomSlope.Checked;
-
-			if (!settingup)
-			{
-				threeDFloor.Rebuild = true;
-			}
-		}
-
-		private void topSlope_CheckedChanged(object sender, EventArgs e)
-		{
-			topSlopeHeight1.Enabled = topSlope.Checked;
-
-			if (!settingup)
-			{
-				threeDFloor.Rebuild = true;
-			}
 		}
 
 		private void buttonEditSector_Click(object sender, EventArgs e)

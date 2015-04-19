@@ -46,6 +46,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			  ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
 			  ButtonGroup = "000_editing",
 			  AllowCopyPaste = false,
+			  SupportedMapFormats = new[] { "UniversalMapSetIO" },
 			  Volatile = true,
 			  UseByDefault = true,
 			  Optional = false)]
@@ -109,8 +110,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (!isdisposed)
 			{
 				// Dispose old labels
-				foreach (KeyValuePair<Sector, TextLabel[]> lbl in labels)
-					foreach (TextLabel l in lbl.Value) l.Dispose();
+				if (labels != null)
+					foreach (KeyValuePair<Sector, TextLabel[]> lbl in labels)
+						foreach (TextLabel l in lbl.Value) l.Dispose();
 
 				// Done
 				base.Dispose();
@@ -501,6 +503,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public override void OnEngage()
 		{
 			base.OnEngage();
+
+			// If no sectors are selected nothing can be done, so exit this mode immediately
+			if (General.Map.Map.SelectedSectorsCount == 0)
+			{
+				General.Interface.DisplayStatus(StatusType.Warning, "No sectors selected.");
+				General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
+				return;
+			}
+
 			EnableAutoPanning();
 			renderer.SetPresentation(Presentation.Standard);
 
@@ -560,9 +571,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// When points have been drawn
 			if (points.Count > 1)
 			{
-				bool floor = false;
-				bool ceiling = false;
-
 				// Make undo for the draw
 				General.Map.UndoRedo.CreateUndo("Draw slope");
 
@@ -611,6 +619,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 					{
+						// Make sure the field work with undo/redo
+						s.Fields.BeforeFieldsChange();
+
 						if (s.Fields.ContainsKey("user_floorplane_id"))
 							s.Fields.Remove("user_floorplane_id");
 
@@ -630,6 +641,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 					{
+						// Make sure the field work with undo/redo
+						s.Fields.BeforeFieldsChange();
+
 						if (s.Fields.ContainsKey("user_ceilingplane_id"))
 							s.Fields.Remove("user_ceilingplane_id");
 

@@ -60,6 +60,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
               ButtonImage = "SlopeModeIcon.png",	// Image resource name for the button
               ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
               ButtonGroup = "000_editing",
+			  SupportedMapFormats = new[] { "UniversalMapSetIO" },
               UseByDefault = true,
               SafeStartMode = true)]
 
@@ -660,9 +661,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (highlightedslope == null)
 				return;
 
-			Vector2D origin;
-			Vector2D direction;
-
 			MessageBox.Show("Flipping temporarily removed");
 
 			/*
@@ -724,6 +722,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if(selected.Count > 0)
 			{
 				List<SlopeVertexGroup> groups = new List<SlopeVertexGroup>();
+
+				General.Map.UndoRedo.CreateUndo("Delete slope");
 
 				foreach (SlopeVertex sv in selected)
 				{
