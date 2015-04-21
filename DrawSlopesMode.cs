@@ -24,6 +24,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 using CodeImp.DoomBuilder.Windows;
 using CodeImp.DoomBuilder.IO;
 using CodeImp.DoomBuilder.Map;
@@ -74,7 +75,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool snaptonearest;		// CTRL to enable
 
 		private FlatVertex[] overlayGeometry;
-		private Dictionary<Sector, TextLabel[]> labels;
+		private List<TextLabel> labels;
 
 		private static SlopeDrawingMode slopedrawingmode = SlopeDrawingMode.Floor;
 
@@ -111,8 +112,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				// Dispose old labels
 				if (labels != null)
-					foreach (KeyValuePair<Sector, TextLabel[]> lbl in labels)
-						foreach (TextLabel l in lbl.Value) l.Dispose();
+					foreach (TextLabel l in labels)
+						l.Dispose();
 
 				// Done
 				base.Dispose();
@@ -143,6 +144,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		}
 
 		// This sets up new labels
+		/*
 		private void SetupLabels()
 		{
 			if (labels != null)
@@ -173,24 +175,53 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				labels.Add(s, labelarray);
 			}
 		}
+		*/
 
-		// This updates labels from the selected sectors
-		private void UpdateSelectedLabels()
+		private void SetupLabels()
 		{
-			// Go for all labels in all selected sectors
-			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
-			int index = 0;
-			foreach (Sector s in orderedselection)
+			labels = new List<TextLabel>();
+			PixelColor white = new PixelColor(255, 255, 255, 255);
+
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
-				TextLabel[] labelarray = labels[s];
-				foreach (TextLabel l in labelarray)
+				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
-					// Make sure the text and color are right
-					int labelnum = index + 1;
-					l.Text = labelnum.ToString();
-					l.Color = General.Colors.Selection;
+					SlopeVertex sv = svg.Vertices[i];
+					float x = sv.Pos.x;
+					float y = sv.Pos.y - 14 * (1 / renderer.Scale);
+
+					TextLabel label = new TextLabel(20);
+					label.TransformCoords = true;
+					label.Rectangle = new RectangleF(x, y, 0.0f, 0.0f);
+					label.AlignX = TextAlignmentX.Center;
+					label.AlignY = TextAlignmentY.Middle;
+					label.Scale = 14f;
+					label.Backcolor = General.Colors.Background.WithAlpha(255);
+					label.Text = "";
+
+					// Rearrange labels if they'd be (exactly) on each other
+					// TODO: do something like that also for overlapping labels
+					foreach (TextLabel l in labels)
+					{
+						if (l.Rectangle.X == label.Rectangle.X && l.Rectangle.Y == label.Rectangle.Y)
+							label.Rectangle = new RectangleF(x, l.Rectangle.Y - 14.0f * (1 / renderer.Scale), 0.0f, 0.0f);
+					}
+
+					label.Color = white;
+
+					if (svg.Ceiling)
+					{
+						label.Text += String.Format("C: {0}", sv.Z);
+
+						if (svg.Floor)
+							label.Text += "; ";
+					}
+
+					if (svg.Floor)
+						label.Text += String.Format("F: {0}", sv.Z);
+
+					labels.Add(label);
 				}
-				index++;
 			}
 		}
 
@@ -209,6 +240,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			float vsize = ((float)renderer.VertexSize + 1.0f) / renderer.Scale;
 			float vsizeborder = ((float)renderer.VertexSize + 3.0f) / renderer.Scale;
 
+			SetupLabels();
+
 			// Render drawing lines
 			if (renderer.StartOverlay(true))
 			{
@@ -219,24 +252,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					renderer.RenderHighlight(overlayGeometry, General.Colors.Selection.WithAlpha(64).ToInt());
 				}
 
-				if (BuilderPlug.Me.ViewSelectionNumbers)
-				{
-					// Go for all selected sectors
-					ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
-					foreach (Sector s in orderedselection)
-					{
-						// Render labels
-						TextLabel[] labelarray = labels[s];
-						for (int i = 0; i < s.Labels.Count; i++)
-						{
-							TextLabel l = labelarray[i];
+				List<SlopeVertex> vertices = new List<SlopeVertex>();
 
-							// Render only when enough space for the label to see
-							float requiredsize = (l.TextSize.Height / 2) / renderer.Scale;
-							if (requiredsize < s.Labels[i].radius) renderer.RenderText(l);
-						}
+				// Store all slope vertices and draw the lines between them
+				foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+				{
+					for (int i = 0; i < svg.Vertices.Count; i++)
+					{
+						vertices.Add(svg.Vertices[i]);
+
+						if (i < svg.Vertices.Count - 1)
+							renderer.RenderLine(svg.Vertices[0].Pos, svg.Vertices[i + 1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
 					}
 				}
+
+				// Sort the slope vertex list and draw them. The sorting ensures that selected vertices are always drawn on top
+				foreach (SlopeVertex sv in vertices.OrderBy(o => o.Selected))
+				{
+					PixelColor c = General.Colors.Indication;
+					Vector3D v = sv.Pos;
+
+					renderer.RenderRectangleFilled(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), General.Colors.Background, true);
+					renderer.RenderRectangle(new RectangleF(v.x - size / 2, v.y - size / 2, size, size), 2, c, true);
+				}
+
 
 				// Go for all points to draw lines
 				if (points.Count > 0)
@@ -274,6 +313,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						renderer.RenderRectangle(new RectangleF(points[i].pos.x - size / 2, points[i].pos.y - size / 2, size, size), 2, General.Colors.Indication, true);
 					}
 				}
+
+				foreach (TextLabel l in labels)
+					renderer.RenderText(l);
 
 				// Determine point color
 				if (snaptonearest) color = stitchcolor;
@@ -531,7 +573,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			// Make text labels for sectors
 			SetupLabels();
-			UpdateSelectedLabels();
 			updateOverlaySurfaces();
 			Update();
 
