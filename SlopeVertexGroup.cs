@@ -22,6 +22,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int id;
 		private bool ceiling;
 		private bool floor;
+		private int height; // Sector floor or ceiling height
 
 		#endregion
 
@@ -36,6 +37,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			this.id = id;
 			sectors = new List<Sector>();
+			taggedsectors = new List<Sector>();
 			vertices = new List<SlopeVertex>();
 
 			floor = sector.Fields.GetValue(planetypeidentifier, "") == "floor" ? true : false;
@@ -67,6 +69,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			this.floor = floor;
 			this.ceiling = ceiling;
 			sectors = new List<Sector>();
+			taggedsectors = new List<Sector>();
 		}
 
 		#endregion
@@ -79,6 +82,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public int Id { get { return id; } }
 		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
 		public bool Floor { get { return floor; } set { floor = value; } }
+		public int Height { get { return height; } set { height = value; } }
 
 		#endregion
 
@@ -101,6 +105,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (s.Fields.GetValue("user_floorplane_id", -1) == id || s.Fields.GetValue("user_ceilingplane_id", -1) == id)
 				{
 					sectors.Add(s);
+
+					if (floor)
+						height = s.FloorHeight;
+
+					if (ceiling)
+						height = s.CeilHeight;
 
 					// Check if the current sector is a 3D floor control sector. If that's the case also store the
 					// tagged sector(s). They will be used for highlighting in slope mode
@@ -170,8 +180,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				planevertices.Add(new Vector3D(v, z));
 			}
 
-			Plane floorplane = new Plane(planevertices[0], planevertices[1], planevertices[2], floor ? true : false);
-
 			foreach (Sector s in sectors)
 			{
 				bool hasplane = false;
@@ -217,7 +225,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void StoreInSector(Sector sector)
 		{
-			string identifier = String.Format("user_svg{0}_planetype", id);;
+			string identifier = String.Format("user_svg{0}_planetype", id);
 			List<string> list = new List<string> { "floor", "ceiling" };
 			Type type = typeof(SlopeVertexGroup);
 
@@ -240,6 +248,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Also store all slope vertices in the sector
 			for (int i = 0; i < vertices.Count; i++)
 				vertices[i].StoreInSector(sector, id, i);
+		}
+
+		public void SelectVertices(bool select)
+		{
+			foreach (SlopeVertex sv in vertices)
+				sv.Selected = select;
 		}
 
 		#endregion

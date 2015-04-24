@@ -28,6 +28,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Diagnostics;
 using CodeImp.DoomBuilder.Windows;
 using CodeImp.DoomBuilder.IO;
 using CodeImp.DoomBuilder.Map;
@@ -43,6 +44,7 @@ using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.BuilderModes;
 using CodeImp.DoomBuilder.GZBuilder.Tools;
 using CodeImp.DoomBuilder.GZBuilder.Geometry;
+using CodeImp.DoomBuilder.VisualModes;
 
 #endregion
 
@@ -71,6 +73,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private List<SlopeVertexGroup> slopevertexgroups;
 		private float stitchrange;
 		private Sector dummysector;
+		private bool updateafteraction;
 
 		#endregion
 
@@ -231,6 +234,105 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			// Load slope vertex data from the dummy sector
 			LoadSlopeVertexGroupsFromSector();
+		}
+	
+		public override void OnActionBegin(CodeImp.DoomBuilder.Actions.Action action)
+		{
+			base.OnActionBegin(action);
+
+			// Debug.WriteLine("########## BEGIN: " + action.Name);
+
+			string[] monitoractions = {
+				"buildermodes_raisesector8", "buildermodes_lowersector8", "buildermodes_raisesector1",
+				"buildermodes_lowersector1", "builder_visualedit", "builder_classicedit"
+			};
+
+			if (monitoractions.Contains(action.Name))
+				updateafteraction = true;
+			else
+				updateafteraction = false;
+		}
+
+		public override void OnActionEnd(CodeImp.DoomBuilder.Actions.Action action)
+		{
+			base.OnActionEnd(action);
+
+			//Debug.WriteLine("########## END: " + action.Name);
+
+			if (!updateafteraction)
+				return;
+
+			List<SlopeVertexGroup> updatesvgs = new List<SlopeVertexGroup>();
+
+			// Find SVGs that needs to be updated, and change the SV z positions
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				int diff = 0;
+				bool update = false;
+
+				foreach (Sector s in svg.Sectors)
+				{
+					if (svg.Floor)
+					{
+						if (svg.Height != s.FloorHeight)
+						{
+							diff = s.FloorHeight - svg.Height;
+							update = true;
+							break;
+						}
+					}
+					
+					if(svg.Ceiling)
+					{
+						if (svg.Height != s.CeilHeight)
+						{
+							diff = s.CeilHeight - svg.Height;
+							update = true;
+							break;
+						}
+					}
+				}
+
+				if (update)
+				{
+					foreach (SlopeVertex sv in svg.Vertices)
+						sv.Z += diff;
+
+					updatesvgs.Add(svg);
+				}
+			}
+
+			// Update the slopes, and also update the view if in visual mode
+			foreach (SlopeVertexGroup svg in updatesvgs)
+			{
+				foreach (Sector s in svg.Sectors)
+					UpdateSlopes(s);
+
+				if (General.Editing.Mode is BaseVisualMode)
+				{
+					List<Sector> sectors = new List<Sector>();
+					List<VisualSector> visualsectors = new List<VisualSector>();
+					BaseVisualMode mode = ((BaseVisualMode)General.Editing.Mode);
+
+					foreach (Sector s in svg.Sectors)
+					{
+						sectors.Add(s);
+
+						// Get neighbouring sectors and add them to the list
+						foreach (Sidedef sd in s.Sidedefs)
+						{
+							if (sd.Other != null && !sectors.Contains(sd.Other.Sector))
+								sectors.Add(sd.Other.Sector);
+						}
+					}
+
+					foreach (Sector s in sectors)
+						visualsectors.Add(mode.GetVisualSector(s));
+
+					foreach (VisualSector vs in visualsectors) vs.UpdateSectorGeometry(true);
+					foreach (VisualSector vs in visualsectors) vs.UpdateSectorData();
+				}
+			}
 		}
 
         #region ================== Actions
@@ -425,6 +527,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					s.FloorSlope = new Vector3D(p.a, p.b, p.c);
 					s.FloorSlopeOffset = p.d;
+					s.FloorHeight = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
+					svg.Height = s.FloorHeight;
 				}
 				else
 				{
@@ -432,8 +536,26 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					s.CeilSlope = new Vector3D(p.a, p.b, p.c);
 					s.CeilSlopeOffset = p.d;
+					s.CeilHeight = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
+					svg.Height = s.CeilHeight;
 				}
 			}
+		}
+
+		private Vector2D GetCircumcenter(List<Vector3D> points)
+		{
+			float u_ray;
+
+			Line2D line1 = new Line2D(points[0], points[1]);
+			Line2D line2 = new Line2D(points[2], points[0]);
+
+			// Perpendicular bisectors
+			Line2D bisector1 = new Line2D(line1.GetCoordinatesAt(0.5f), line1.GetCoordinatesAt(0.5f) + line1.GetPerpendicular());
+			Line2D bisector2 = new Line2D(line2.GetCoordinatesAt(0.5f), line2.GetCoordinatesAt(0.5f) + line2.GetPerpendicular());
+
+			bisector1.GetIntersection(bisector2, out u_ray);
+
+			return bisector1.GetCoordinatesAt(u_ray);
 		}
 
 		public static List<ThreeDFloor> GetThreeDFloors(List<Sector> sectors)

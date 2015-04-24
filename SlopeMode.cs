@@ -75,6 +75,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// Highlighted item
         private SlopeVertex highlightedslope;
 		private Association[] association = new Association[Thing.NUM_ARGS];
+		private List<SlopeVertexGroup> copyslopevertexgroups;
 
 		// Interface
 		private bool editpressed;
@@ -243,8 +244,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							label.Rectangle = new RectangleF(x, l.Rectangle.Y - 14.0f * (1 / renderer.Scale), 0.0f, 0.0f);
 					}
 
-					if(svg.Vertices.Contains(highlightedslope))
+					if (svg.Vertices.Contains(highlightedslope))
 						label.Color = General.Colors.Highlight.WithAlpha(255);
+					else if (sv.Selected)
+						label.Color = General.Colors.Selection.WithAlpha(255);
 					else
 						label.Color = white;
 
@@ -618,6 +621,90 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			base.OnUpdateMultiSelection();
 
 			UpdateOverlay();
+		}
+
+		public override bool OnCopyBegin()
+		{
+			copyslopevertexgroups = new List<SlopeVertexGroup>();
+
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			{
+				bool copy = false;
+
+				// Check if the current SVG has to be copied
+				foreach (SlopeVertex sv in svg.Vertices)
+				{
+					if (sv.Selected)
+					{
+						copy = true;
+						break;
+					}
+				}
+
+				if (copy)
+				{
+					List<SlopeVertex> newsv = new List<SlopeVertex>();
+
+					foreach (SlopeVertex sv in svg.Vertices)
+						newsv.Add(new SlopeVertex(sv.Pos, sv.Z));
+
+					// Use -1 for id, since a real id will be assigned when pasting
+					copyslopevertexgroups.Add(new SlopeVertexGroup(-1, newsv, svg.Floor, svg.Ceiling));
+				}
+			}
+
+			return true;
+		}
+
+		public override bool OnPasteBegin(PasteOptions options)
+		{
+			if (copyslopevertexgroups == null || copyslopevertexgroups.Count == 0)
+				return false;
+
+			// Unselect all slope vertices, so the pasted vertices can be selected
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+				svg.SelectVertices(false);
+
+			float l = copyslopevertexgroups[0].Vertices[0].Pos.x;
+			float r = copyslopevertexgroups[0].Vertices[0].Pos.x;
+			float t = copyslopevertexgroups[0].Vertices[0].Pos.y;
+			float b = copyslopevertexgroups[0].Vertices[0].Pos.y;
+
+			// Find the outer dimensions of all SVGs to paste
+			foreach (SlopeVertexGroup svg in copyslopevertexgroups)
+			{
+				foreach (SlopeVertex sv in svg.Vertices)
+				{
+					if (sv.Pos.x < l) l = sv.Pos.x;
+					if (sv.Pos.x > r) r = sv.Pos.x;
+					if (sv.Pos.y > t) t = sv.Pos.y;
+					if (sv.Pos.y < b) b = sv.Pos.y;
+				}
+			}
+
+			Vector2D center = new Vector2D(l + ((r - l) / 2), b + ((t - b) / 2));
+			Vector2D diff = center - General.Map.Grid.SnappedToGrid(mousemappos);
+
+			foreach (SlopeVertexGroup svg in copyslopevertexgroups)
+			{
+				int id;
+				List<SlopeVertex> newsv = new List<SlopeVertex>();
+
+				foreach (SlopeVertex sv in svg.Vertices)
+				{
+					newsv.Add(new SlopeVertex(new Vector2D(sv.Pos.x - diff.x, sv.Pos.y - diff.y), sv.Z));
+				}
+
+				SlopeVertexGroup newsvg = BuilderPlug.Me.AddSlopeVertexGroup(newsv, out id, svg.Floor, svg.Ceiling);
+				newsvg.SelectVertices(true);
+			}
+
+			// Redraw the display, so that pasted SVGs are shown immediately
+			General.Interface.RedrawDisplay();
+
+			// Don't go into the standard process for pasting, so tell the core that
+			// pasting should not proceed
+			return false;
 		}
 
 		public List<SlopeVertex> GetSelectedSlopeVertices()
