@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Types;
@@ -23,6 +24,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool ceiling;
 		private bool floor;
 		private int height; // Sector floor or ceiling height
+		private Vertex anchorvertex;
+		private Vector2D anchor;
+		private bool reposition;
 
 		#endregion
 
@@ -39,6 +43,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sectors = new List<Sector>();
 			taggedsectors = new List<Sector>();
 			vertices = new List<SlopeVertex>();
+			anchorvertex = null;
 
 			floor = sector.Fields.GetValue(planetypeidentifier, "") == "floor" ? true : false;
 			ceiling = sector.Fields.GetValue(planetypeidentifier, "") == "ceiling" ? true : false;
@@ -70,6 +75,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			this.ceiling = ceiling;
 			sectors = new List<Sector>();
 			taggedsectors = new List<Sector>();
+			anchorvertex = null;
 		}
 
 		#endregion
@@ -83,6 +89,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
 		public bool Floor { get { return floor; } set { floor = value; } }
 		public int Height { get { return height; } set { height = value; } }
+		public bool Reposition { get { return reposition; } set { reposition = value; } }
 
 		#endregion
 
@@ -254,6 +261,61 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			foreach (SlopeVertex sv in vertices)
 				sv.Selected = select;
+		}
+
+		public bool GetAnchor()
+		{
+			anchorvertex = null;
+
+			if (sectors.Count == 0)
+				return false;
+
+			// Try to find a sector that contains a SV
+			/*
+			foreach (Sector s in sectors)
+			{
+				foreach (SlopeVertex sv in vertices)
+				{
+					if (s.Intersect(sv.Pos))
+					{
+						anchorvertex = s.Sidedefs.First().Line.Start;
+						anchor = new Vector2D(anchorvertex.Position);
+						return true;
+					}
+				}
+			}
+			*/
+
+			// Just grab the next best vertex
+			foreach (Sector s in sectors)
+			{
+				foreach (Sidedef sd in s.Sidedefs)
+				{
+					anchorvertex = sd.Line.Start;
+					anchor = new Vector2D(anchorvertex.Position);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public void RepositionByAnchor()
+		{
+			if (anchorvertex == null || !reposition)
+				return;
+
+			Vector2D diff = anchorvertex.Position - anchor;
+
+			if (diff.x == 0.0f && diff.y == 0.0f)
+				return;
+
+			foreach (SlopeVertex sv in vertices)
+			{
+				sv.Pos += diff;
+			}
+
+			anchorvertex = null;
 		}
 
 		#endregion

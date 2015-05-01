@@ -42,6 +42,7 @@
 			this.checkedListBoxSectors = new System.Windows.Forms.CheckedListBox();
 			this.addselectedsectors = new System.Windows.Forms.CheckBox();
 			this.removeselectedsectors = new System.Windows.Forms.CheckBox();
+			this.reposition = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -50,7 +51,7 @@
 			// 
 			this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.apply.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.apply.Location = new System.Drawing.Point(57, 178);
+			this.apply.Location = new System.Drawing.Point(247, 174);
 			this.apply.Name = "apply";
 			this.apply.Size = new System.Drawing.Size(112, 25);
 			this.apply.TabIndex = 0;
@@ -62,7 +63,7 @@
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(177, 178);
+			this.cancel.Location = new System.Drawing.Point(367, 174);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(112, 25);
 			this.cancel.TabIndex = 1;
@@ -130,12 +131,15 @@
 			// 
 			// positionz
 			// 
-			this.positionz.AllowDecimal = false;
+			this.positionz.AllowDecimal = true;
 			this.positionz.AllowNegative = true;
 			this.positionz.AllowRelative = true;
 			this.positionz.BackColor = System.Drawing.Color.Transparent;
 			this.positionz.ButtonStep = 8;
+			this.positionz.ButtonStepBig = 10F;
 			this.positionz.ButtonStepFloat = 1F;
+			this.positionz.ButtonStepSmall = 0.1F;
+			this.positionz.ButtonStepsUseModifierKeys = false;
 			this.positionz.ButtonStepsWrapAround = false;
 			this.positionz.Location = new System.Drawing.Point(29, 82);
 			this.positionz.Name = "positionz";
@@ -145,12 +149,15 @@
 			// 
 			// positiony
 			// 
-			this.positiony.AllowDecimal = false;
+			this.positiony.AllowDecimal = true;
 			this.positiony.AllowNegative = true;
 			this.positiony.AllowRelative = true;
 			this.positiony.BackColor = System.Drawing.Color.Transparent;
 			this.positiony.ButtonStep = 8;
+			this.positiony.ButtonStepBig = 10F;
 			this.positiony.ButtonStepFloat = 1F;
+			this.positiony.ButtonStepSmall = 0.1F;
+			this.positiony.ButtonStepsUseModifierKeys = false;
 			this.positiony.ButtonStepsWrapAround = false;
 			this.positiony.Location = new System.Drawing.Point(29, 52);
 			this.positiony.Name = "positiony";
@@ -160,12 +167,15 @@
 			// 
 			// positionx
 			// 
-			this.positionx.AllowDecimal = false;
+			this.positionx.AllowDecimal = true;
 			this.positionx.AllowNegative = true;
 			this.positionx.AllowRelative = true;
 			this.positionx.BackColor = System.Drawing.Color.Transparent;
 			this.positionx.ButtonStep = 8;
+			this.positionx.ButtonStepBig = 10F;
 			this.positionx.ButtonStepFloat = 1F;
+			this.positionx.ButtonStepSmall = 0.1F;
+			this.positionx.ButtonStepsUseModifierKeys = false;
 			this.positionx.ButtonStepsWrapAround = false;
 			this.positionx.Location = new System.Drawing.Point(29, 20);
 			this.positionx.Name = "positionx";
@@ -178,7 +188,7 @@
 			this.groupBox2.Controls.Add(this.checkedListBoxSectors);
 			this.groupBox2.Location = new System.Drawing.Point(174, 13);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(138, 101);
+			this.groupBox2.Size = new System.Drawing.Size(113, 149);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Sectors to remove";
@@ -189,13 +199,13 @@
 			this.checkedListBoxSectors.FormattingEnabled = true;
 			this.checkedListBoxSectors.Location = new System.Drawing.Point(6, 19);
 			this.checkedListBoxSectors.Name = "checkedListBoxSectors";
-			this.checkedListBoxSectors.Size = new System.Drawing.Size(126, 79);
+			this.checkedListBoxSectors.Size = new System.Drawing.Size(100, 124);
 			this.checkedListBoxSectors.TabIndex = 1;
 			// 
 			// addselectedsectors
 			// 
 			this.addselectedsectors.AutoSize = true;
-			this.addselectedsectors.Location = new System.Drawing.Point(180, 120);
+			this.addselectedsectors.Location = new System.Drawing.Point(293, 15);
 			this.addselectedsectors.Name = "addselectedsectors";
 			this.addselectedsectors.Size = new System.Drawing.Size(130, 18);
 			this.addselectedsectors.TabIndex = 3;
@@ -206,7 +216,7 @@
 			// removeselectedsectors
 			// 
 			this.removeselectedsectors.AutoSize = true;
-			this.removeselectedsectors.Location = new System.Drawing.Point(180, 144);
+			this.removeselectedsectors.Location = new System.Drawing.Point(293, 39);
 			this.removeselectedsectors.Name = "removeselectedsectors";
 			this.removeselectedsectors.Size = new System.Drawing.Size(149, 18);
 			this.removeselectedsectors.TabIndex = 4;
@@ -214,13 +224,24 @@
 			this.removeselectedsectors.UseVisualStyleBackColor = true;
 			this.removeselectedsectors.CheckedChanged += new System.EventHandler(this.removeselectedsectors_CheckedChanged);
 			// 
+			// reposition
+			// 
+			this.reposition.AutoSize = true;
+			this.reposition.Location = new System.Drawing.Point(293, 64);
+			this.reposition.Name = "reposition";
+			this.reposition.Size = new System.Drawing.Size(187, 18);
+			this.reposition.TabIndex = 5;
+			this.reposition.Text = "Reposition after dragging sectors";
+			this.reposition.UseVisualStyleBackColor = true;
+			// 
 			// SlopeVertexEditForm
 			// 
 			this.AcceptButton = this.apply;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancel;
-			this.ClientSize = new System.Drawing.Size(346, 215);
+			this.ClientSize = new System.Drawing.Size(491, 211);
+			this.Controls.Add(this.reposition);
 			this.Controls.Add(this.removeselectedsectors);
 			this.Controls.Add(this.addselectedsectors);
 			this.Controls.Add(this.groupBox2);
@@ -257,5 +278,6 @@
 		public System.Windows.Forms.CheckedListBox checkedListBoxSectors;
 		private System.Windows.Forms.CheckBox addselectedsectors;
 		private System.Windows.Forms.CheckBox removeselectedsectors;
+		private System.Windows.Forms.CheckBox reposition;
 	}
 }

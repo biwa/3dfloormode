@@ -51,6 +51,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (!sectors.Contains(s))
 					sectors.Add(s);
 
+			reposition.Checked = fsvg.Reposition;
+
 			canaddsectors = true;
 			canremovesectors = true;
 
@@ -80,6 +82,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					{
 						planetype.Items.Insert(0, "");
 						planetype.SelectedIndex = 0;
+					}
+
+					if (svg.Reposition != reposition.Checked)
+					{
+						reposition.CheckState = CheckState.Indeterminate;
 					}
 
 					foreach (Sector s in svg.Sectors)
@@ -150,6 +157,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (SlopeVertexGroup svg in groups)
 			{
+				if (reposition.CheckState != CheckState.Indeterminate)
+					svg.Reposition = reposition.Checked;
+
 				if (addselectedsectors.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
 						if (!svg.Sectors.Contains(s))

@@ -240,8 +240,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnActionBegin(action);
 
-			// Debug.WriteLine("########## BEGIN: " + action.Name);
-
 			string[] monitoractions = {
 				"buildermodes_raisesector8", "buildermodes_lowersector8", "buildermodes_raisesector1",
 				"buildermodes_lowersector1", "builder_visualedit", "builder_classicedit"
@@ -256,8 +254,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public override void OnActionEnd(CodeImp.DoomBuilder.Actions.Action action)
 		{
 			base.OnActionEnd(action);
-
-			//Debug.WriteLine("########## END: " + action.Name);
 
 			if (!updateafteraction)
 				return;
@@ -333,6 +329,28 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					foreach (VisualSector vs in visualsectors) vs.UpdateSectorData();
 				}
 			}
+		}
+
+		public override bool OnModeChange(EditMode oldmode, EditMode newmode)
+		{
+			if (newmode != null && oldmode != null)
+			{
+				if (newmode.GetType().Name == "DragSectorsMode")
+				{
+					foreach (SlopeVertexGroup svg in slopevertexgroups)
+						if (svg.Reposition)
+							svg.GetAnchor();
+				}
+				else if(oldmode.GetType().Name == "DragSectorsMode")
+				{
+					foreach (SlopeVertexGroup svg in slopevertexgroups)
+						if (svg.Reposition)
+							svg.RepositionByAnchor();
+				}
+
+			}
+
+			return base.OnModeChange(oldmode, newmode);
 		}
 
         #region ================== Actions

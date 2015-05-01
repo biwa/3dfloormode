@@ -546,14 +546,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnEngage();
 
-			// If no sectors are selected nothing can be done, so exit this mode immediately
-			if (General.Map.Map.SelectedSectorsCount == 0)
-			{
-				General.Interface.DisplayStatus(StatusType.Warning, "No sectors selected.");
-				General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
-				return;
-			}
-
 			EnableAutoPanning();
 			renderer.SetPresentation(Presentation.Standard);
 
