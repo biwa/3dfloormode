@@ -27,6 +27,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Diagnostics;
 using CodeImp.DoomBuilder.Windows;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.IO;
@@ -74,6 +75,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		// Highlighted item
         private SlopeVertex highlightedslope;
+		private Sector highlightedsector;
 		private Association[] association = new Association[Thing.NUM_ARGS];
 		private List<SlopeVertexGroup> copyslopevertexgroups;
 
@@ -92,6 +94,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private Vector2D dragstartmappos;
 		private List<Vector2D> oldpositions;
+
+		private static PlaneType slopemode = PlaneType.Floor;
 		
 		#endregion
 
@@ -125,6 +129,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
             base.OnEngage();
             renderer.SetPresentation(Presentation.Things);
 
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorSlope);
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.CeilingSlope);
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.UpdateSlopes);
+
+			if (slopemode == PlaneType.Floor)
+				BuilderPlug.Me.MenusForm.FloorSlope.Checked = true;
+			else if (slopemode == PlaneType.Ceiling)
+				BuilderPlug.Me.MenusForm.CeilingSlope.Checked = true;
+			else
+				BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = true;
+
+
             // Convert geometry selection to sectors
             General.Map.Map.ConvertSelection(SelectionType.Sectors);
 
@@ -148,6 +165,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public override void OnDisengage()
 		{
 			base.OnDisengage();
+
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FloorSlope);
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.CeilingSlope);
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.UpdateSlopes);
 			
 			// Hide highlight info
 			General.Interface.HideInfo();
@@ -163,6 +185,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				renderer.PlotLinedefSet(General.Map.Map.Linedefs);
 				renderer.PlotVerticesSet(General.Map.Map.Vertices);
+
+				foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
+					renderer.PlotSector(s, General.Colors.Selection);
+
+				if ((highlightedsector != null) && !highlightedsector.IsDisposed)
+					renderer.PlotSector(highlightedsector, General.Colors.Highlight);
 
 				renderer.Finish();
 			}
@@ -285,6 +313,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (selectedsectorgeometry != null)
 					renderer.RenderHighlight(selectedsectorgeometry, General.Colors.Selection.WithAlpha(64).ToInt());
 
+				if (BuilderPlug.Me.UseHighlight && highlightedsector != null)
+				{
+					renderer.RenderHighlight(highlightedsector.FlatVertices, General.Colors.Highlight.WithAlpha(64).ToInt());
+				}
+
 				List<SlopeVertex> vertices = new List<SlopeVertex>();
 
 				// Store all slope vertices and draw the lines between them
@@ -383,6 +416,88 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			selectedsectorgeometry = vertslist.ToArray();
 		}
+
+		// This highlights a new item
+		protected void HighlightSector(Sector s)
+		{
+			// Update display
+
+			highlightedsector = s;
+			/*
+			if (renderer.StartPlotter(false))
+			{
+				// Undraw previous highlight
+				if ((highlightedsector != null) && !highlightedsector.IsDisposed)
+					renderer.PlotSector(highlightedsector);
+
+				// Set new highlight
+				highlightedsector = s;
+
+				// Render highlighted item
+				if ((highlightedsector != null) && !highlightedsector.IsDisposed)
+					renderer.PlotSector(highlightedsector, General.Colors.Highlight);
+
+				// Done
+				renderer.Finish();
+			}
+
+			UpdateOverlay();
+			renderer.Present();
+			*/
+			General.Interface.RedrawDisplay();
+
+			// Show highlight info
+			if ((highlightedsector != null) && !highlightedsector.IsDisposed)
+				General.Interface.ShowSectorInfo(highlightedsector);
+			else
+				General.Interface.HideInfo();
+		}
+
+		// This selectes or deselects a sector
+		protected void SelectSector(Sector s, bool selectstate)
+		{
+			bool selectionchanged = false;
+
+			if (!s.IsDisposed)
+			{
+				// Select the sector?
+				if (selectstate && !s.Selected)
+				{
+					s.Selected = true;
+					selectionchanged = true;
+				}
+				// Deselect the sector?
+				else if (!selectstate && s.Selected)
+				{
+					s.Selected = false;
+					selectionchanged = true;
+				}
+
+				// Selection changed?
+				if (selectionchanged)
+				{
+					// Make update lines selection
+					foreach (Sidedef sd in s.Sidedefs)
+					{
+						bool front, back;
+						if (sd.Line.Front != null) front = sd.Line.Front.Sector.Selected; else front = false;
+						if (sd.Line.Back != null) back = sd.Line.Back.Sector.Selected; else back = false;
+						sd.Line.Selected = front | back;
+					}
+
+					//mxd. Also (de)select things?
+					if (General.Interface.AltState)
+					{
+						foreach (Thing t in General.Map.ThingsFilter.VisibleThings)
+						{
+							t.DetermineSector();
+							if (t.Sector != s) continue;
+							t.Selected = s.Selected;
+						}
+					}
+				}
+			}
+		}
 		
 		// Selection
 		protected override void OnSelectBegin()
@@ -395,11 +510,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				updateOverlaySurfaces();
 				UpdateOverlay();
-			}
-			else
-			{
-				// Start making a selection
-				StartMultiSelection();
 			}
 
 			base.OnSelectBegin();
@@ -417,15 +527,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					updateOverlaySurfaces();
 					UpdateOverlay();
 				}
+
+				if (highlightedsector != null)
+				{
+					SelectSector(highlightedsector, !highlightedsector.Selected);
+					// highlightedsector.Selected = !highlightedsector.Selected;
+
+					updateOverlaySurfaces();
+					General.Interface.RedrawDisplay();
+				}
 			}
 
 			base.OnSelectEnd();
-		}
-
-		// Start editing
-		protected override void OnEditBegin()
-		{
-			base.OnEditBegin();
 		}
 
 		// Done editing
@@ -433,28 +546,35 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnEditEnd();
 
-			if (dragging || highlightedslope == null) return;
+			if (dragging) return;
 
-			SlopeVertex sv = highlightedslope;
-
-			List<SlopeVertex> vertices = GetSelectedSlopeVertices();
-
-			if(!vertices.Contains(highlightedslope))
-				vertices.Add(highlightedslope);
-
-			SlopeVertexEditForm svef = new SlopeVertexEditForm();
-			svef.Setup(vertices);
-
-			DialogResult result = svef.ShowDialog((Form)General.Interface);
-
-			if (result == DialogResult.OK)
+			if (highlightedslope != null)
 			{
-				General.Map.IsChanged = true;
+				SlopeVertex sv = highlightedslope;
 
-				BuilderPlug.Me.UpdateSlopes();
+				List<SlopeVertex> vertices = GetSelectedSlopeVertices();
+
+				if (!vertices.Contains(highlightedslope))
+					vertices.Add(highlightedslope);
+
+				SlopeVertexEditForm svef = new SlopeVertexEditForm();
+				svef.Setup(vertices);
+
+				DialogResult result = svef.ShowDialog((Form)General.Interface);
+
+				if (result == DialogResult.OK)
+				{
+					General.Map.IsChanged = true;
+
+					BuilderPlug.Me.UpdateSlopes();
+				}
+
+				highlightedslope = null;
 			}
-
-			highlightedslope = null;
+			else
+			{
+				BuilderPlug.Me.MenusForm.AddSectorsContextMenu.Show(Cursor.Position);
+			}
 
 			updateOverlaySurfaces();
 			UpdateOverlay();
@@ -467,10 +587,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnMouseMove(e);
 
-			// Not holding any buttons?
-			if(e.Button == MouseButtons.None)
+			if (selectpressed && !editpressed && !selecting)
+			{
+				// Check if moved enough pixels for multiselect
+				Vector2D delta = mousedownpos - mousepos;
+				if ((Math.Abs(delta.x) > 2) || (Math.Abs(delta.y) > 2))
+				{
+					// Start multiselecting
+					StartMultiSelection();
+				}
+			}
+			else if(e.Button == MouseButtons.None)
 			{
 				SlopeVertex oldhighlight = highlightedslope;
+				Sector oldhighlightedsector = highlightedsector;
 
                 float distance = float.MaxValue;
                 float d;
@@ -488,6 +618,50 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							highlightedslope = sv;
 						}
 					}
+				}
+
+				// If no slope vertex is highlighted, check if a sector should be
+				if (highlightedslope == null)
+				{
+					// Find the nearest linedef within highlight range
+					Linedef l = General.Map.Map.NearestLinedef(mousemappos);
+					if (l != null)
+					{
+						// Check on which side of the linedef the mouse is
+						float side = l.SideOfLine(mousemappos);
+						if (side > 0)
+						{
+							// Is there a sidedef here?
+							if (l.Back != null)
+							{
+								// Highlight if not the same
+								if (l.Back.Sector != highlightedsector) HighlightSector(l.Back.Sector);
+							}
+							else
+							{
+								// Highlight nothing
+								if (highlightedsector != null) HighlightSector(null);
+							}
+						}
+						else
+						{
+							// Is there a sidedef here?
+							if (l.Front != null)
+							{
+								// Highlight if not the same
+								if (l.Front.Sector != highlightedsector) HighlightSector(l.Front.Sector);
+							}
+							else
+							{
+								// Highlight nothing
+								if (highlightedsector != null) HighlightSector(null);
+							}
+						}
+					}
+				}
+				else
+				{
+					HighlightSector(null);
 				}
 
 				if (highlightedslope != oldhighlight)
@@ -738,9 +912,60 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			return selected;
 		}
 
+		public List<SlopeVertexGroup> GetSelectedSlopeVertexGroups()
+		{
+			List<SlopeVertexGroup> svgs = new List<SlopeVertexGroup>();
+
+			foreach (SlopeVertex sv in GetSelectedSlopeVertices())
+			{
+				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(sv);
+
+				if (!svgs.Contains(svg))
+					svgs.Add(svg);
+			}
+
+			return svgs;
+		}
+
 		#endregion
 
 		#region ================== Actions
+
+		[BeginAction("drawfloorslope")]
+		public void DrawFloorSlope()
+		{
+			slopemode = PlaneType.Floor;
+
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = true;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = false;
+
+			General.Interface.DisplayStatus(StatusType.Info, "Applying drawn slope to floor");
+		}
+
+		[BeginAction("drawceilingslope")]
+		public void DrawCeilingSlope()
+		{
+			slopemode = PlaneType.Ceiling;
+
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = true;
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = false;
+
+			General.Interface.DisplayStatus(StatusType.Info, "Applying drawn slope to ceiling");
+		}
+
+		[BeginAction("drawfloorandceilingslope")]
+		public void DrawFloorAndCeilingSlope()
+		{
+			slopemode = PlaneType.Floor | PlaneType.Ceiling;
+
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = true;
+
+			General.Interface.DisplayStatus(StatusType.Info, "Applying drawn slope to floor and ceiling");
+		}
 
 		[BeginAction("threedflipslope")]
 		public void FlipSlope()

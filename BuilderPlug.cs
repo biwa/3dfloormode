@@ -58,6 +58,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	// Make sure the class is public, because only public classes can be seen
 	// by the core.
 	//
+	[Flags]
+	public enum PlaneType
+	{
+		Floor = 1,
+		Ceiling = 2,
+	}
 
 	public class BuilderPlug : Plug
 	{
@@ -513,19 +519,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				List<Vector3D> sp = new List<Vector3D>();
 				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
-				if (fn == "user_floorplane_id")
+				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
-					for (int i = 0; i < svg.Vertices.Count; i++)
-					{
-						sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
-					}
-				}
-				else
-				{
-					for (int i = 0; i < svg.Vertices.Count; i++)
-					{
-						sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
-					}
+					sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
 				}
 
 				if (svg.Vertices.Count == 2)
@@ -547,6 +543,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					s.FloorSlopeOffset = p.d;
 					s.FloorHeight = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
 					svg.Height = s.FloorHeight;
+					svg.FloorHeight = s.FloorHeight;
 				}
 				else
 				{
@@ -556,6 +553,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					s.CeilSlopeOffset = p.d;
 					s.CeilHeight = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
 					svg.Height = s.CeilHeight;
+					svg.CeilingHeight = s.CeilHeight;
 				}
 			}
 		}
@@ -767,7 +765,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					return svg;
 			}
 
-			throw new Exception("SlopeVertex does not belong to a SlopeVertexGroup");
+			return null;
 		}
 
 		public SlopeVertexGroup GetSlopeVertexGroup(int id)
@@ -778,7 +776,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					return svg;
 			}
 
-			throw new Exception("SlopeVertexGroup with id " + id.ToString() + " does not exist");
+			return null;
+		}
+
+		public SlopeVertexGroup GetSlopeVertexGroup(Sector s)
+		{
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				if (svg.Sectors.Contains(s))
+					return svg;
+			}
+
+			return null;
 		}
 
 		#endregion

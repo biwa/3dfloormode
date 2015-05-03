@@ -19,14 +19,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		#region ================== Variables
 		private List<SlopeVertex> vertices;
 		private List<Sector> sectors;
+		private Dictionary<Sector, PlaneType> sectorplanes;
 		private List<Sector> taggedsectors; // For highlighting 3D floors
 		private int id;
 		private bool ceiling;
 		private bool floor;
 		private int height; // Sector floor or ceiling height
+		private int floorheight;
+		private int ceilingheight;
 		private Vertex anchorvertex;
 		private Vector2D anchor;
 		private bool reposition;
+
+		#endregion
+
+		#region ================== Enums
+
+		#endregion
+
+		#region ================== Properties
+
+		public List<SlopeVertex> Vertices { get { return vertices; } set { vertices = value; } }
+		public List<Sector> Sectors { get { return sectors; } set { sectors = value; } }
+		public List<Sector> TaggedSectors { get { return taggedsectors; } set { taggedsectors = value; } }
+		public int Id { get { return id; } }
+		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
+		public bool Floor { get { return floor; } set { floor = value; } }
+		public int Height { get { return height; } set { height = value; } }
+		public int FloorHeight { get { return floorheight; } set { floorheight = value; } }
+		public int CeilingHeight { get { return ceilingheight; } set { ceilingheight = value; } }
+		public bool Reposition { get { return reposition; } set { reposition = value; } }
 
 		#endregion
 
@@ -41,6 +63,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			this.id = id;
 			sectors = new List<Sector>();
+			sectorplanes = new Dictionary<Sector, PlaneType>();
 			taggedsectors = new List<Sector>();
 			vertices = new List<SlopeVertex>();
 			anchorvertex = null;
@@ -74,22 +97,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			this.floor = floor;
 			this.ceiling = ceiling;
 			sectors = new List<Sector>();
+			sectorplanes = new Dictionary<Sector, PlaneType>();
 			taggedsectors = new List<Sector>();
 			anchorvertex = null;
 		}
-
-		#endregion
-
-		#region ================== Properties
-
-		public List<SlopeVertex> Vertices { get { return vertices; } set { vertices = value; } }
-		public List<Sector> Sectors { get { return sectors; } set { sectors = value; } }
-		public List<Sector> TaggedSectors { get { return taggedsectors; } set { taggedsectors = value; } }
-		public int Id { get { return id; } }
-		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
-		public bool Floor { get { return floor; } set { floor = value; } }
-		public int Height { get { return height; } set { height = value; } }
-		public bool Reposition { get { return reposition; } set { reposition = value; } }
 
 		#endregion
 
@@ -107,29 +118,44 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			else
 				taggedsectors.Clear();
 
+			sectorplanes.Clear();
+
 			foreach (Sector s in General.Map.Map.Sectors)
 			{
-				if (s.Fields.GetValue("user_floorplane_id", -1) == id || s.Fields.GetValue("user_ceilingplane_id", -1) == id)
+				bool onfloor = s.Fields.GetValue("user_floorplane_id", -1) == id;
+				bool onceiling = s.Fields.GetValue("user_ceilingplane_id", -1) == id;
+
+				if (!onfloor && !onceiling)
+					continue;
+
+				sectors.Add(s);
+
+				floorheight = s.FloorHeight;
+				ceilingheight = s.CeilHeight;
+
+				if (onfloor && onceiling)
+					sectorplanes.Add(s, PlaneType.Floor | PlaneType.Ceiling);
+				else if (onfloor)
+					sectorplanes.Add(s, PlaneType.Floor);
+				else if (onceiling)
+					sectorplanes.Add(s, PlaneType.Ceiling);
+
+				if (floor)
+					height = s.FloorHeight;
+
+				if (ceiling)
+					height = s.CeilHeight;
+
+				// Check if the current sector is a 3D floor control sector. If that's the case also store the
+				// tagged sector(s). They will be used for highlighting in slope mode
+				foreach (Sidedef sd in s.Sidedefs)
 				{
-					sectors.Add(s);
-
-					if (floor)
-						height = s.FloorHeight;
-
-					if (ceiling)
-						height = s.CeilHeight;
-
-					// Check if the current sector is a 3D floor control sector. If that's the case also store the
-					// tagged sector(s). They will be used for highlighting in slope mode
-					foreach (Sidedef sd in s.Sidedefs)
+					if (sd.Line.Action == 160)
 					{
-						if (sd.Line.Action == 160)
+						foreach (Sector ts in General.Map.Map.GetSectorsByTag(sd.Line.Args[0]))
 						{
-							foreach (Sector ts in General.Map.Map.GetSectorsByTag(sd.Line.Args[0]))
-							{
-								if (!taggedsectors.Contains(ts))
-									taggedsectors.Add(ts);
-							}
+							if (!taggedsectors.Contains(ts))
+								taggedsectors.Add(ts);
 						}
 					}
 				}
@@ -144,14 +170,57 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void RemoveFromSector(Sector s)
 		{
-			if (floor)
+			if ((sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
+			{
+				s.FloorSlope = new Vector3D();
+				s.FloorSlopeOffset = 0;
+				s.Fields.Remove("user_floorplane_id");
+
+				if (sectors.Contains(s))
+					sectors.Remove(s);
+			}
+
+			if ((sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
+			{
+				s.CeilSlope = new Vector3D();
+				s.CeilSlopeOffset = 0;
+				s.Fields.Remove("user_ceilingplane_id");
+
+				if (sectors.Contains(s))
+					sectors.Remove(s);
+			}
+		}
+
+		public void AddSector(Sector s, PlaneType pt)
+		{
+			if (sectorplanes.ContainsKey(s))
+				sectorplanes.Remove(s);
+
+			if (sectors.Contains(s))
+				sectors.Remove(s);
+
+			sectorplanes.Add(s, pt);
+			sectors.Add(s);
+
+			ApplyToSectors();
+		}
+
+		public void RemoveSector(Sector s, PlaneType pt)
+		{
+			if (sectorplanes.ContainsKey(s))
+				sectorplanes.Remove(s);
+
+			if (sectors.Contains(s))
+				sectors.Remove(s);
+
+			if ((pt & PlaneType.Floor) == PlaneType.Floor)
 			{
 				s.FloorSlope = new Vector3D();
 				s.FloorSlopeOffset = 0;
 				s.Fields.Remove("user_floorplane_id");
 			}
 
-			if (ceiling)
+			if ((pt & PlaneType.Floor) == PlaneType.Floor)
 			{
 				s.CeilSlope = new Vector3D();
 				s.CeilSlopeOffset = 0;
@@ -161,37 +230,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void ApplyToSectors()
 		{
-			List<Vector3D> planevertices = new List<Vector3D>();
 			List<Sector> removesectors = new List<Sector>();
-
-			foreach (SlopeVertex sv in vertices)
-			{
-				planevertices.Add(new Vector3D(sv.Pos, sv.Z));
-			}
-
-			// Only 2 vertices, so create the 3rd one we need for the plane
-			if (planevertices.Count == 2)
-			{
-				float z = planevertices[0].z;
-
-				// Create a line between the two points we got...
-				Line2D line = new Line2D(planevertices[0], planevertices[1]);
-
-				// ... and the the perpendicular
-				Vector3D perpendicular = line.GetPerpendicular();
-
-				// Adding the perpendicular to one of the original points will result
-				// in the third point we need
-				Vector2D v = planevertices[0] + perpendicular;
-
-				planevertices.Add(new Vector3D(v, z));
-			}
 
 			foreach (Sector s in sectors)
 			{
 				bool hasplane = false;
 
-				if (floor)
+				if ((sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
 				{
 					hasplane = true;
 
@@ -205,7 +250,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					s.Fields.Remove("user_floorplane_id");
 				}
 
-				if (ceiling)
+				if ((sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
 				{
 					hasplane = true;
 
