@@ -36,11 +36,11 @@
 			this.floorandceilingslope = new System.Windows.Forms.ToolStripButton();
 			this.updateslopes = new System.Windows.Forms.ToolStripButton();
 			this.addsectorscontextmenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.ceilingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.floorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.addslopeceiling = new System.Windows.Forms.ToolStripMenuItem();
+			this.addslopefloor = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.removeSlopeFromCeilingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.removeSlopeFromFloorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.removeslopeceiling = new System.Windows.Forms.ToolStripMenuItem();
+			this.removeslopefloor = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStrip1.SuspendLayout();
 			this.addsectorscontextmenu.SuspendLayout();
 			this.SuspendLayout();
@@ -104,47 +104,47 @@
 			// addsectorscontextmenu
 			// 
 			this.addsectorscontextmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ceilingToolStripMenuItem,
-            this.floorToolStripMenuItem,
+            this.addslopeceiling,
+            this.addslopefloor,
             this.toolStripSeparator1,
-            this.removeSlopeFromCeilingToolStripMenuItem,
-            this.removeSlopeFromFloorToolStripMenuItem});
+            this.removeslopeceiling,
+            this.removeslopefloor});
 			this.addsectorscontextmenu.Name = "addsectorscontextmenu";
 			this.addsectorscontextmenu.Size = new System.Drawing.Size(216, 120);
 			this.addsectorscontextmenu.Opening += new System.ComponentModel.CancelEventHandler(this.addsectorscontextmenu_Opening);
 			// 
-			// ceilingToolStripMenuItem
+			// addslopeceiling
 			// 
-			this.ceilingToolStripMenuItem.Name = "ceilingToolStripMenuItem";
-			this.ceilingToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-			this.ceilingToolStripMenuItem.Text = "Add slope to ceiling";
-			this.ceilingToolStripMenuItem.Click += new System.EventHandler(this.ceilingToolStripMenuItem_Click);
+			this.addslopeceiling.Name = "addslopeceiling";
+			this.addslopeceiling.Size = new System.Drawing.Size(215, 22);
+			this.addslopeceiling.Text = "Add slope to ceiling";
+			this.addslopeceiling.Click += new System.EventHandler(this.ceilingToolStripMenuItem_Click);
 			// 
-			// floorToolStripMenuItem
+			// addslopefloor
 			// 
-			this.floorToolStripMenuItem.Name = "floorToolStripMenuItem";
-			this.floorToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-			this.floorToolStripMenuItem.Text = "Add slope to floor";
-			this.floorToolStripMenuItem.Click += new System.EventHandler(this.floorToolStripMenuItem_Click);
+			this.addslopefloor.Name = "addslopefloor";
+			this.addslopefloor.Size = new System.Drawing.Size(215, 22);
+			this.addslopefloor.Text = "Add slope to floor";
+			this.addslopefloor.Click += new System.EventHandler(this.floorToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
 			this.toolStripSeparator1.Size = new System.Drawing.Size(212, 6);
 			// 
-			// removeSlopeFromCeilingToolStripMenuItem
+			// removeslopeceiling
 			// 
-			this.removeSlopeFromCeilingToolStripMenuItem.Name = "removeSlopeFromCeilingToolStripMenuItem";
-			this.removeSlopeFromCeilingToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-			this.removeSlopeFromCeilingToolStripMenuItem.Text = "Remove slope from ceiling";
-			this.removeSlopeFromCeilingToolStripMenuItem.Click += new System.EventHandler(this.removeSlopeFromCeilingToolStripMenuItem_Click);
+			this.removeslopeceiling.Name = "removeslopeceiling";
+			this.removeslopeceiling.Size = new System.Drawing.Size(215, 22);
+			this.removeslopeceiling.Text = "Remove slope from ceiling";
+			this.removeslopeceiling.Click += new System.EventHandler(this.removeSlopeFromCeilingToolStripMenuItem_Click);
 			// 
-			// removeSlopeFromFloorToolStripMenuItem
+			// removeslopefloor
 			// 
-			this.removeSlopeFromFloorToolStripMenuItem.Name = "removeSlopeFromFloorToolStripMenuItem";
-			this.removeSlopeFromFloorToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-			this.removeSlopeFromFloorToolStripMenuItem.Text = "Remove slope from floor";
-			this.removeSlopeFromFloorToolStripMenuItem.Click += new System.EventHandler(this.removeSlopeFromFloorToolStripMenuItem_Click);
+			this.removeslopefloor.Name = "removeslopefloor";
+			this.removeslopefloor.Size = new System.Drawing.Size(215, 22);
+			this.removeslopefloor.Text = "Remove slope from floor";
+			this.removeslopefloor.Click += new System.EventHandler(this.removeSlopeFromFloorToolStripMenuItem_Click);
 			// 
 			// MenusForm
 			// 
@@ -170,10 +170,10 @@
 		private System.Windows.Forms.ToolStripButton floorandceilingslope;
 		private System.Windows.Forms.ToolStripButton updateslopes;
 		private System.Windows.Forms.ContextMenuStrip addsectorscontextmenu;
-		private System.Windows.Forms.ToolStripMenuItem floorToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem ceilingToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem addslopefloor;
+		private System.Windows.Forms.ToolStripMenuItem addslopeceiling;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-		private System.Windows.Forms.ToolStripMenuItem removeSlopeFromCeilingToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem removeSlopeFromFloorToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem removeslopeceiling;
+		private System.Windows.Forms.ToolStripMenuItem removeslopefloor;
 	}
 }

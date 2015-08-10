@@ -101,6 +101,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		#region ================== Properties
 
+		public Sector HighlightedSector { get { return highlightedsector; } }
+
 		#endregion
 
 		#region ================== Constructor / Disposer
@@ -129,18 +131,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
             base.OnEngage();
             renderer.SetPresentation(Presentation.Things);
 
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorSlope);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.CeilingSlope);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.UpdateSlopes);
-
-			if (slopemode == PlaneType.Floor)
-				BuilderPlug.Me.MenusForm.FloorSlope.Checked = true;
-			else if (slopemode == PlaneType.Ceiling)
-				BuilderPlug.Me.MenusForm.CeilingSlope.Checked = true;
-			else
-				BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = true;
-
 
             // Convert geometry selection to sectors
             General.Map.Map.ConvertSelection(SelectionType.Sectors);
@@ -166,9 +157,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnDisengage();
 
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FloorSlope);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.CeilingSlope);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.UpdateSlopes);
 			
 			// Hide highlight info
@@ -245,10 +233,54 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void SetupLabels()
 		{
 			labels = new List<TextLabel>();
+			Dictionary<Sector, List<TextLabel>> sectorlabels = new Dictionary<Sector, List<TextLabel>>();
 			PixelColor white = new PixelColor(255, 255, 255, 255);
 
 			foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
+				foreach (Sector s in svg.Sectors)
+				{
+					TextAlignmentX alignx = TextAlignmentX.Center;
+
+					if (sectorlabels.ContainsKey(s))
+					{
+						foreach (TextLabel l in sectorlabels[s])
+							l.AlignX = TextAlignmentX.Right;
+
+						alignx = TextAlignmentX.Left;
+					}
+					else
+					{
+						sectorlabels.Add(s, new List<TextLabel>());
+					}
+
+					// Setup labels
+					TextLabel[] labelarray = new TextLabel[s.Labels.Count];
+					for (int i = 0; i < s.Labels.Count; i++)
+					{
+						Vector2D v = s.Labels[i].position;
+						labelarray[i] = new TextLabel(20);
+						labelarray[i].TransformCoords = true;
+						labelarray[i].Rectangle = new RectangleF(v.x, v.y, 0.0f, 0.0f);
+						labelarray[i].AlignX = alignx;
+						labelarray[i].AlignY = TextAlignmentY.Middle;
+						labelarray[i].Scale = 14f;
+						labelarray[i].Backcolor = General.Colors.Background.WithAlpha(255);
+
+						if ((svg.SectorPlanes[s] & PlaneType.Floor) == PlaneType.Floor)
+							labelarray[i].Text = "F";
+						if ((svg.SectorPlanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
+							labelarray[i].Text = "C";
+
+						if (svg.Vertices.Contains(highlightedslope))
+							labelarray[i].Color = General.Colors.Highlight.WithAlpha(255);
+						else
+							labelarray[i].Color = white;
+					}
+					labels.AddRange(labelarray);
+
+				}
+
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					SlopeVertex sv = svg.Vertices[i];
@@ -279,16 +311,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					else
 						label.Color = white;
 
-					if (svg.Ceiling)
-					{
-						label.Text += String.Format("C: {0}", sv.Z);
-
-						if (svg.Floor)
-							label.Text += "; ";
-					}
-
-					if (svg.Floor)
-						label.Text += String.Format("F: {0}", sv.Z);
+					label.Text += String.Format("Z: {0}", sv.Z);
 
 					labels.Add(label);
 				}
@@ -571,8 +594,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				highlightedslope = null;
 			}
-			else
+			else if(highlightedsector != null)
 			{
+				if (!highlightedsector.Selected && General.Map.Map.SelectedSectorsCount == 0)
+					highlightedsector.Selected = true;
+
 				BuilderPlug.Me.MenusForm.AddSectorsContextMenu.Show(Cursor.Position);
 			}
 

@@ -209,16 +209,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					label.Color = white;
 
-					if (svg.Ceiling)
-					{
-						label.Text += String.Format("C: {0}", sv.Z);
-
-						if (svg.Floor)
-							label.Text += "; ";
-					}
-
-					if (svg.Floor)
-						label.Text += String.Format("F: {0}", sv.Z);
+					label.Text += String.Format("Z: {0}", sv.Z);
 
 					labels.Add(label);
 				}
@@ -556,6 +547,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.CeilingSlope);
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FloorAndCeilingSlope);
 
+			BuilderPlug.Me.MenusForm.FloorSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.CeilingSlope.Checked = false;
+			BuilderPlug.Me.MenusForm.FloorAndCeilingSlope.Checked = false;
+
 			if (slopedrawingmode == SlopeDrawingMode.Floor)
 				BuilderPlug.Me.MenusForm.FloorSlope.Checked = true;
 			else if (slopedrawingmode == SlopeDrawingMode.Ceiling)
@@ -660,7 +655,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 						s.Fields.Add("user_floorplane_id", new UniValue(UniversalType.Integer, id));
 
-						svg.Sectors.Add(s);
+						// svg.Sectors.Add(s);
+
+						svg.AddSector(s, PlaneType.Floor);
 					}
 				}
 
@@ -682,13 +679,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 						s.Fields.Add("user_ceilingplane_id", new UniValue(UniversalType.Integer, id));
 
-						svg.Sectors.Add(s);
+						// svg.Sectors.Add(s);
+						svg.AddSector(s, PlaneType.Ceiling);
 					}
 				}
 
 				BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
 
-				BuilderPlug.Me.UpdateSlopes();
+				// BuilderPlug.Me.UpdateSlopes();
 
 				// Clear selection
 				General.Map.Map.ClearAllSelected();

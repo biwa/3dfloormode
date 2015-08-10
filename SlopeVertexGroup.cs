@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Diagnostics;
 using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Types;
@@ -24,9 +25,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int id;
 		private bool ceiling;
 		private bool floor;
-		private int height; // Sector floor or ceiling height
-		private int floorheight;
-		private int ceilingheight;
+		private int height;
 		private Vertex anchorvertex;
 		private Vector2D anchor;
 		private bool reposition;
@@ -39,15 +38,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		#region ================== Properties
 
-		public List<SlopeVertex> Vertices { get { return vertices; } set { vertices = value; } }
+		public List<SlopeVertex> Vertices { get { return vertices; } set { vertices = value; ComputeHeight(); } }
 		public List<Sector> Sectors { get { return sectors; } set { sectors = value; } }
+		public Dictionary<Sector, PlaneType> SectorPlanes { get { return sectorplanes; } }
 		public List<Sector> TaggedSectors { get { return taggedsectors; } set { taggedsectors = value; } }
 		public int Id { get { return id; } }
 		public bool Ceiling { get { return ceiling; } set { ceiling = value; } }
 		public bool Floor { get { return floor; } set { floor = value; } }
 		public int Height { get { return height; } set { height = value; } }
-		public int FloorHeight { get { return floorheight; } set { floorheight = value; } }
-		public int CeilingHeight { get { return ceilingheight; } set { ceilingheight = value; } }
 		public bool Reposition { get { return reposition; } set { reposition = value; } }
 
 		#endregion
@@ -87,6 +85,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 			}
 
+			ComputeHeight();
 			FindSectors();
 		}
 
@@ -100,6 +99,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sectorplanes = new Dictionary<Sector, PlaneType>();
 			taggedsectors = new List<Sector>();
 			anchorvertex = null;
+			height = 0;
+
+			ComputeHeight();
 		}
 
 		#endregion
@@ -130,8 +132,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				sectors.Add(s);
 
-				floorheight = s.FloorHeight;
-				ceilingheight = s.CeilHeight;
+				//floorheight = s.FloorHeight;
+				//ceilingheight = s.CeilHeight;
 
 				if (onfloor && onceiling)
 					sectorplanes.Add(s, PlaneType.Floor | PlaneType.Ceiling);
@@ -140,31 +142,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				else if (onceiling)
 					sectorplanes.Add(s, PlaneType.Ceiling);
 
-				if (floor)
-					height = s.FloorHeight;
-
-				if (ceiling)
-					height = s.CeilHeight;
-
-				// Check if the current sector is a 3D floor control sector. If that's the case also store the
-				// tagged sector(s). They will be used for highlighting in slope mode
-				foreach (Sidedef sd in s.Sidedefs)
-				{
-					if (sd.Line.Action == 160)
-					{
-						foreach (Sector ts in General.Map.Map.GetSectorsByTag(sd.Line.Args[0]))
-						{
-							if (!taggedsectors.Contains(ts))
-								taggedsectors.Add(ts);
-						}
-					}
-				}
+				GetTaggesSectors(s);
 			}
 		}
 
 		public void RemoveFromSectors()
 		{
-			foreach (Sector s in sectors)
+			foreach (Sector s in sectors.ToList())
 				RemoveFromSector(s);
 		}
 
@@ -191,10 +175,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
+		private void GetTaggesSectors(Sector s)
+		{
+			// Check if the current sector is a 3D floor control sector. If that's the case also store the
+			// tagged sector(s). They will be used for highlighting in slope mode
+			foreach (Sidedef sd in s.Sidedefs)
+			{
+				if (sd.Line.Action == 160)
+				{
+					foreach (Sector ts in General.Map.Map.GetSectorsByTag(sd.Line.Args[0]))
+					{
+						if (!taggedsectors.Contains(ts))
+							taggedsectors.Add(ts);
+					}
+				}
+			}
+		}
+
 		public void AddSector(Sector s, PlaneType pt)
 		{
 			if (sectorplanes.ContainsKey(s))
+			{
+				pt |= sectorplanes[s];
 				sectorplanes.Remove(s);
+			}
 
 			if (sectors.Contains(s))
 				sectors.Remove(s);
@@ -202,11 +206,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sectorplanes.Add(s, pt);
 			sectors.Add(s);
 
+			GetTaggesSectors(s);
+
 			ApplyToSectors();
 		}
 
 		public void RemoveSector(Sector s, PlaneType pt)
 		{
+			Debug.WriteLine("Removing from Sector " + s.Index.ToString() + ": " + pt.ToString());
+
 			if (sectorplanes.ContainsKey(s))
 				sectorplanes.Remove(s);
 
@@ -220,7 +228,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				s.Fields.Remove("user_floorplane_id");
 			}
 
-			if ((pt & PlaneType.Floor) == PlaneType.Floor)
+			if ((pt & PlaneType.Ceiling) == PlaneType.Ceiling)
 			{
 				s.CeilSlope = new Vector3D();
 				s.CeilSlopeOffset = 0;
@@ -231,6 +239,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void ApplyToSectors()
 		{
 			List<Sector> removesectors = new List<Sector>();
+
+			ComputeHeight();
 
 			foreach (Sector s in sectors)
 			{
@@ -361,6 +371,47 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			anchorvertex = null;
+		}
+
+		public void ComputeHeight()
+		{
+			List<Vector3D> sp = new List<Vector3D>();
+
+			for (int i = 0; i < vertices.Count; i++)
+			{
+				sp.Add(new Vector3D(vertices[i].Pos.x, vertices[i].Pos.y,vertices[i].Z));
+			}
+
+			if (vertices.Count == 2)
+			{
+				float z = sp[0].z;
+				Line2D line = new Line2D(sp[0], sp[1]);
+				Vector3D perpendicular = line.GetPerpendicular();
+
+				Vector2D v = sp[0] + perpendicular;
+
+				sp.Add(new Vector3D(v.x, v.y, z));
+			}
+
+			Plane p = new Plane(sp[0], sp[1], sp[2], true);
+
+			height = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
+		}
+
+		private Vector2D GetCircumcenter(List<Vector3D> points)
+		{
+			float u_ray;
+
+			Line2D line1 = new Line2D(points[0], points[1]);
+			Line2D line2 = new Line2D(points[2], points[0]);
+
+			// Perpendicular bisectors
+			Line2D bisector1 = new Line2D(line1.GetCoordinatesAt(0.5f), line1.GetCoordinatesAt(0.5f) + line1.GetPerpendicular());
+			Line2D bisector2 = new Line2D(line2.GetCoordinatesAt(0.5f), line2.GetCoordinatesAt(0.5f) + line2.GetPerpendicular());
+
+			bisector1.GetIntersection(bisector2, out u_ray);
+
+			return bisector1.GetCoordinatesAt(u_ray);
 		}
 
 		#endregion

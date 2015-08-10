@@ -71,6 +71,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				svgs[0].AddSector(s, PlaneType.Floor);
 				BuilderPlug.Me.UpdateSlopes(s);
 			}
+
+			if (General.Map.Map.SelectedSectorsCount == 1)
+				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
 		}
 
 		private void removeSlopeFromFloorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -78,8 +81,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
 			{
 				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(s);
-				svg.RemoveSector(s, PlaneType.Floor);
+
+				if (svg != null)
+					svg.RemoveSector(s, PlaneType.Floor);
 			}
+
+			if (General.Map.Map.SelectedSectorsCount == 1)
+				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
 		}
 
 		private void ceilingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -95,6 +103,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				svgs[0].AddSector(s, PlaneType.Ceiling);
 				BuilderPlug.Me.UpdateSlopes(s);
 			}
+
+			if (General.Map.Map.SelectedSectorsCount == 1)
+				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
 		}
 
 		private void removeSlopeFromCeilingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -102,8 +113,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
 			{
 				SlopeVertexGroup svg = BuilderPlug.Me.GetSlopeVertexGroup(s);
-				svg.RemoveSector(s, PlaneType.Ceiling);
+
+				if(svg != null)
+					svg.RemoveSector(s, PlaneType.Ceiling);
 			}
+
+			if (General.Map.Map.SelectedSectorsCount == 1)
+				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
 		}
 
 		private void addsectorscontextmenu_Opening(object sender, CancelEventArgs e)
@@ -112,8 +128,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// otherwise enable adding
 			List<SlopeVertexGroup> svgs = ((SlopeMode)General.Editing.Mode).GetSelectedSlopeVertexGroups();
 
-			floorToolStripMenuItem.Enabled = svgs.Count == 1;
-			ceilingToolStripMenuItem.Enabled = svgs.Count == 1;
+			addslopefloor.Enabled = svgs.Count == 1;
+			addslopeceiling.Enabled = svgs.Count == 1;
 		}
 	}
 }
