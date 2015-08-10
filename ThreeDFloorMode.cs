@@ -202,6 +202,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				BuilderPlug.Me.ControlSectorArea.Draw(renderer, csahighlight);
 
+				List<Line3D> arrows = new List<Line3D>();
+
 				foreach (ThreeDFloor tdf in threedfloors)
 				{
                     if (!tdf.TopSloped || !tdf.BottomSloped)
@@ -215,11 +217,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					if (tdf.TaggedSectors.Contains(highlighted))
 						a = 192;
 
-					renderer.RenderArrow(new Line3D(v1, v2), new PixelColor(a, 255, 255, 255));
-
+					arrows.Add(new Line3D(v1, v2, new PixelColor(a, 255, 255, 255), true));
+					
 					if(!tdf.TopSlope.IsSimple)
-						renderer.RenderArrow(new Line3D(v1, v3), new PixelColor(a, 255, 255, 255));
+						arrows.Add(new Line3D(v1, v3, new PixelColor(a, 255, 255, 255), true));
 				}
+
+				renderer.RenderArrows(arrows);
 
 				renderer.Finish();
 			}
