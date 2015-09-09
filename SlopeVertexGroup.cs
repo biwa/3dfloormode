@@ -154,7 +154,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void RemoveFromSector(Sector s)
 		{
-			if ((sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
+			RemoveFromSector(s, PlaneType.Ceiling);
+			RemoveFromSector(s, PlaneType.Floor);
+		}
+
+		public void RemoveFromSector(Sector s, PlaneType pt)
+		{
+			if (!sectorplanes.ContainsKey(s))
+				return;
+
+			if (pt == PlaneType.Floor && (sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
 			{
 				s.FloorSlope = new Vector3D();
 				s.FloorSlopeOffset = 0;
@@ -164,7 +173,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					sectors.Remove(s);
 			}
 
-			if ((sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
+			if (pt == PlaneType.Ceiling && (sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
 			{
 				s.CeilSlope = new Vector3D();
 				s.CeilSlopeOffset = 0;
@@ -246,7 +255,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				bool hasplane = false;
 
-				if ((sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
+				if (sectorplanes.ContainsKey(s) && (sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
 				{
 					hasplane = true;
 
@@ -260,7 +269,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					s.Fields.Remove("user_floorplane_id");
 				}
 
-				if ((sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
+				if (sectorplanes.ContainsKey(s) && (sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
 				{
 					hasplane = true;
 

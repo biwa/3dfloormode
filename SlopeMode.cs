@@ -261,16 +261,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						Vector2D v = s.Labels[i].position;
 						labelarray[i] = new TextLabel(20);
 						labelarray[i].TransformCoords = true;
-						labelarray[i].Rectangle = new RectangleF(v.x, v.y, 0.0f, 0.0f);
 						labelarray[i].AlignX = alignx;
 						labelarray[i].AlignY = TextAlignmentY.Middle;
 						labelarray[i].Scale = 14f;
 						labelarray[i].Backcolor = General.Colors.Background.WithAlpha(255);
 
 						if ((svg.SectorPlanes[s] & PlaneType.Floor) == PlaneType.Floor)
+						{
 							labelarray[i].Text = "F";
+							labelarray[i].Rectangle = new RectangleF(v.x - labelarray[i].Scale / renderer.Scale / 4, v.y, 0.0f, 0.0f);
+						}
 						if ((svg.SectorPlanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
+						{
 							labelarray[i].Text = "C";
+							labelarray[i].Rectangle = new RectangleF(v.x + labelarray[i].Scale / renderer.Scale / 4, v.y, 0.0f, 0.0f);
+						}
 
 						if (svg.Vertices.Contains(highlightedslope))
 							labelarray[i].Color = General.Colors.Highlight.WithAlpha(255);
