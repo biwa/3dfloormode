@@ -74,6 +74,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (General.Map.Map.SelectedSectorsCount == 1)
 				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
+
+			General.Interface.RedrawDisplay();
 		}
 
 		private void removeSlopeFromFloorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -88,6 +90,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (General.Map.Map.SelectedSectorsCount == 1)
 				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
+
+			General.Interface.RedrawDisplay();
 		}
 
 		private void ceilingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -106,6 +110,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (General.Map.Map.SelectedSectorsCount == 1)
 				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
+
+			General.Interface.RedrawDisplay();
 		}
 
 		private void removeSlopeFromCeilingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -120,6 +126,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (General.Map.Map.SelectedSectorsCount == 1)
 				((SlopeMode)General.Editing.Mode).HighlightedSector.Selected = false;
+
+			General.Interface.RedrawDisplay();
 		}
 
 		private void addsectorscontextmenu_Opening(object sender, CancelEventArgs e)

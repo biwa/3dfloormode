@@ -150,37 +150,29 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				// Ceiling
 				if (addselectedsectorsceiling.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
-						if (!svg.Sectors.Contains(s))
-							svg.AddSector(s, PlaneType.Ceiling);
+						svg.AddSector(s, PlaneType.Ceiling);
 
 				if (removeselectedsectorsceiling.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
 						if (svg.Sectors.Contains(s))
-						{
-							svg.RemoveFromSector(s, PlaneType.Ceiling);
-							svg.Sectors.Remove(s);
-						}
+							svg.RemoveSector(s, PlaneType.Ceiling);
+
 				// Floor
 				if (addselectedsectorsfloor.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
-						if (!svg.Sectors.Contains(s))
-							svg.AddSector(s, PlaneType.Floor);
+						svg.AddSector(s, PlaneType.Floor);
 
 				if (removeselectedsectorsfloor.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
 						if (svg.Sectors.Contains(s))
-						{
-							svg.RemoveFromSector(s, PlaneType.Floor);
-							svg.Sectors.Remove(s);
-						}
-
+							svg.RemoveSector(s, PlaneType.Floor);
 
 				foreach (Sector s in checkedListBoxSectors.CheckedItems)
 				{
 					if (svg.Sectors.Contains(s))
 					{
-						svg.RemoveFromSector(s);
-						svg.Sectors.Remove(s);
+						svg.RemoveSector(s, PlaneType.Floor);
+						svg.RemoveSector(s, PlaneType.Ceiling);
 					}
 				}
 					

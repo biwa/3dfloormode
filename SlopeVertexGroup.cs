@@ -149,38 +149,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void RemoveFromSectors()
 		{
 			foreach (Sector s in sectors.ToList())
-				RemoveFromSector(s);
-		}
-
-		public void RemoveFromSector(Sector s)
-		{
-			RemoveFromSector(s, PlaneType.Ceiling);
-			RemoveFromSector(s, PlaneType.Floor);
-		}
-
-		public void RemoveFromSector(Sector s, PlaneType pt)
-		{
-			if (!sectorplanes.ContainsKey(s))
-				return;
-
-			if (pt == PlaneType.Floor && (sectorplanes[s] & PlaneType.Floor) == PlaneType.Floor)
 			{
-				s.FloorSlope = new Vector3D();
-				s.FloorSlopeOffset = 0;
-				s.Fields.Remove("user_floorplane_id");
-
-				if (sectors.Contains(s))
-					sectors.Remove(s);
-			}
-
-			if (pt == PlaneType.Ceiling && (sectorplanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
-			{
-				s.CeilSlope = new Vector3D();
-				s.CeilSlopeOffset = 0;
-				s.Fields.Remove("user_ceilingplane_id");
-
-				if (sectors.Contains(s))
-					sectors.Remove(s);
+				RemoveSector(s, PlaneType.Floor);
+				RemoveSector(s, PlaneType.Ceiling);
 			}
 		}
 
@@ -225,10 +196,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			Debug.WriteLine("Removing from Sector " + s.Index.ToString() + ": " + pt.ToString());
 
 			if (sectorplanes.ContainsKey(s))
-				sectorplanes.Remove(s);
+			{
+				sectorplanes[s] &= ~pt;
 
-			if (sectors.Contains(s))
-				sectors.Remove(s);
+				if (sectors.Contains(s) && sectorplanes[s] == pt)
+				{
+					sectors.Remove(s);
+					sectorplanes.Remove(s);
+				}
+			}
 
 			if ((pt & PlaneType.Floor) == PlaneType.Floor)
 			{
