@@ -112,6 +112,7 @@
 			this.addsectorscontextmenu.Name = "addsectorscontextmenu";
 			this.addsectorscontextmenu.Size = new System.Drawing.Size(216, 120);
 			this.addsectorscontextmenu.Opening += new System.ComponentModel.CancelEventHandler(this.addsectorscontextmenu_Opening);
+			this.addsectorscontextmenu.Closing += new System.Windows.Forms.ToolStripDropDownClosingEventHandler(this.addsectorscontextmenu_Closing);
 			// 
 			// addslopeceiling
 			// 

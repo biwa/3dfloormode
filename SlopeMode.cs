@@ -96,12 +96,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private List<Vector2D> oldpositions;
 
 		private static PlaneType slopemode = PlaneType.Floor;
+		private bool contextmenuclosing = false;
 		
 		#endregion
 
 		#region ================== Properties
 
 		public Sector HighlightedSector { get { return highlightedsector; } }
+		public bool ContextMenuClosing { get { return contextmenuclosing; } set { contextmenuclosing = value; } }
 
 		#endregion
 
@@ -232,11 +234,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void SetupLabels()
 		{
-			labels = new List<TextLabel>();
 			Dictionary<Sector, List<TextLabel>> sectorlabels = new Dictionary<Sector, List<TextLabel>>();
 			PixelColor white = new PixelColor(255, 255, 255, 255);
 
 			Dictionary<Sector, Dictionary<PlaneType, SlopeVertexGroup>> requiredlabels = new Dictionary<Sector, Dictionary<PlaneType, SlopeVertexGroup>>();
+
+			if (labels != null)
+			{
+				// Dispose old labels
+				foreach (TextLabel l in labels)
+					l.Dispose();
+			}
+
+			labels = new List<TextLabel>();
 
 			// Go through all sectors that belong to a SVG and set which SVG their floor and
 			// ceiling belongs to
@@ -566,6 +576,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 			}
 		}
+
+		public void ResetHighlightedSector()
+		{
+			HighlightSector(null);
+		}
 		
 		// Selection
 		protected override void OnSelectBegin()
@@ -598,12 +613,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				if (highlightedsector != null)
 				{
-					SelectSector(highlightedsector, !highlightedsector.Selected);
-					// highlightedsector.Selected = !highlightedsector.Selected;
+					if (!contextmenuclosing)
+					{
+						SelectSector(highlightedsector, !highlightedsector.Selected);
 
-					updateOverlaySurfaces();
-					General.Interface.RedrawDisplay();
+						updateOverlaySurfaces();
+						General.Interface.RedrawDisplay();
+					}
 				}
+
+				contextmenuclosing = false;
 			}
 
 			base.OnSelectEnd();
@@ -641,8 +660,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 			else if(highlightedsector != null)
 			{
-				if (!highlightedsector.Selected && General.Map.Map.SelectedSectorsCount == 0)
-					highlightedsector.Selected = true;
+				if (General.Map.Map.SelectedSectorsCount == 0)
+				{
+					BuilderPlug.Me.MenusForm.AddSectorsContextMenu.Tag = new List<Sector>() { highlightedsector };
+				}
+				else
+				{
+					BuilderPlug.Me.MenusForm.AddSectorsContextMenu.Tag = General.Map.Map.GetSelectedSectors(true).ToList();
+				}
 
 				BuilderPlug.Me.MenusForm.AddSectorsContextMenu.Show(Cursor.Position);
 			}

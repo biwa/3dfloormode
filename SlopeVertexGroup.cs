@@ -197,13 +197,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (sectorplanes.ContainsKey(s))
 			{
-				sectorplanes[s] &= ~pt;
-
 				if (sectors.Contains(s) && sectorplanes[s] == pt)
 				{
 					sectors.Remove(s);
 					sectorplanes.Remove(s);
 				}
+				else
+					sectorplanes[s] &= ~pt;
 			}
 
 			if ((pt & PlaneType.Floor) == PlaneType.Floor)
