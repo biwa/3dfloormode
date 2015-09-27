@@ -68,6 +68,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (Sector s in (List<Sector>)addsectorscontextmenu.Tag)
 			{
+				SlopeVertexGroup rsvg = BuilderPlug.Me.GetSlopeVertexGroup(s);
+
+				if (rsvg != null)
+					rsvg.RemoveSector(s, PlaneType.Floor);
+
 				svgs[0].AddSector(s, PlaneType.Floor);
 				BuilderPlug.Me.UpdateSlopes(s);
 			}
@@ -98,6 +103,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			foreach (Sector s in (List<Sector>)addsectorscontextmenu.Tag)
 			{
+				SlopeVertexGroup rsvg = BuilderPlug.Me.GetSlopeVertexGroup(s);
+
+				if (rsvg != null)
+					rsvg.RemoveSector(s, PlaneType.Ceiling);
+
 				svgs[0].AddSector(s, PlaneType.Ceiling);
 				BuilderPlug.Me.UpdateSlopes(s);
 			}
