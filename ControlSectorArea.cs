@@ -40,18 +40,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			OuterRight,
 			OuterTop,
 			OuterBottom,
-			InnerLeft,
-			InnerRight,
-			InnerTop,
-			InnerBottom,
 			OuterTopLeft,
 			OuterTopRight,
 			OuterBottomLeft,
 			OuterBottomRight,
-			InnerTopLeft,
-			InnerTopRight,
-			InnerBottomLeft,
-			InnerBottomRight,
 			Body
 		};
 
@@ -60,7 +52,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		#region ================== Variables
 
 		private RectangleF outerborder;
-		private RectangleF innerborder;
 		private PixelColor bordercolor = new PixelColor(255, 0, 192, 0);
 		private PixelColor fillcolor = new PixelColor(128, 0, 128, 0);
 		private PixelColor borderhighlightcolor = new PixelColor(255, 0, 192, 0);
@@ -75,10 +66,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private float outerright;
 		private float outertop;
 		private float outerbottom;
-		private float innerleft;
-		private float innerright;
-		private float innertop;
-		private float innerbottom;
 
 		private bool usecustomtagrange;
 		private int firsttag;
@@ -94,7 +81,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public float SectorSize { get { return sectorsize; } }
 
 		public RectangleF OuterBorder { get { return outerborder; } }
-		public RectangleF InnerBorder { get { return innerborder; } }
 
 		public float OuterLeft
 		{
@@ -120,30 +106,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			set { outerbottom = value; UpdateLinesAndPoints(); }
 		}
 
-		public float InnerLeft
-		{
-			get { return innerleft; }
-			set { innerleft = value; UpdateLinesAndPoints(); }
-		}
-
-		public float InnerRight
-		{
-			get { return innerright; }
-			set { innerright = value; UpdateLinesAndPoints(); }
-		}
-
-		public float InnerTop
-		{
-			get { return innertop; }
-			set { innertop = value; UpdateLinesAndPoints(); }
-		}
-
-		public float InnerBottom
-		{
-			get { return innerbottom; }
-			set { innerbottom = value; UpdateLinesAndPoints(); }
-		}
-
 		public bool UseCustomTagRnage { get { return usecustomtagrange; } set { usecustomtagrange = value; } }
 		public int FirstTag { get { return firsttag; } set { firsttag = value; } }
 		public int LastTag { get { return lasttag; } set { lasttag = value; } }
@@ -152,16 +114,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		#region ================== Constructor / Disposer
 
-		public ControlSectorArea(float outerleft, float outerright, float outertop, float outerbottom, float innerleft, float innerright, float innertop, float innerbottom, float gridsize, float sectorsize)
+		public ControlSectorArea(float outerleft, float outerright, float outertop, float outerbottom, float gridsize, float sectorsize)
 		{
 			this.outerleft = outerleft;
 			this.outerright = outerright;
 			this.outertop = outertop;
 			this.outerbottom = outerbottom;
-			this.innerleft = innerleft;
-			this.innerright = innerright;
-			this.innertop = innertop;
-			this.innerbottom = innerbottom;
 
 			lines = new Dictionary<Highlight, Line2D>();
 			points = new Dictionary<Highlight, Vector2D>();
@@ -185,69 +143,29 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			lines[Highlight.OuterTop] = new Line2D(outerleft, outertop, outerright, outertop);
 			lines[Highlight.OuterBottom] = new Line2D(outerleft, outerbottom, outerright, outerbottom);
 
-			lines[Highlight.InnerLeft] = new Line2D(innerleft, innertop, innerleft, innerbottom);
-			lines[Highlight.InnerRight] = new Line2D(innerright, innertop, innerright, innerbottom);
-			lines[Highlight.InnerTop] = new Line2D(innerleft, innertop, innerright, innertop);
-			lines[Highlight.InnerBottom] = new Line2D(innerleft, innerbottom, innerright, innerbottom);
-
 			points[Highlight.OuterTopLeft] = new Vector2D(outerleft, outertop);
 			points[Highlight.OuterTopRight] = new Vector2D(outerright, outertop);
 			points[Highlight.OuterBottomLeft] = new Vector2D(outerleft, outerbottom);
 			points[Highlight.OuterBottomRight] = new Vector2D(outerright, outerbottom);
 
-			points[Highlight.InnerTopLeft] = new Vector2D(innerleft, innertop);
-			points[Highlight.InnerTopRight] = new Vector2D(innerright, innertop);
-			points[Highlight.InnerBottomLeft] = new Vector2D(innerleft, innerbottom);
-			points[Highlight.InnerBottomRight] = new Vector2D(innerright, innerbottom);
-
 			outerborder = new RectangleF(outerleft, outertop, outerright - outerleft, outerbottom - outertop);
-			innerborder = new RectangleF(innerleft, innertop, innerright - innerleft, innerbottom - innertop);
 		}
 
 		public void Draw(IRenderer2D renderer, Highlight highlight)
 		{
 			PixelColor fcolor = highlight == Highlight.Body ? fillhighlightcolor : fillcolor;
 
-			// The area is drawn in 4 steps as shown below (e stands for an empty space/hole)
-			//
-			// |-----------|
-			// |   | 3 |   |
-			// |   |---|   |
-			// | 1 | e | 2 |
-			// |   |---|   |
-			// |   | 4 |   |
-			// |-----------|
-
 			renderer.RenderRectangleFilled(
-				new RectangleF(outerleft, outertop, innerleft - outerleft, outerbottom - outertop),
-				fcolor,
-				true
-			);
-
-			renderer.RenderRectangleFilled(
-				new RectangleF(outerright, outertop, innerright - outerright, outerbottom - outertop),
-				fcolor,
-				true
-			);
-
-			renderer.RenderRectangleFilled(
-				new RectangleF(innerleft, outertop, innerright - innerleft, innertop - outertop),
-				fcolor,
-				true
-			);
-
-			renderer.RenderRectangleFilled(
-				new RectangleF(innerleft, innerbottom, innerright - innerleft, outerbottom - innerbottom),
+				new RectangleF(outerleft, outertop, outerright - outerleft, outerbottom - outertop),
 				fcolor,
 				true
 			);
 
 			// Draw the borders
 			renderer.RenderRectangle(outerborder, 1.0f, bordercolor, true);
-			renderer.RenderRectangle(innerborder, 1.0f, bordercolor, true);
 
 			// Highlight a border if necessary
-			if (highlight >= Highlight.OuterLeft && highlight <= Highlight.InnerBottom)
+			if (highlight >= Highlight.OuterLeft && highlight <= Highlight.OuterBottom)
 				renderer.RenderLine(lines[highlight].v1, lines[highlight].v2, 1.0f, borderhighlightcolor, true);
 			else
 			{
@@ -271,24 +189,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						renderer.RenderLine(lines[Highlight.OuterBottom].v1, lines[Highlight.OuterBottom].v2, 1.0f, borderhighlightcolor, true);
 						renderer.RenderLine(lines[Highlight.OuterRight].v1, lines[Highlight.OuterRight].v2, 1.0f, borderhighlightcolor, true);
 						break;
-
-					// Inner corners
-					case Highlight.InnerTopLeft:
-						renderer.RenderLine(lines[Highlight.InnerTop].v1, lines[Highlight.InnerTop].v2, 1.0f, borderhighlightcolor, true);
-						renderer.RenderLine(lines[Highlight.InnerLeft].v1, lines[Highlight.InnerLeft].v2, 1.0f, borderhighlightcolor, true);
-						break;
-					case Highlight.InnerTopRight:
-						renderer.RenderLine(lines[Highlight.InnerTop].v1, lines[Highlight.InnerTop].v2, 1.0f, borderhighlightcolor, true);
-						renderer.RenderLine(lines[Highlight.InnerRight].v1, lines[Highlight.InnerRight].v2, 1.0f, borderhighlightcolor, true);
-						break;
-					case Highlight.InnerBottomLeft:
-						renderer.RenderLine(lines[Highlight.InnerBottom].v1, lines[Highlight.InnerBottom].v2, 1.0f, borderhighlightcolor, true);
-						renderer.RenderLine(lines[Highlight.InnerLeft].v1, lines[Highlight.InnerLeft].v2, 1.0f, borderhighlightcolor, true);
-						break;
-					case Highlight.InnerBottomRight:
-						renderer.RenderLine(lines[Highlight.InnerBottom].v1, lines[Highlight.InnerBottom].v2, 1.0f, borderhighlightcolor, true);
-						renderer.RenderLine(lines[Highlight.InnerRight].v1, lines[Highlight.InnerRight].v2, 1.0f, borderhighlightcolor, true);
-						break;
 				}
 			}
 		}
@@ -302,7 +202,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Find a line to highlight
 			foreach (Highlight h in (Highlight[])Enum.GetValues(typeof(Highlight)))
 			{
-				if (h >= Highlight.OuterLeft && h <= Highlight.InnerBottom)
+				if (h >= Highlight.OuterLeft && h <= Highlight.OuterBottom)
 				{
 					d = Line2D.GetDistanceToLine(lines[h].v1, lines[h].v2, pos, true);
 
@@ -319,7 +219,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Find a corner to highlight
 			foreach (Highlight h in (Highlight[])Enum.GetValues(typeof(Highlight)))
 			{
-				if (h >= Highlight.OuterTopLeft && h <= Highlight.InnerBottomRight)
+				if (h >= Highlight.OuterTopLeft && h <= Highlight.OuterBottomRight)
 				{
 					d = Vector2D.Distance(pos, points[h]);
 
@@ -334,7 +234,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (highlight != Highlight.None)
 				return highlight;
 
-			if ((OuterLeft < pos.x && OuterRight > pos.x && OuterTop > pos.y && OuterBottom < pos.y) &&	!(InnerLeft < pos.x && InnerRight > pos.x && InnerTop > pos.y && InnerBottom < pos.y))
+			if (OuterLeft < pos.x && OuterRight > pos.x && OuterTop > pos.y && OuterBottom < pos.y)
 				return Highlight.Body;
 
 			return Highlight.None;
@@ -348,66 +248,34 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				// Outer border
 				case Highlight.OuterLeft:
-					if (newpos.x < innerleft) outerleft = newpos.x;
+					if (newpos.x < outerright) outerleft = newpos.x;
 					break;
 				case Highlight.OuterRight:
-					if(newpos.x > innerright) outerright = newpos.x;
+					if(newpos.x > outerleft) outerright = newpos.x;
 					break;
 				case Highlight.OuterTop:
-					if (newpos.y > innertop) outertop = newpos.y;
+					if (newpos.y > outerbottom) outertop = newpos.y;
 					break;
 				case Highlight.OuterBottom:
-					if (newpos.y < innerbottom) outerbottom = newpos.y;
-					break;
-
-				// Inner border
-				case Highlight.InnerLeft:
-					if (newpos.x > outerleft && newpos.x < innerright) innerleft = newpos.x;
-					break;
-				case Highlight.InnerRight:
-					if (newpos.x < outerright && newpos.x > innerleft) innerright = newpos.x;
-					break;
-				case Highlight.InnerTop:
-					if (newpos.y < outertop && newpos.y > innerbottom) innertop = newpos.y;
-					break;
-				case Highlight.InnerBottom:
-					if (newpos.y > outerbottom && newpos.y < innertop) innerbottom = newpos.y;
+					if (newpos.y < outertop) outerbottom = newpos.y;
 					break;
 
 				// Outer corners
 				case Highlight.OuterTopLeft:
-					if (newpos.x < innerleft) outerleft = newpos.x;
-					if (newpos.y > innertop) outertop = newpos.y;
+					if (newpos.x < outerright) outerleft = newpos.x;
+					if (newpos.y > outerbottom) outertop = newpos.y;
 					break;
 				case Highlight.OuterTopRight:
-					if (newpos.x > innerright) outerright = newpos.x;
-					if (newpos.y > innertop) outertop = newpos.y;
+					if (newpos.x > outerleft) outerright = newpos.x;
+					if (newpos.y > outerbottom) outertop = newpos.y;
 					break;
 				case Highlight.OuterBottomLeft:
-					if (newpos.x < innerleft) outerleft = newpos.x;
-					if (newpos.y < innerbottom) outerbottom = newpos.y;
+					if (newpos.x < outerright) outerleft = newpos.x;
+					if (newpos.y < outertop) outerbottom = newpos.y;
 					break;
 				case Highlight.OuterBottomRight:
-					if (newpos.x > innerright) outerright = newpos.x;
-					if (newpos.y < innerbottom) outerbottom = newpos.y;
-					break;
-
-				// Inner corners
-				case Highlight.InnerTopLeft:
-					if (newpos.x > outerleft && newpos.x < innerright) innerleft = newpos.x;
-					if (newpos.y < outertop && newpos.y > innerbottom) innertop = newpos.y;
-					break;
-				case Highlight.InnerTopRight:
-					if (newpos.x < outerright && newpos.x > innerleft) innerright = newpos.x;
-					if (newpos.y < outertop && newpos.y > innerbottom) innertop = newpos.y;
-					break;
-				case Highlight.InnerBottomLeft:
-					if (newpos.x > outerleft && newpos.x < innerright) innerleft = newpos.x;
-					if (newpos.y > outerbottom && newpos.y < innertop) innerbottom = newpos.y;
-					break;
-				case Highlight.InnerBottomRight:
-					if (newpos.x < outerright && newpos.x > innerleft) innerright = newpos.x;
-					if (newpos.y > outerbottom && newpos.y < innertop) innerbottom = newpos.y;
+					if (newpos.x > outerleft) outerright = newpos.x;
+					if (newpos.y < outertop) outerbottom = newpos.y;
 					break;
 			}
 
@@ -425,9 +293,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				for (int y = (int)outertop; y > (int)outerbottom; y -= (int)gridsize)
 				{
-					if (x >= (int)innerleft && x < (int)innerright && y <= (int)innertop && y > (int)innerbottom)
-						continue;
-
 					List<BlockEntry> blocks = blockmap.GetLineBlocks(
 						//new Vector2D(x + margin, y - margin),
 						//new Vector2D(x + sectorsize - (2 * margin), y - sectorsize - (2 * margin))
@@ -482,10 +347,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public bool Inside(Vector2D pos)
 		{
-			if (
-				(pos.x > outerleft && pos.x < outerright && pos.y < outertop && pos.y > outerbottom) &&
-				!(pos.x > innerleft && pos.x < innerright && pos.y < innertop && pos.y > innerbottom)
-			)
+			if (pos.x > outerleft && pos.x < outerright && pos.y < outertop && pos.y > outerbottom)
 				return true;
 
 			return false;
@@ -572,11 +434,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			config.Add("outertop", outertop);
 			config.Add("outerbottom", outerbottom);
 
-			config.Add("innerleft", innerleft);
-			config.Add("innerright", innerright);
-			config.Add("innertop", innertop);
-			config.Add("innerbottom", innerbottom);
-
 			General.Map.Options.WritePluginSetting("controlsectorarea", config);
 		}
 
@@ -592,11 +449,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			outerright = General.Map.Options.ReadPluginSetting("controlsectorarea.outerright", outerright);
 			outertop = General.Map.Options.ReadPluginSetting("controlsectorarea.outertop", outertop);
 			outerbottom = General.Map.Options.ReadPluginSetting("controlsectorarea.outerbottom", outerbottom);
-
-			innerleft = General.Map.Options.ReadPluginSetting("controlsectorarea.innerleft", innerleft);
-			innerright = General.Map.Options.ReadPluginSetting("controlsectorarea.innerright", innerright);
-			innertop = General.Map.Options.ReadPluginSetting("controlsectorarea.innertop", innertop);
-			innerbottom = General.Map.Options.ReadPluginSetting("controlsectorarea.innerbottom", innerbottom);
 
 			UpdateLinesAndPoints();
 		}

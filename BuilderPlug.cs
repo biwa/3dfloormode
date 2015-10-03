@@ -170,7 +170,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnMapNewEnd();
 
-			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
+			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, 64, 56);
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 
 			slopevertexgroups.Clear();
@@ -184,7 +184,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnMapOpenEnd();
 
-			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, -128, -64, 128, 64, 64, 56);
+			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, 64, 56);
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 
 			LoadSlopesFromDBS();
