@@ -31,7 +31,6 @@
 			this.apply = new System.Windows.Forms.Button();
 			this.cancel = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.planetype = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
@@ -40,18 +39,24 @@
 			this.positionx = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.checkedListBoxSectors = new System.Windows.Forms.CheckedListBox();
-			this.addselectedsectors = new System.Windows.Forms.CheckBox();
-			this.removeselectedsectors = new System.Windows.Forms.CheckBox();
 			this.reposition = new System.Windows.Forms.CheckBox();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.removeselectedsectorsceiling = new System.Windows.Forms.CheckBox();
+			this.addselectedsectorsceiling = new System.Windows.Forms.CheckBox();
+			this.groupBox4 = new System.Windows.Forms.GroupBox();
+			this.removeselectedsectorsfloor = new System.Windows.Forms.CheckBox();
+			this.addselectedsectorsfloor = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
+			this.groupBox3.SuspendLayout();
+			this.groupBox4.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// apply
 			// 
 			this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.apply.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.apply.Location = new System.Drawing.Point(247, 174);
+			this.apply.Location = new System.Drawing.Point(260, 174);
 			this.apply.Name = "apply";
 			this.apply.Size = new System.Drawing.Size(112, 25);
 			this.apply.TabIndex = 0;
@@ -63,7 +68,7 @@
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(367, 174);
+			this.cancel.Location = new System.Drawing.Point(380, 174);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(112, 25);
 			this.cancel.TabIndex = 1;
@@ -73,7 +78,6 @@
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.planetype);
 			this.groupBox1.Controls.Add(this.label3);
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this.label1);
@@ -86,18 +90,6 @@
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Position";
-			// 
-			// planetype
-			// 
-			this.planetype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.planetype.FormattingEnabled = true;
-			this.planetype.Items.AddRange(new object[] {
-            "Ceiling",
-            "Floor"});
-			this.planetype.Location = new System.Drawing.Point(29, 113);
-			this.planetype.Name = "planetype";
-			this.planetype.Size = new System.Drawing.Size(95, 22);
-			this.planetype.TabIndex = 1;
 			// 
 			// label3
 			// 
@@ -202,37 +194,81 @@
 			this.checkedListBoxSectors.Size = new System.Drawing.Size(100, 124);
 			this.checkedListBoxSectors.TabIndex = 1;
 			// 
-			// addselectedsectors
-			// 
-			this.addselectedsectors.AutoSize = true;
-			this.addselectedsectors.Location = new System.Drawing.Point(293, 15);
-			this.addselectedsectors.Name = "addselectedsectors";
-			this.addselectedsectors.Size = new System.Drawing.Size(130, 18);
-			this.addselectedsectors.TabIndex = 3;
-			this.addselectedsectors.Text = "Add selected sectors";
-			this.addselectedsectors.UseVisualStyleBackColor = true;
-			this.addselectedsectors.CheckedChanged += new System.EventHandler(this.addselectedsectors_CheckedChanged);
-			// 
-			// removeselectedsectors
-			// 
-			this.removeselectedsectors.AutoSize = true;
-			this.removeselectedsectors.Location = new System.Drawing.Point(293, 39);
-			this.removeselectedsectors.Name = "removeselectedsectors";
-			this.removeselectedsectors.Size = new System.Drawing.Size(149, 18);
-			this.removeselectedsectors.TabIndex = 4;
-			this.removeselectedsectors.Text = "Remove selected sectors";
-			this.removeselectedsectors.UseVisualStyleBackColor = true;
-			this.removeselectedsectors.CheckedChanged += new System.EventHandler(this.removeselectedsectors_CheckedChanged);
-			// 
 			// reposition
 			// 
 			this.reposition.AutoSize = true;
-			this.reposition.Location = new System.Drawing.Point(293, 64);
+			this.reposition.Location = new System.Drawing.Point(18, 178);
 			this.reposition.Name = "reposition";
 			this.reposition.Size = new System.Drawing.Size(187, 18);
 			this.reposition.TabIndex = 5;
 			this.reposition.Text = "Reposition after dragging sectors";
 			this.reposition.UseVisualStyleBackColor = true;
+			// 
+			// groupBox3
+			// 
+			this.groupBox3.Controls.Add(this.removeselectedsectorsceiling);
+			this.groupBox3.Controls.Add(this.addselectedsectorsceiling);
+			this.groupBox3.Location = new System.Drawing.Point(297, 13);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(195, 71);
+			this.groupBox3.TabIndex = 8;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "Ceiling";
+			// 
+			// removeselectedsectorsceiling
+			// 
+			this.removeselectedsectorsceiling.AutoSize = true;
+			this.removeselectedsectorsceiling.Location = new System.Drawing.Point(6, 43);
+			this.removeselectedsectorsceiling.Name = "removeselectedsectorsceiling";
+			this.removeselectedsectorsceiling.Size = new System.Drawing.Size(174, 18);
+			this.removeselectedsectorsceiling.TabIndex = 6;
+			this.removeselectedsectorsceiling.Text = "Remove from selected sectors";
+			this.removeselectedsectorsceiling.UseVisualStyleBackColor = true;
+			this.removeselectedsectorsceiling.CheckedChanged += new System.EventHandler(this.removeselectedsectorsceiling_CheckedChanged);
+			// 
+			// addselectedsectorsceiling
+			// 
+			this.addselectedsectorsceiling.AutoSize = true;
+			this.addselectedsectorsceiling.Location = new System.Drawing.Point(6, 19);
+			this.addselectedsectorsceiling.Name = "addselectedsectorsceiling";
+			this.addselectedsectorsceiling.Size = new System.Drawing.Size(150, 18);
+			this.addselectedsectorsceiling.TabIndex = 5;
+			this.addselectedsectorsceiling.Text = "Apply to selected sectors";
+			this.addselectedsectorsceiling.UseVisualStyleBackColor = true;
+			this.addselectedsectorsceiling.CheckedChanged += new System.EventHandler(this.addselectedsectorsceiling_CheckedChanged);
+			// 
+			// groupBox4
+			// 
+			this.groupBox4.Controls.Add(this.removeselectedsectorsfloor);
+			this.groupBox4.Controls.Add(this.addselectedsectorsfloor);
+			this.groupBox4.Location = new System.Drawing.Point(297, 90);
+			this.groupBox4.Name = "groupBox4";
+			this.groupBox4.Size = new System.Drawing.Size(195, 72);
+			this.groupBox4.TabIndex = 9;
+			this.groupBox4.TabStop = false;
+			this.groupBox4.Text = "Floor";
+			// 
+			// removeselectedsectorsfloor
+			// 
+			this.removeselectedsectorsfloor.AutoSize = true;
+			this.removeselectedsectorsfloor.Location = new System.Drawing.Point(6, 43);
+			this.removeselectedsectorsfloor.Name = "removeselectedsectorsfloor";
+			this.removeselectedsectorsfloor.Size = new System.Drawing.Size(174, 18);
+			this.removeselectedsectorsfloor.TabIndex = 9;
+			this.removeselectedsectorsfloor.Text = "Remove from selected sectors";
+			this.removeselectedsectorsfloor.UseVisualStyleBackColor = true;
+			this.removeselectedsectorsfloor.CheckedChanged += new System.EventHandler(this.removeselectedsectorsfloor_CheckedChanged);
+			// 
+			// addselectedsectorsfloor
+			// 
+			this.addselectedsectorsfloor.AutoSize = true;
+			this.addselectedsectorsfloor.Location = new System.Drawing.Point(6, 19);
+			this.addselectedsectorsfloor.Name = "addselectedsectorsfloor";
+			this.addselectedsectorsfloor.Size = new System.Drawing.Size(150, 18);
+			this.addselectedsectorsfloor.TabIndex = 8;
+			this.addselectedsectorsfloor.Text = "Apply to selected sectors";
+			this.addselectedsectorsfloor.UseVisualStyleBackColor = true;
+			this.addselectedsectorsfloor.CheckedChanged += new System.EventHandler(this.addselectedsectorsfloor_CheckedChanged);
 			// 
 			// SlopeVertexEditForm
 			// 
@@ -240,10 +276,10 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancel;
-			this.ClientSize = new System.Drawing.Size(491, 211);
+			this.ClientSize = new System.Drawing.Size(504, 211);
+			this.Controls.Add(this.groupBox4);
+			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.reposition);
-			this.Controls.Add(this.removeselectedsectors);
-			this.Controls.Add(this.addselectedsectors);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.cancel);
@@ -257,6 +293,10 @@
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
+			this.groupBox4.ResumeLayout(false);
+			this.groupBox4.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -267,7 +307,6 @@
 		private System.Windows.Forms.Button apply;
 		private System.Windows.Forms.Button cancel;
 		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.ComboBox planetype;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label1;
@@ -276,8 +315,12 @@
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox positionx;
 		private System.Windows.Forms.GroupBox groupBox2;
 		public System.Windows.Forms.CheckedListBox checkedListBoxSectors;
-		private System.Windows.Forms.CheckBox addselectedsectors;
-		private System.Windows.Forms.CheckBox removeselectedsectors;
 		private System.Windows.Forms.CheckBox reposition;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.CheckBox removeselectedsectorsceiling;
+		private System.Windows.Forms.CheckBox addselectedsectorsceiling;
+		private System.Windows.Forms.GroupBox groupBox4;
+		private System.Windows.Forms.CheckBox removeselectedsectorsfloor;
+		private System.Windows.Forms.CheckBox addselectedsectorsfloor;
 	}
 }

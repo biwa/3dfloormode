@@ -42,11 +42,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			positiony.Text = fv.Pos.y.ToString();
 			positionz.Text = fv.Z.ToString();
 
-			if (fsvg.Floor)
-				planetype.Text = "Floor";
-			else
-				planetype.Text = "Ceiling";
-
 			foreach (Sector s in fsvg.Sectors)
 				if (!sectors.Contains(s))
 					sectors.Add(s);
@@ -77,12 +72,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					if (sv.Z.ToString() != positionz.Text)
 						positionz.Text = "";
-
-					if ((svg.Floor != fsvg.Floor || svg.Ceiling != fsvg.Ceiling) && (string)planetype.Items[0] != "")
-					{
-						planetype.Items.Insert(0, "");
-						planetype.SelectedIndex = 0;
-					}
 
 					if (svg.Reposition != reposition.Checked)
 					{
@@ -118,13 +107,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (General.Map.Map.SelectedSectorsCount == 0)
 			{
-				addselectedsectors.Enabled = false;
-				removeselectedsectors.Enabled = false;
+				addselectedsectorsceiling.Enabled = false;
+				removeselectedsectorsceiling.Enabled = false;
+				addselectedsectorsfloor.Enabled = false;
+				removeselectedsectorsfloor.Enabled = false;
 			}
 			else
 			{
-				addselectedsectors.Enabled = canaddsectors;
-				removeselectedsectors.Enabled = canremovesectors;
+				addselectedsectorsceiling.Enabled = canaddsectors;
+				removeselectedsectorsceiling.Enabled = canremovesectors;
+				addselectedsectorsfloor.Enabled = canaddsectors;
+				removeselectedsectorsfloor.Enabled = canremovesectors;
 			}
 		}
 
@@ -145,12 +138,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				sv.Z = positionz.GetResultFloat(sv.Z);
 
-				if (planetype.Text != "")
-				{
-					svg.Floor = planetype.Text == "Floor" ? true : false;
-					svg.Ceiling = !svg.Floor;
-				}
-
 				if (!groups.Contains(svg))
 					groups.Add(svg);
 			}
@@ -160,25 +147,32 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (reposition.CheckState != CheckState.Indeterminate)
 					svg.Reposition = reposition.Checked;
 
-				if (addselectedsectors.Checked)
+				// Ceiling
+				if (addselectedsectorsceiling.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
-						if (!svg.Sectors.Contains(s))
-							svg.Sectors.Add(s);
+						svg.AddSector(s, PlaneType.Ceiling);
 
-				if (removeselectedsectors.Checked)
+				if (removeselectedsectorsceiling.Checked)
 					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
 						if (svg.Sectors.Contains(s))
-						{
-							svg.RemoveFromSector(s);
-							svg.Sectors.Remove(s);
-						}
+							svg.RemoveSector(s, PlaneType.Ceiling);
+
+				// Floor
+				if (addselectedsectorsfloor.Checked)
+					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
+						svg.AddSector(s, PlaneType.Floor);
+
+				if (removeselectedsectorsfloor.Checked)
+					foreach (Sector s in General.Map.Map.GetSelectedSectors(true).ToList())
+						if (svg.Sectors.Contains(s))
+							svg.RemoveSector(s, PlaneType.Floor);
 
 				foreach (Sector s in checkedListBoxSectors.CheckedItems)
 				{
 					if (svg.Sectors.Contains(s))
 					{
-						svg.RemoveFromSector(s);
-						svg.Sectors.Remove(s);
+						svg.RemoveSector(s, PlaneType.Floor);
+						svg.RemoveSector(s, PlaneType.Ceiling);
 					}
 				}
 					
@@ -195,20 +189,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			this.DialogResult = DialogResult.Cancel;
 		}
 
-		private void addselectedsectors_CheckedChanged(object sender, EventArgs e)
+		private void addselectedsectorsceiling_CheckedChanged(object sender, EventArgs e)
 		{
 			// Adding and removing selected sectors at the same time doesn't make sense,
 			// so make sure only one of the checkboxes is checked at most
-			if (addselectedsectors.Checked)
-				removeselectedsectors.Checked = false;
+			if (addselectedsectorsceiling.Checked)
+				removeselectedsectorsceiling.Checked = false;
 		}
 
-		private void removeselectedsectors_CheckedChanged(object sender, EventArgs e)
+		private void removeselectedsectorsceiling_CheckedChanged(object sender, EventArgs e)
 		{
 			// Adding and removing selected sectors at the same time doesn't make sense,
 			// so make sure only one of the checkboxes is checked at most
-			if (removeselectedsectors.Checked)
-				addselectedsectors.Checked = false;
+			if (removeselectedsectorsceiling.Checked)
+				addselectedsectorsceiling.Checked = false;
+		}
+
+		private void addselectedsectorsfloor_CheckedChanged(object sender, EventArgs e)
+		{
+			// Adding and removing selected sectors at the same time doesn't make sense,
+			// so make sure only one of the checkboxes is checked at most
+			if (addselectedsectorsfloor.Checked)
+				removeselectedsectorsfloor.Checked = false;
+		}
+
+		private void removeselectedsectorsfloor_CheckedChanged(object sender, EventArgs e)
+		{
+			// Adding and removing selected sectors at the same time doesn't make sense,
+			// so make sure only one of the checkboxes is checked at most
+			if (removeselectedsectorsfloor.Checked)
+				addselectedsectorsfloor.Checked = false;
 		}
 	}
 }

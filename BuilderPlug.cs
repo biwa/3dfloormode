@@ -58,6 +58,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	// Make sure the class is public, because only public classes can be seen
 	// by the core.
 	//
+	[Flags]
+	public enum PlaneType
+	{
+		Floor = 1,
+		Ceiling = 2,
+	}
 
 	public class BuilderPlug : Plug
 	{
@@ -74,6 +80,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private float stitchrange;
 		private Sector dummysector;
 		private bool updateafteraction;
+		private string updateafteractionname;
 
 		#endregion
 
@@ -245,62 +252,99 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				"buildermodes_lowersector1", "builder_visualedit", "builder_classicedit"
 			};
 
+			if (General.Editing.Mode is SlopeMode)
+				return;
+
 			if (monitoractions.Contains(action.Name))
+			{
 				updateafteraction = true;
-			else
-				updateafteraction = false;
+				updateafteractionname = action.Name;
+			}
+			//else
+			//	updateafteraction = false;
 		}
 
 		public override void OnActionEnd(CodeImp.DoomBuilder.Actions.Action action)
 		{
 			base.OnActionEnd(action);
 
-			if (!updateafteraction)
+			Debug.WriteLine("SLOPE: OnActionEnd (" + action.Name + ")");
+
+			if (!updateafteraction && action.Name != updateafteractionname)
 				return;
 
-			List<SlopeVertexGroup> updatesvgs = new List<SlopeVertexGroup>();
+			updateafteraction = false;
+
+			Debug.WriteLine("SLOPE: Acting for OnActionEnd (" + action.Name + ")");
+
+			Dictionary<SlopeVertexGroup, int> updatesvgs = new Dictionary<SlopeVertexGroup, int>();
 
 			// Find SVGs that needs to be updated, and change the SV z positions
 			foreach (SlopeVertexGroup svg in slopevertexgroups)
 			{
-				int diff = 0;
 				bool update = false;
+				Dictionary<int, List<Sector>> newheights = new Dictionary<int, List<Sector>>();
 
 				foreach (Sector s in svg.Sectors)
 				{
-					if (svg.Floor)
+					if ((svg.SectorPlanes[s] & PlaneType.Floor) == PlaneType.Floor)
 					{
-						if (svg.Height != s.FloorHeight)
+						if (s.Fields.ContainsKey("user_floorplane_id") && s.Fields.GetValue("user_floorplane_id", -1) == svg.Id)
 						{
-							diff = s.FloorHeight - svg.Height;
-							update = true;
-							break;
+							if (svg.Height != s.FloorHeight)
+							{
+								int diff = s.FloorHeight - svg.Height;
+
+								if (!newheights.ContainsKey(diff))
+									newheights.Add(diff, new List<Sector>() { s });
+								else
+									newheights[diff].Add(s);
+
+								update = true;
+								//break;
+							}
 						}
 					}
 					
-					if(svg.Ceiling)
+					if ((svg.SectorPlanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
 					{
-						if (svg.Height != s.CeilHeight)
+						if (s.Fields.ContainsKey("user_ceilingplane_id") && s.Fields.GetValue("user_ceilingplane_id", -1) == svg.Id)
 						{
-							diff = s.CeilHeight - svg.Height;
-							update = true;
-							break;
+							if (svg.Height != s.CeilHeight)
+							{
+								int diff = s.CeilHeight - svg.Height;
+
+								if (!newheights.ContainsKey(diff))
+									newheights.Add(diff, new List<Sector>() { s });
+								else
+									newheights[diff].Add(s);
+
+								update = true;
+								//break;
+							}
 						}
 					}
 				}
 
+				// Debug.WriteLine(String.Format("floordiff: {0} / ceilingdiff: {1} / height: {2}", floordiff, ceilingdiff, svg.Height));
+
 				if (update)
 				{
-					foreach (SlopeVertex sv in svg.Vertices)
-						sv.Z += diff;
-
-					updatesvgs.Add(svg);
+					if (newheights.Count > 1)
+						Debug.WriteLine(String.Format("Slope: multiple new heights, doing nothing. Your map is fucked!"));
+					else if (!updatesvgs.ContainsKey(svg))
+							updatesvgs.Add(svg, newheights.First().Key);
 				}
 			}
 
 			// Update the slopes, and also update the view if in visual mode
-			foreach (SlopeVertexGroup svg in updatesvgs)
+			foreach (SlopeVertexGroup svg in updatesvgs.Keys)
 			{
+				foreach (SlopeVertex sv in svg.Vertices)
+					sv.Z += updatesvgs[svg];
+
+				svg.ComputeHeight();
+
 				foreach (Sector s in svg.Sectors)
 					UpdateSlopes(s);
 
@@ -313,6 +357,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					foreach (Sector s in svg.Sectors)
 					{
 						sectors.Add(s);
+
+						// Get neighbouring sectors and add them to the list
+						foreach (Sidedef sd in s.Sidedefs)
+						{
+							if (sd.Other != null && !sectors.Contains(sd.Other.Sector))
+								sectors.Add(sd.Other.Sector);
+						}
+					}
+
+					foreach (Sector s in svg.TaggedSectors)
+					{
+						if(!sectors.Contains(s))
+							sectors.Add(s);
 
 						// Get neighbouring sectors and add them to the list
 						foreach (Sidedef sd in s.Sidedefs)
@@ -450,6 +507,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (SlopeVertexGroup svg in slopevertexgroups)
 			{
 				svg.FindSectors();
+				svg.ComputeHeight();
 			}
 		}
 
@@ -482,8 +540,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void UpdateSlopes()
 		{
-			foreach (Sector s in General.Map.Map.Sectors)
-				UpdateSlopes(s);
+			// foreach (Sector s in General.Map.Map.Sectors)
+			//	UpdateSlopes(s);
+
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				foreach (Sector s in svg.Sectors)
+				{
+					if (s != null && !s.IsDisposed)
+						UpdateSlopes(s);
+				}
+			}
+			
 		}
 
 		public void UpdateSlopes(Sector s)
@@ -513,19 +581,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				List<Vector3D> sp = new List<Vector3D>();
 				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
-				if (fn == "user_floorplane_id")
+				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
-					for (int i = 0; i < svg.Vertices.Count; i++)
-					{
-						sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
-					}
-				}
-				else
-				{
-					for (int i = 0; i < svg.Vertices.Count; i++)
-					{
-						sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
-					}
+					sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
 				}
 
 				if (svg.Vertices.Count == 2)
@@ -545,7 +603,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					s.FloorSlope = new Vector3D(p.a, p.b, p.c);
 					s.FloorSlopeOffset = p.d;
-					s.FloorHeight = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
+					s.FloorHeight = svg.Height;
 					svg.Height = s.FloorHeight;
 				}
 				else
@@ -554,26 +612,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					s.CeilSlope = new Vector3D(p.a, p.b, p.c);
 					s.CeilSlopeOffset = p.d;
-					s.CeilHeight = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
+					s.CeilHeight = svg.Height;
 					svg.Height = s.CeilHeight;
 				}
 			}
-		}
-
-		private Vector2D GetCircumcenter(List<Vector3D> points)
-		{
-			float u_ray;
-
-			Line2D line1 = new Line2D(points[0], points[1]);
-			Line2D line2 = new Line2D(points[2], points[0]);
-
-			// Perpendicular bisectors
-			Line2D bisector1 = new Line2D(line1.GetCoordinatesAt(0.5f), line1.GetCoordinatesAt(0.5f) + line1.GetPerpendicular());
-			Line2D bisector2 = new Line2D(line2.GetCoordinatesAt(0.5f), line2.GetCoordinatesAt(0.5f) + line2.GetPerpendicular());
-
-			bisector1.GetIntersection(bisector2, out u_ray);
-
-			return bisector1.GetCoordinatesAt(u_ray);
 		}
 
 		public static List<ThreeDFloor> GetThreeDFloors(List<Sector> sectors)
@@ -767,7 +809,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					return svg;
 			}
 
-			throw new Exception("SlopeVertex does not belong to a SlopeVertexGroup");
+			return null;
 		}
 
 		public SlopeVertexGroup GetSlopeVertexGroup(int id)
@@ -778,7 +820,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					return svg;
 			}
 
-			throw new Exception("SlopeVertexGroup with id " + id.ToString() + " does not exist");
+			return null;
+		}
+
+		public SlopeVertexGroup GetSlopeVertexGroup(Sector s)
+		{
+			foreach (SlopeVertexGroup svg in slopevertexgroups)
+			{
+				if (svg.Sectors.Contains(s))
+					return svg;
+			}
+
+			return null;
 		}
 
 		#endregion
