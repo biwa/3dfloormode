@@ -630,7 +630,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			foreach (Linedef ld in General.Map.Map.Linedefs)
 				if (ld.Action == 160)
 					foreach (Sector s in sectors)
-						if (s != null && ld.Args[0] == s.Tag && !tmpsectors.Contains(ld.Front.Sector))
+						if (s != null && s.Tags.Contains(ld.Args[0]) && !tmpsectors.Contains(ld.Front.Sector))
 							tmpsectors.Add(ld.Front.Sector);
 							
 			foreach(Sector s in tmpsectors)
@@ -704,6 +704,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// and a list of all 3D floors, that should be applied to to this sector, as value
 			foreach (Sector s in selectedSectors)
 			{
+				// Multiple tags is actually a UDMF field, so make sure it gets recorded for undo/redo
+				s.Fields.BeforeFieldsChange();
+
 				if (!sectorsToThreeDFloors.ContainsKey(s))
 					sectorsToThreeDFloors.Add(s, new List<ThreeDFloor>());
 
@@ -742,38 +745,68 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Bind the 3D floors to the selected sectors
 			foreach (List<Sector> sectors in sectorGroups)
 			{
-				int newtag;
+				if (General.Map.UDMF == true)
+				{
+					foreach (Sector s in sectors)
+					{
+						// Remove all tags associated to 3D floors from the sector...
+						foreach (ThreeDFloor tdf in threedfloors)
+						{
+							if (s.Tags.Contains(tdf.UDMFTag))
+								s.Tags.Remove(tdf.UDMFTag);
+						}
 
-				// Just use sectors.First(), all elements in sectors have the same 3D floors anyway
-				// If there are no 3D floors associated set the tag to 0
-				if (sectorsToThreeDFloors[sectors.First()].Count == 0)
-					newtag = 0;
+						// ... and re-add the ones that are still associated
+						foreach (ThreeDFloor tdf in sectorsToThreeDFloors[s])
+						{
+							if (!s.Tags.Contains(tdf.UDMFTag))
+								s.Tags.Add(tdf.UDMFTag);
+						}
+
+						// Remove tag 0 if there are other tags present, or add tag 0 if the sector has no tags
+						if (s.Tags.Count > 1 && s.Tags.Contains(0))
+							s.Tags.Remove(0);
+
+						if(s.Tags.Count == 0)
+							s.Tags.Add(0);
+
+					}
+				}
 				else
+				{
+					int newtag;
+
+					// Just use sectors.First(), all elements in sectors have the same 3D floors anyway
+					// If there are no 3D floors associated set the tag to 0
+					if (sectorsToThreeDFloors[sectors.First()].Count == 0)
+						newtag = 0;
+					else
+						try
+						{
+							newtag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag();
+						}
+						catch (Exception e)
+						{
+							MessageBox.Show(e.Message + "\nPlease increase the custom tag range.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+							General.Map.UndoRedo.WithdrawUndo();
+							return;
+						}
+
+
+					foreach (Sector s in sectors)
+						s.Tag = newtag;
+
 					try
 					{
-						newtag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag();
+						foreach (ThreeDFloor tdf in sectorsToThreeDFloors[sectors.First()])
+							tdf.BindTag(newtag);
 					}
 					catch (Exception e)
 					{
-						MessageBox.Show(e.Message + "\nPlease increase the custom tag range.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						General.Map.UndoRedo.WithdrawUndo();
 						return;
 					}
-
-
-				foreach (Sector s in sectors)
-					s.Tag = newtag;
-
-				try
-				{
-					foreach (ThreeDFloor tdf in sectorsToThreeDFloors[sectors.First()])
-						tdf.BindTag(newtag);
-				}
-				catch (Exception e)
-				{
-					MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-					General.Map.UndoRedo.WithdrawUndo();
-					return;
 				}
 			}
 
@@ -844,7 +877,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			List<Sector> sectors = new List<Sector>();
 
 			foreach (Sector s in ms.Sectors)
-				if (s.Tag == tag)
+				if (s.Tags.Contains(tag))
 					sectors.Add(s);
 
 			return sectors;

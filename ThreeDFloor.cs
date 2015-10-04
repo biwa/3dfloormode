@@ -85,6 +85,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private SlopeInfo bottomslope;
 		private bool topsloped;
 		private bool bottomsloped;
+		private int udmftag;
 
 		public static Rectangle controlsectorarea = new Rectangle(-512, 512, 512, -512);
 
@@ -106,6 +107,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public bool BottomSloped { get { return bottomsloped; } set { bottomsloped = value; } }
 		public SlopeInfo TopSlope { get { return topslope; } set { topslope = value; } }
 		public SlopeInfo BottomSlope { get { return bottomslope; } set { bottomslope = value; } }
+		public int UDMFTag { get { return udmftag; } set { udmftag = value; } }
 		
 		public ThreeDFloor()
 		{
@@ -142,6 +144,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (sd.Line.Action == 160)
 				{
 					bordertexture = sd.MiddleTexture;
+					udmftag = sd.Line.Args[0];
 					type = sd.Line.Args[1];
 					flags = sd.Line.Args[2];
 					alpha = sd.Line.Args[3];
@@ -361,6 +364,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				newsectors[0].Fields.Add("tdfh_managed", new UniValue(UniversalType.Boolean, true));
 
 			sector = newsectors[0];
+
+			// With multiple tag support in UDMF only one tag is needed, so bind it right away
+			if (General.Map.UDMF == true)
+			{
+				if(isnew)
+					udmftag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag();
+
+				BindTag(udmftag);
+			}
 
 			if (topsloped || bottomsloped)
 			{
