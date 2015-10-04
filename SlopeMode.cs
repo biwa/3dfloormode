@@ -150,8 +150,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			// Update overlay surfaces, so that selected sectors are drawn correctly
 			updateOverlaySurfaces();
-
-			UpdateSlopeObjects();
 		}
 
 		// Mode disengages
@@ -197,39 +195,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
             UpdateOverlay();
 
 			renderer.Present();
-		}
-
-		private void UpdateSlopeObjects()
-		{
-			slopeobjects = new List<SlopeObject>();
-
-			foreach (ThreeDFloor tdf in threedfloors)
-			{
-				if (!tdf.TopSloped || !tdf.BottomSloped)
-					continue;
-
-				SlopeObject so = new SlopeObject();
-				so.ThreeDFloor = tdf;
-				so.Position = tdf.BottomSlope.V1;
-				so.V = 1;
-				slopeobjects.Add(so);
-
-				so = new SlopeObject();
-				so.ThreeDFloor = tdf;
-				so.Position = tdf.BottomSlope.V2;
-				so.V = 2;
-				slopeobjects.Add(so);
-
-				if (!tdf.BottomSlope.IsSimple)
-				{
-					so = new SlopeObject();
-					so.ThreeDFloor = tdf;
-					so.Position = tdf.BottomSlope.V3;
-					so.V = 3;
-					slopeobjects.Add(so);
-				}
-
-			}
 		}
 
 		private void SetupLabels()

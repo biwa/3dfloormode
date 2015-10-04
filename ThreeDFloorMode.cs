@@ -202,29 +202,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				BuilderPlug.Me.ControlSectorArea.Draw(renderer, csahighlight);
 
-				List<Line3D> arrows = new List<Line3D>();
-
-				foreach (ThreeDFloor tdf in threedfloors)
-				{
-                    if (!tdf.TopSloped || !tdf.BottomSloped)
-                        continue;
-
-					Vector3D v1 = new Vector3D(tdf.TopSlope.V1);
-					Vector3D v2 = new Vector3D(tdf.TopSlope.V2);
-					Vector3D v3 = new Vector3D(tdf.TopSlope.V3);
-					byte a = 64;
-
-					if (tdf.TaggedSectors.Contains(highlighted))
-						a = 192;
-
-					arrows.Add(new Line3D(v1, v2, new PixelColor(a, 255, 255, 255), true));
-					
-					if(!tdf.TopSlope.IsSimple)
-						arrows.Add(new Line3D(v1, v3, new PixelColor(a, 255, 255, 255), true));
-				}
-
-				renderer.RenderArrows(arrows);
-
 				renderer.Finish();
 			}
 		}

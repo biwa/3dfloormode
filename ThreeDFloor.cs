@@ -33,38 +33,6 @@ using CodeImp.DoomBuilder.Data;
 
 namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
-	public class SlopeInfo
-	{
-		private int heightv1;
-		private int heightv2;
-		private int heightv3;
-		private Vector3D v1;
-		private Vector3D v2;
-		private Vector3D v3;
-		private bool issimple;
-
-		public int HeightV1 { get { return heightv1; } set { heightv1 = value; } }
-		public int HeightV2 { get { return heightv2; } set { heightv2 = value; } }
-		public int HeightV3 { get { return heightv3; } set { heightv3 = value; } }
-		public Vector3D V1 { get { return v1; } set { v1 = value; } }
-		public Vector3D V2 { get { return v2; } set { v2 = value; } }
-		public Vector3D V3 { get { return v3; } set { v3 = value; } }
-		public bool IsSimple { get { return issimple; } set { issimple = value; } }
-
-		public void Update()
-		{
-			v1.z = heightv1;
-			v2.z = heightv2;
-
-			if (!issimple)
-			{
-				v3 = v1 + new Vector3D(new Line2D(v1, v2).GetPerpendicular());
-				v3.z = heightv3;
-
-			}
-		}
-	}
-
 	public class ThreeDFloor
 	{
 		private Sector sector;
@@ -81,10 +49,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int bottomheight;
 		private bool isnew;
 		private bool rebuild;
-		private SlopeInfo topslope;
-		private SlopeInfo bottomslope;
-		private bool topsloped;
-		private bool bottomsloped;
 		private int udmftag;
 
 		public static Rectangle controlsectorarea = new Rectangle(-512, 512, 512, -512);
@@ -103,10 +67,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public int BottomHeight { get { return bottomheight; } set { bottomheight = value; } }
 		public bool IsNew { get { return isnew; } set { isnew = value; } }
 		public bool Rebuild { get { return rebuild; } set { rebuild = value; } }
-		public bool TopSloped { get { return topsloped; } set { topsloped = value; } }
-		public bool BottomSloped { get { return bottomsloped; } set { bottomsloped = value; } }
-		public SlopeInfo TopSlope { get { return topslope; } set { topslope = value; } }
-		public SlopeInfo BottomSlope { get { return bottomslope; } set { bottomslope = value; } }
 		public int UDMFTag { get { return udmftag; } set { udmftag = value; } }
 		
 		public ThreeDFloor()
@@ -121,9 +81,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			type = 1;
 			flags = 0;
 			
-			topslope = new SlopeInfo();
-			bottomslope = new SlopeInfo();
-
 			alpha = 255;
 		}
 
@@ -156,52 +113,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					}
 				}
 			}
-
-            bottomslope = new SlopeInfo();
-			topslope = new SlopeInfo();
-
-			topsloped = sector.Fields.GetValue("tdfh_slope_top", false);
-			bottomsloped = sector.Fields.GetValue("tdfh_slope_bottom", false);
-
-			topslope.IsSimple = sector.Fields.GetValue("tdfh_slope_top_issimple", true);
-			bottomslope.IsSimple = sector.Fields.GetValue("tdfh_slope_bottom_issimple", true);
-
-			topslope.V1 = new Vector3D(
-				sector.Fields.GetValue("tdfh_slope_top_v1_x", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_top_v1_y", 0.0f),
-				0
-			);
-
-			topslope.V2 = new Vector3D(
-				sector.Fields.GetValue("tdfh_slope_top_v2_x", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_top_v2_y", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_top_v2_z", 0.0f)
-			);
-
-			topslope.V3 = new Vector3D(
-				sector.Fields.GetValue("tdfh_slope_top_v3_x", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_top_v3_y", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_top_v3_z", 0.0f)
-			);
-
-			bottomslope.V1 = new Vector3D(
-				sector.Fields.GetValue("tdfh_slope_bottom_v1_x", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_bottom_v1_y", 0.0f),
-				0
-			);
-
-			bottomslope.V2 = new Vector3D(
-				sector.Fields.GetValue("tdfh_slope_bottom_v2_x", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_bottom_v2_y", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_bottom_v2_z", 0.0f)
-			);
-
-			bottomslope.V3 = new Vector3D(
-				sector.Fields.GetValue("tdfh_slope_bottom_v3_x", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_bottom_v3_y", 0.0f),
-				sector.Fields.GetValue("tdfh_slope_bottom_v3_z", 0.0f)
-			);
-
 		}
 
 		public void BindTag(int tag)
@@ -264,9 +175,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sector.SetCeilTexture(topflat);
 			sector.SetFloorTexture(bottomflat);
 
-			topslope.Update();
-			bottomslope.Update();
-
 			foreach (Sidedef sd in sector.Sidedefs)
 			{
 				sd.SetTextureMid(bordertexture);
@@ -313,14 +221,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					}
 				}
 			}
-
-			topslope.V1 = ld1.Line.GetCoordinatesAt(0.5f);
-			topslope.V2 = ld2.Line.GetCoordinatesAt(0.5f);
-			topslope.Update();
-
-			bottomslope.V1 = ld1.Line.GetCoordinatesAt(0.5f);
-			bottomslope.V2 = ld2.Line.GetCoordinatesAt(0.5f);
-			bottomslope.Update();
 		}
 
 		public bool CreateGeometry()
@@ -373,63 +273,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				BindTag(udmftag);
 			}
-
-			if (topsloped || bottomsloped)
-			{
-				topslope.Update();
-				bottomslope.Update();
-
-				// Ceiling slope
-				if (topsloped)
-				{
-					Plane p = new Plane(topslope.V1, topslope.V2, topslope.V3, false);
-
-					sector.Fields.Add("ceilingplane_a", new UniValue(UniversalType.Float, (float)p.a));
-					sector.Fields.Add("ceilingplane_b", new UniValue(UniversalType.Float, (float)p.b));
-					sector.Fields.Add("ceilingplane_c", new UniValue(UniversalType.Float, (float)p.c));
-					sector.Fields.Add("ceilingplane_d", new UniValue(UniversalType.Float, (float)p.d));
-
-					sector.Fields.Add("tdfh_slope_top", new UniValue(UniversalType.Boolean, true));
-				}
-
-				// Floor slope
-				if (bottomsloped)
-				{
-					Plane p = new Plane(bottomslope.V1, bottomslope.V2, bottomslope.V3, false);
-
-					sector.Fields.Add("floorplane_a", new UniValue(UniversalType.Float, (float)p.a));
-					sector.Fields.Add("floorplane_b", new UniValue(UniversalType.Float, (float)p.b));
-					sector.Fields.Add("floorplane_c", new UniValue(UniversalType.Float, (float)p.c));
-					sector.Fields.Add("floorplane_d", new UniValue(UniversalType.Float, (float)p.d));
-
-					sector.Fields.Add("tdfh_slope_bottom", new UniValue(UniversalType.Boolean, true));
-
-				}
-
-				sector.Fields.Add("tdfh_slope_top_v1_x", new UniValue(UniversalType.Float, (float)topslope.V1.x));
-				sector.Fields.Add("tdfh_slope_top_v1_y", new UniValue(UniversalType.Float, (float)topslope.V1.y));
-
-				sector.Fields.Add("tdfh_slope_top_v2_x", new UniValue(UniversalType.Float, (float)topslope.V2.x));
-				sector.Fields.Add("tdfh_slope_top_v2_y", new UniValue(UniversalType.Float, (float)topslope.V2.y));
-				sector.Fields.Add("tdfh_slope_top_v2_z", new UniValue(UniversalType.Float, (float)topslope.V2.z));
-
-				sector.Fields.Add("tdfh_slope_top_v3_x", new UniValue(UniversalType.Float, (float)topslope.V3.x));
-				sector.Fields.Add("tdfh_slope_top_v3_y", new UniValue(UniversalType.Float, (float)topslope.V3.y));
-				sector.Fields.Add("tdfh_slope_top_v3_z", new UniValue(UniversalType.Float, (float)topslope.V3.z));
-
-				sector.Fields.Add("tdfh_slope_bottom_v1_x", new UniValue(UniversalType.Float, (float)bottomslope.V1.x));
-				sector.Fields.Add("tdfh_slope_bottom_v1_y", new UniValue(UniversalType.Float, (float)bottomslope.V1.y));
-
-				sector.Fields.Add("tdfh_slope_bottom_v2_x", new UniValue(UniversalType.Float, (float)bottomslope.V2.x));
-				sector.Fields.Add("tdfh_slope_bottom_v2_y", new UniValue(UniversalType.Float, (float)bottomslope.V2.y));
-				sector.Fields.Add("tdfh_slope_bottom_v2_z", new UniValue(UniversalType.Float, (float)bottomslope.V2.z));
-
-				sector.Fields.Add("tdfh_slope_bottom_v3_x", new UniValue(UniversalType.Float, (float)bottomslope.V3.x));
-				sector.Fields.Add("tdfh_slope_bottom_v3_y", new UniValue(UniversalType.Float, (float)bottomslope.V3.y));
-				sector.Fields.Add("tdfh_slope_bottom_v3_z", new UniValue(UniversalType.Float, (float)bottomslope.V3.z));
-
-			}
-
 
 			// Snap to map format accuracy
 			General.Map.Map.SnapAllToAccuracy();
