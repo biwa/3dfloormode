@@ -900,7 +900,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						newsv.Add(new SlopeVertex(sv.Pos, sv.Z));
 
 					// Use -1 for id, since a real id will be assigned when pasting
-					copyslopevertexgroups.Add(new SlopeVertexGroup(-1, newsv, svg.Floor, svg.Ceiling));
+					copyslopevertexgroups.Add(new SlopeVertexGroup(-1, newsv));
 				}
 			}
 
@@ -946,7 +946,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					newsv.Add(new SlopeVertex(new Vector2D(sv.Pos.x - diff.x, sv.Pos.y - diff.y), sv.Z));
 				}
 
-				SlopeVertexGroup newsvg = BuilderPlug.Me.AddSlopeVertexGroup(newsv, out id, svg.Floor, svg.Ceiling);
+				SlopeVertexGroup newsvg = BuilderPlug.Me.AddSlopeVertexGroup(newsv, out id);
 				newsvg.SelectVertices(true);
 			}
 

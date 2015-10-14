@@ -83,17 +83,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							sectors.Add(s);
 				}
 
-				// Only allow adding/removing sectors if the plane type of the selected SVGs don't clash.
-				// For example you can't have two floor slopes applied to one sector
-				if (listsvgs.Count == 2)
-				{
-					if (listsvgs[0].Floor == listsvgs[1].Floor || listsvgs[0].Ceiling == listsvgs[1].Ceiling)
-					{
-						canaddsectors = false;
-						canremovesectors = false;
-					}
-				}
-				else if (listsvgs.Count > 2)
+				if (listsvgs.Count > 2)
 				{
 					canaddsectors = false;
 					canremovesectors = false;

@@ -206,11 +206,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				ListDictionary data = new ListDictionary();
 
-				if (svg.Floor)
-					data.Add("planetype", "floor");
-				else
-					data.Add("planetype", "ceiling");
-
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					string name = String.Format("vertex{0}.", i+1);
@@ -509,7 +504,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						vertices.Add(new SlopeVertex(new Vector2D(values[i * 3], values[i * 3 + 1]), values[i * 3 + 2]));
 					}
 
-					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices, floor, ceiling));
+					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices));
 				}
 			}
 
@@ -839,13 +834,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				tdf.Cleanup();
 		}
 
-		public SlopeVertexGroup AddSlopeVertexGroup(List<SlopeVertex> vertices, out int id, bool floor, bool ceiling)
+		public SlopeVertexGroup AddSlopeVertexGroup(List<SlopeVertex> vertices, out int id)
 		{
 			for (int i = 1; i < int.MaxValue; i++)
 			{
 				if (!slopevertexgroups.Exists(x => x.Id == i))
 				{
-					SlopeVertexGroup svg = new SlopeVertexGroup(i, (List<SlopeVertex>)vertices, floor, ceiling);
+					SlopeVertexGroup svg = new SlopeVertexGroup(i, (List<SlopeVertex>)vertices);
 					
 					slopevertexgroups.Add(svg);
 

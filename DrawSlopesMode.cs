@@ -656,7 +656,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (slopedrawingmode == SlopeDrawingMode.Floor || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 				{
 					int id = -1;
-					SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sv_floor, out id, true, false);
+					SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sv_floor, out id);
 
 					svg.Sectors.Clear();
 
@@ -680,7 +680,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (slopedrawingmode == SlopeDrawingMode.Ceiling || slopedrawingmode == SlopeDrawingMode.FloorAndCeiling)
 				{
 					int id = -1;
-					SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sv_ceiling, out id, false, true);
+					SlopeVertexGroup svg = BuilderPlug.Me.AddSlopeVertexGroup(sv_ceiling, out id);
 
 					svg.Sectors.Clear();
 
