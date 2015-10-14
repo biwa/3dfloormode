@@ -225,45 +225,36 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public bool CreateGeometry()
 		{
-			List<List<DrawnVertex>> drawnvertices = new List<List<DrawnVertex>>();
+			List<DrawnVertex> drawnvertices = new List<DrawnVertex>();
 			List<Vertex> vertices = new List<Vertex>();
 			Vector3D slopetopthingpos = new Vector3D(0, 0, 0);
 			Vector3D slopebottomthingpos = new Vector3D(0, 0, 0);
 			Line2D slopeline = new Line2D(0, 0, 0, 0);
-			List<Sector> newsectors = new List<Sector>();
 
-			drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorPosition();
+			drawnvertices = BuilderPlug.Me.ControlSectorArea.GetNewControlSectorVertices();
 
-			foreach(List<DrawnVertex> dv in drawnvertices)
+			if (Tools.DrawLines(drawnvertices) == false)
 			{
-				List<Sector> oldsectors = new List<Sector>(General.Map.Map.Sectors);
-
-				Tools.DrawLines(dv);
-
-				foreach (Sector s in General.Map.Map.Sectors)
-				{
-					// this is a new control sector
-					if (!oldsectors.Contains(s))
-					{
-						newsectors.Add(s);
-					}
-				}
+				General.Interface.DisplayStatus(StatusType.Warning, "Could not draw new sector");
+				return false;
 			}
 
-			newsectors[0].FloorHeight = bottomheight;
-			newsectors[0].CeilHeight = topheight;
-			newsectors[0].SetFloorTexture(bottomflat);
-			newsectors[0].SetCeilTexture(topflat);
+			sector = General.Map.Map.GetMarkedSectors(true)[0];
 
-			foreach (Sidedef sd in newsectors[0].Sidedefs)
+			sector.FloorHeight = bottomheight;
+			sector.CeilHeight = topheight;
+			sector.SetFloorTexture(bottomflat);
+			sector.SetCeilTexture(topflat);
+
+			foreach (Sidedef sd in sector.Sidedefs)
 			{
 				sd.Line.Front.SetTextureMid(bordertexture);
 			}
 
-			if(!newsectors[0].Fields.ContainsKey("tdfh_managed"))
-				newsectors[0].Fields.Add("tdfh_managed", new UniValue(UniversalType.Boolean, true));
+			if (!sector.Fields.ContainsKey("user_managed_3d_floor"))
+				sector.Fields.Add("user_managed_3d_floor", new UniValue(UniversalType.Boolean, true));
 
-			sector = newsectors[0];
+			sector.Fields["comment"] = new UniValue(UniversalType.String, "[!]DO NOT DELETE! This sector is managed by the 3D floor plugin.");
 
 			// With multiple tag support in UDMF only one tag is needed, so bind it right away
 			if (General.Map.UDMF == true)

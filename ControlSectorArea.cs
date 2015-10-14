@@ -292,7 +292,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			UpdateLinesAndPoints();
 		}
 
-		public List<List<DrawnVertex>> GetNewControlSectorPosition()
+		public List<DrawnVertex> GetNewControlSectorVertices()
 		{
 			CreateBlockmap();
 
@@ -323,7 +323,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
 						dv.Add(SectorVertex(p.X, p.Y));
 
-						return new List<List<DrawnVertex>> { dv };
+						return dv;
 					}
 					else
 					{
@@ -340,7 +340,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 								dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
 								dv.Add(SectorVertex(p.X, p.Y));
 
-								return new List<List<DrawnVertex>> { dv };
+								return dv;
 							}
 						}
 					}
