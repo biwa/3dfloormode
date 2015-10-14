@@ -78,7 +78,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
         private float highlightsloperange;
 		private List<SlopeVertexGroup> slopevertexgroups;
 		private float stitchrange;
-		private Sector dummysector;
+		private Sector slopedatasector;
 		private bool updateafteraction;
 		private string updateafteractionname;
 
@@ -108,7 +108,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public List<SlopeVertexGroup> SlopeVertexGroups { get { return slopevertexgroups; } set { slopevertexgroups = value; } }
 		public float StitchRange { get { return stitchrange; } }
 
-		public Sector DummySector { get { return dummysector; } set { dummysector = value; } }
+		public Sector SlopeDataSector { get { return slopedatasector; } set { slopedatasector = value; } }
 
 		#endregion
 
@@ -175,9 +175,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			slopevertexgroups.Clear();
 
-			// Create the dummy sector used to store the slope vertex group info
-			dummysector = General.Map.Map.CreateSector();
-			General.Map.Map.Update();
+			slopedatasector = null;
 		}
 
 		public override void OnMapOpenEnd()
@@ -189,12 +187,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			LoadSlopesFromDBS();
 
-			// Create the dummy sector used to store the slope vertex group info
-			dummysector = General.Map.Map.CreateSector();
-			General.Map.Map.Update();
+			// Try to find the slope data sector and store slope information in it
+			slopedatasector = GetSlopeDataSector();
 
-			foreach (SlopeVertexGroup svg in slopevertexgroups)
-				svg.StoreInSector(dummysector);
+			if(slopedatasector != null)
+				foreach (SlopeVertexGroup svg in slopevertexgroups)
+					svg.StoreInSector(slopedatasector);
 		}
 
 		// Write the slope data to the .dbs file when the map is saved
@@ -416,6 +414,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		#region ================== Methods
 
+		private Sector GetSlopeDataSector()
+		{
+			foreach (Sector s in General.Map.Map.Sectors)
+			{
+				if (s.Fields.GetValue("user_slopedatasector", false) == true)
+					return s;
+			}
+
+			return null;
+		}
+
 		public DialogResult ThreeDFloorEditor()
 		{
 			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
@@ -513,8 +522,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void StoreSlopeVertexGroupsInSector()
 		{
-			foreach (SlopeVertexGroup svg in slopevertexgroups)
-				svg.StoreInSector(dummysector);
+			if (slopedatasector != null && !slopedatasector.IsDisposed)
+			{
+				slopedatasector.Fields.BeforeFieldsChange();
+
+				if (!slopedatasector.Fields.ContainsKey("user_slopedatasector"))
+				{
+					slopedatasector.Fields.Add("user_slopedatasector", new UniValue(UniversalType.Boolean, true));
+				}
+
+				slopedatasector.Fields["comment"] = new UniValue(UniversalType.String, "[!]DO NOT EDIT OR DELETE! This sector is used by the slope mode for undo/redo operations.");
+
+				foreach (SlopeVertexGroup svg in slopevertexgroups)
+					svg.StoreInSector(slopedatasector);
+			}
 		}
 
 		public void LoadSlopeVertexGroupsFromSector()
@@ -523,7 +544,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			slopevertexgroups.Clear();
 
-			foreach (KeyValuePair<string, UniValue> kvp in dummysector.Fields)
+			if (slopedatasector == null || slopedatasector.IsDisposed)
+				return;
+
+			foreach (KeyValuePair<string, UniValue> kvp in slopedatasector.Fields)
 			{
 				Match svgmatch = svgregex.Match((string)kvp.Key);
 
@@ -531,7 +555,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					int svgid = Convert.ToInt32(svgmatch.Groups[1].ToString());
 
-					slopevertexgroups.Add(new SlopeVertexGroup(svgid, dummysector));
+					slopevertexgroups.Add(new SlopeVertexGroup(svgid, slopedatasector));
 				}
 			}
 

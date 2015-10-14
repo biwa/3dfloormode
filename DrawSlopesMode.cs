@@ -537,6 +537,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnEngage();
 
+			if (BuilderPlug.Me.SlopeDataSector == null || BuilderPlug.Me.SlopeDataSector.IsDisposed)
+			{
+				SlopeDataSectorDialog sdsd = new SlopeDataSectorDialog();
+				DialogResult dr = sdsd.ShowDialog();
+
+				if (dr == DialogResult.Cancel)
+					General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
+
+				if (dr == DialogResult.OK)
+				{
+					BuilderPlug.Me.SlopeDataSector = General.Map.Map.GetSelectedSectors(true).ToList()[0];
+					BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
+				}
+			}
+
 			EnableAutoPanning();
 			renderer.SetPresentation(Presentation.Standard);
 

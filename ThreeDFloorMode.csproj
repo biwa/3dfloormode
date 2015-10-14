@@ -107,6 +107,12 @@
     <Compile Include="Windows\MenusForm.Designer.cs">
       <DependentUpon>MenusForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Windows\SlopeDataSectorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\SlopeDataSectorDialog.Designer.cs">
+      <DependentUpon>SlopeDataSectorDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Windows\SlopeVertexEditForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -178,6 +184,9 @@
     <EmbeddedResource Include="Resources\Ceiling.png" />
     <EmbeddedResource Include="Resources\Floor.png" />
     <EmbeddedResource Include="Resources\FloorAndCeiling.png" />
+    <EmbeddedResource Include="Windows\SlopeDataSectorDialog.resx">
+      <DependentUpon>SlopeDataSectorDialog.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
