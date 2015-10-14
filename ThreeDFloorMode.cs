@@ -227,8 +227,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					float requiredsize = (General.Map.GetTextSize(group.Value[0], l.Scale).Width) / renderer.Scale;
 					if (requiredsize > group.Key.Labels[i].radius)
 					{
-						requiredsize = (General.Map.GetTextSize(group.Value[1], l.Scale).Width) / renderer.Scale;
-						l.Text = (requiredsize > group.Key.Labels[i].radius ? "+" : group.Value[1]);
+						l.Text = group.Value[1];
 					}
 					else
 					{
@@ -1048,6 +1047,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			// Clear labels
 			SetupLabels();
+
+			UpdateLabels();
 		}
 		
 		// When redo is used
@@ -1064,6 +1065,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			// Clear labels
 			SetupLabels();
+
+			UpdateLabels();
 		}
 		
 		#endregion
