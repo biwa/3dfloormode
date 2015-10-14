@@ -74,6 +74,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		// Labels
 		private Dictionary<Sector, TextLabel[]> labels;
+		private Dictionary<Sector, string[]> selected3Dfloorlabels;
+		private Dictionary<Sector, string[]> unselected3Dfloorlabels;
 
 		ThreeDFloorHelperTooltipElementControl ctrl = new ThreeDFloorHelperTooltipElementControl();
 		List<ThreeDFloorHelperTooltipElementControl> tooltipelements;
@@ -180,8 +182,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					renderer.RenderHighlight(highlighted.FlatVertices, General.Colors.Highlight.WithAlpha(64).ToInt());
 				}
 
-
-				if(BuilderPlug.Me.ViewSelectionNumbers)
+				if (BuilderModes.BuilderPlug.Me.ViewSelectionNumbers)
 				{
 					// Go for all selected sectors
 					ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
@@ -200,9 +201,42 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					}
 				}
 
+				Render3DFloorLabels(unselected3Dfloorlabels);
+
+				if (!BuilderModes.BuilderPlug.Me.ViewSelectionNumbers)
+					Render3DFloorLabels(selected3Dfloorlabels);
+
 				BuilderPlug.Me.ControlSectorArea.Draw(renderer, csahighlight);
 
 				renderer.Finish();
+			}
+		}
+
+		private void Render3DFloorLabels(Dictionary<Sector, string[]> labelsgroup)
+		{
+			foreach (KeyValuePair<Sector, string[]> group in labelsgroup)
+			{
+				// Render labels
+				TextLabel[] labelarray = labels[group.Key];
+				for (int i = 0; i < group.Key.Labels.Count; i++)
+				{
+					TextLabel l = labelarray[i];
+					l.Color = General.Colors.InfoLine;
+
+					// Render only when enough space for the label to see
+					float requiredsize = (General.Map.GetTextSize(group.Value[0], l.Scale).Width) / renderer.Scale;
+					if (requiredsize > group.Key.Labels[i].radius)
+					{
+						requiredsize = (General.Map.GetTextSize(group.Value[1], l.Scale).Width) / renderer.Scale;
+						l.Text = (requiredsize > group.Key.Labels[i].radius ? "+" : group.Value[1]);
+					}
+					else
+					{
+						l.Text = group.Value[0];
+					}
+
+					renderer.RenderText(l);
+				}
 			}
 		}
 
@@ -306,7 +340,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			
 			// Make text labels for sectors
 			SetupLabels();
-			UpdateSelectedLabels();
+			UpdateLabels();
 		}
 
 		// This highlights a new item
@@ -420,9 +454,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					// Clear labels
 					TextLabel[] labelarray = labels[s];
 					foreach(TextLabel l in labelarray) l.Text = "";
-
-					// Update all other labels
-					UpdateSelectedLabels();
 				}
 
 				// Selection changed?
@@ -436,6 +467,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						if(sd.Line.Back != null) back = sd.Line.Back.Sector.Selected; else back = false;
 						sd.Line.Selected = front | back;
 					}
+
+					// Update all other labels
+					UpdateLabels();
 				}
 
 				if(update)
@@ -444,6 +478,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					renderer.Present();
 				}
 			}
+		}
+
+		private void UpdateLabels()
+		{
+			Update3DFloorLabels();
+
+			if (BuilderModes.BuilderPlug.Me.ViewSelectionNumbers)
+				UpdateSelectedLabels();
 		}
 
 		// This updates labels from the selected sectors
@@ -464,6 +506,34 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 				index++;
 			}
+		}
+
+		// Update labels for 3D floors
+		private void Update3DFloorLabels()
+		{
+			selected3Dfloorlabels = new Dictionary<Sector, string[]>();
+			unselected3Dfloorlabels = new Dictionary<Sector, string[]>();
+
+			foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
+			{
+				List<ThreeDFloor> tdfs = BuilderPlug.GetThreeDFloors(new List<Sector> { s });
+
+				if (tdfs.Count == 0)
+					selected3Dfloorlabels.Add(s, new string[] { "", "" });
+				else
+					selected3Dfloorlabels.Add(s, new string[] { tdfs.Count + (tdfs.Count == 1 ? " floor" : " floors"), tdfs.Count.ToString() });
+			}
+
+			foreach (Sector s in General.Map.Map.GetSelectedSectors(false))
+			{
+				List<ThreeDFloor> tdfs = BuilderPlug.GetThreeDFloors(new List<Sector> { s });
+
+				if (tdfs.Count == 0)
+					unselected3Dfloorlabels.Add(s, new string[] { "", "" });
+				else
+					unselected3Dfloorlabels.Add(s, new string[] { tdfs.Count + (tdfs.Count == 1 ? " floor" : " floors"), tdfs.Count.ToString() });
+			}
+
 		}
 
 		#endregion
@@ -499,17 +569,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Interface.AddDocker(docker);
 			General.Interface.SelectDocker(docker);
 
-			// Add toolbar buttons
-			/*
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.CopyProperties);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.PasteProperties);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.SeparatorCopyPaste);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.ViewSelectionNumbers);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.SeparatorSectors1);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.MakeGradientBrightness);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.MakeGradientFloors);
-			General.Interface.AddButton(BuilderPlug.Me.MenusForm.MakeGradientCeilings);
-			*/
+			// Add the view selection number button from BuilderModes. Also add a click event handler
+			// so we can update the labels when the button is pressed
+			General.Interface.AddButton(BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers);
+			BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers.Click += ViewSelectionNumbers_Click;
 
 			// Convert geometry selection to sectors only
 			General.Map.Map.ConvertSelection(SelectionType.Sectors);
@@ -518,9 +581,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			SetupLabels();
 			
 			// Update
-			UpdateSelectedLabels();
+			UpdateLabels();
 			updateOverlaySurfaces();
 			UpdateOverlay();
+		}
+
+		void ViewSelectionNumbers_Click(object sender, EventArgs e)
+		{
+			UpdateLabels();
+
+			OnRedrawDisplay();
 		}
 
 		// Mode disengages
@@ -531,18 +601,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Remove docker
 			General.Interface.RemoveDocker(docker);
 
-			// Remove toolbar buttons
-			/*
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.CopyProperties);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PasteProperties);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.SeparatorCopyPaste);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.ViewSelectionNumbers);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.SeparatorSectors1);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.MakeGradientBrightness);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.MakeGradientFloors);
-			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.MakeGradientCeilings);
-			*/
-			
+			// Remove the button and event handler for view selection numbers
+			General.Interface.RemoveButton(BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers);
+			BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers.Click -= ViewSelectionNumbers_Click;
+
 			// Keep only sectors selected
 			General.Map.Map.ClearSelectedLinedefs();
 			
@@ -731,7 +793,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 								BuilderPlug.ProcessThreeDFloors(BuilderPlug.TDFEW.ThreeDFloors);
 								General.Map.Map.Update();
 								SetupLabels();
-								UpdateSelectedLabels();
+								UpdateLabels();
 
 								threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
 							}
@@ -742,6 +804,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 								General.Map.Map.ClearSelectedSectors();
 								General.Map.Map.ClearSelectedLinedefs();
 							}
+
+							UpdateLabels();
 
 							// Update entire display
 							updateOverlaySurfaces();

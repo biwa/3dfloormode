@@ -73,7 +73,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool autoclearselection;
 		private MenusForm menusform;
 		private bool usehighlight;
-		private bool viewselectionnumbers;
 		private ControlSectorArea controlsectorarea;
         private float highlightsloperange;
 		private List<SlopeVertexGroup> slopevertexgroups;
@@ -89,7 +88,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public bool AdditiveSelect { get { return additiveselect; } }
 		public bool AutoClearSelection { get { return autoclearselection; } }
 		public MenusForm MenusForm { get { return menusform; } }
-		public bool ViewSelectionNumbers { get { return viewselectionnumbers; } set { viewselectionnumbers = value; } }
 		public bool UseHighlight
 		{
 			get
@@ -439,7 +437,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
-			viewselectionnumbers = General.Settings.ReadPluginSetting("BuilderModes", "viewselectionnumbers", true);
             highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
 			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
 		}
