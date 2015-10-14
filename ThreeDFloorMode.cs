@@ -708,7 +708,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		protected override void OnEditEnd()
 		{
 			// Edit pressed in this mode?
-			if(editpressed)
+			if(editpressed && !dragging)
 			{
 				if (csahighlight == ControlSectorArea.Highlight.Body)
 				{
@@ -839,7 +839,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 			else if (dragging && csahighlight != ControlSectorArea.Highlight.None)
 			{
-				BuilderPlug.Me.ControlSectorArea.SnapToGrid(csahighlight, mousemappos);
+				BuilderPlug.Me.ControlSectorArea.SnapToGrid(csahighlight, mousemappos, renderer.DisplayToMap(mouselastpos));
 				Highlight(null);
 			}
 		}

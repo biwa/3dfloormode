@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Diagnostics;
 using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.Rendering;
 using CodeImp.DoomBuilder.Editing;
@@ -240,12 +241,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			return Highlight.None;
 		}
 
-		public void SnapToGrid(Highlight highlight, Vector2D pos)
+		public void SnapToGrid(Highlight highlight, Vector2D pos, Vector2D lastpos)
 		{
 			Vector2D newpos = GridSetup.SnappedToGrid(pos, gridsize, gridsizeinv);
 
 			switch (highlight)
 			{
+				case Highlight.Body:
+					Vector2D diff = GridSetup.SnappedToGrid(pos, gridsize, gridsizeinv) - GridSetup.SnappedToGrid(lastpos, gridsize, gridsizeinv);
+					Debug.WriteLine("diff: " + (diff).ToString());
+					outerleft += diff.x;
+					outerright += diff.x;
+					outertop += diff.y;
+					outerbottom += diff.y;
+					break;
+
 				// Outer border
 				case Highlight.OuterLeft:
 					if (newpos.x < outerright) outerleft = newpos.x;

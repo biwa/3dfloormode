@@ -42,8 +42,8 @@ using CodeImp.DoomBuilder.Types;
 using CodeImp.DoomBuilder.Config;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.BuilderModes;
-using CodeImp.DoomBuilder.GZBuilder.Tools;
 using CodeImp.DoomBuilder.GZBuilder.Geometry;
+using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.VisualModes;
 
 #endregion
