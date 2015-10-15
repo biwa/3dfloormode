@@ -39,6 +39,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void ThreeDFloorEditorWindow_Load(object sender, EventArgs e)
 		{
 			selectedsectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
+			sharedThreeDFloorsCheckBox.Checked = false;
 			FillThreeDFloorPanel(threedfloors);
 		}
 
@@ -182,6 +183,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void FillThreeDFloorPanel(List<ThreeDFloor> threedfloors)
 		{
+			// Get rid of dummy sectors
+			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+				ctrl.Sector.Dispose();
+
 			// Clear all existing controls
 			threeDFloorPanel.Controls.Clear();
 
@@ -196,38 +201,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void sharedThreeDFloorsCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			List<Sector> selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
-			Regex r = new Regex(@"\d+");
+			ICollection<Sector> selectedSectors = General.Map.Map.GetSelectedSectors(true);
 
 			if (selectedSectors.Count > 1 && sharedThreeDFloorsCheckBox.Checked)
 			{
 				var hideControls = new List<ThreeDFloorHelperControl>();
 
-				foreach(ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+				foreach (Sector s in selectedSectors)
 				{
-					bool allChecked = true;
-
-					// Ignore new 3D floors
-					if (ctrl.IsNew)
-						continue;
-
-					foreach (int s in ctrl.CheckedSectors)
+					foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
 					{
-						foreach (ThreeDFloorHelperControl tdfhc in threeDFloorPanel.Controls)
-						{
-							if (ctrl == tdfhc)
-								continue;
-
-							if (!tdfhc.CheckedSectors.Contains(s))
-							{
-								allChecked = false;
-								break;
-							}
-						}
+						// If the selected sector is not in the control's tagged sectors the control
+						// should be hidden
+						if (!ctrl.ThreeDFloor.TaggedSectors.Contains(s))
+							hideControls.Add(ctrl);
 					}
-
-					if(!allChecked)
-						hideControls.Add(ctrl);
 				}
 
 				foreach (ThreeDFloorHelperControl ctrl in hideControls)

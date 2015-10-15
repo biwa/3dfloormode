@@ -189,10 +189,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				int i = checkedListBoxSectors.Items.Add("Sector " + s.Index.ToString(), ThreeDFloor.TaggedSectors.Contains(s));
 
-				checkedsectors.Add(s.Index);
+				if(ThreeDFloor.TaggedSectors.Contains(s))
+					checkedsectors.Add(s.Index);
 
 				if (!BuilderPlug.TDFEW.SelectedSectors.Contains(s))
+				{
 					checkedListBoxSectors.SetItemCheckState(i, CheckState.Indeterminate);
+				}
 			}
 		}
 

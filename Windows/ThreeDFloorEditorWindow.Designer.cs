@@ -28,11 +28,13 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.threeDFloorPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.okButton = new System.Windows.Forms.Button();
 			this.cancelButton = new System.Windows.Forms.Button();
 			this.addThreeDFloorButton = new System.Windows.Forms.Button();
 			this.sharedThreeDFloorsCheckBox = new System.Windows.Forms.CheckBox();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.SuspendLayout();
 			// 
 			// threeDFloorPanel
@@ -91,6 +93,7 @@
 			this.sharedThreeDFloorsCheckBox.Size = new System.Drawing.Size(155, 17);
 			this.sharedThreeDFloorsCheckBox.TabIndex = 2;
 			this.sharedThreeDFloorsCheckBox.Text = "Show shared 3D floors only";
+			this.toolTip1.SetToolTip(this.sharedThreeDFloorsCheckBox, "If checked only shows the 3D floors that are shared among all selected sectors");
 			this.sharedThreeDFloorsCheckBox.UseVisualStyleBackColor = true;
 			this.sharedThreeDFloorsCheckBox.CheckedChanged += new System.EventHandler(this.sharedThreeDFloorsCheckBox_CheckedChanged);
 			// 
@@ -127,6 +130,7 @@
 		private System.Windows.Forms.Button cancelButton;
 		private System.Windows.Forms.Button addThreeDFloorButton;
 		private System.Windows.Forms.CheckBox sharedThreeDFloorsCheckBox;
+		private System.Windows.Forms.ToolTip toolTip1;
 
 	}
 }
