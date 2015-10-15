@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Diagnostics;
 using CodeImp.DoomBuilder.Windows;
 using CodeImp.DoomBuilder.IO;
 using CodeImp.DoomBuilder.Data;
@@ -64,8 +65,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		
 		// Highlighted item
 		protected Sector highlighted;
+		protected ThreeDFloor highlighted3dfloor;
 		private Association highlightasso = new Association();
 		private FlatVertex[] overlayGeometry;
+		private FlatVertex[] overlaygeometry3dfloors;
 
 		// Interface
 		protected bool editpressed;
@@ -180,6 +183,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if (BuilderPlug.Me.UseHighlight && highlighted != null)
 				{
 					renderer.RenderHighlight(highlighted.FlatVertices, General.Colors.Highlight.WithAlpha(64).ToInt());
+
+					if(highlighted3dfloor != null)
+						renderer.RenderHighlight(overlaygeometry3dfloors, General.Colors.ModelWireframe.WithAlpha(64).ToInt());
 				}
 
 				if (BuilderModes.BuilderPlug.Me.ViewSelectionNumbers)
@@ -242,12 +248,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// Generates the tooltip for the 3D floors
 		private void UpdateDocker(Sector s)
 		{
-			List<ThreeDFloor> tdf = BuilderPlug.GetThreeDFloors(new List<Sector> { s });
-			int numfloors = tdf.Count;
+			List<ThreeDFloor> tdfs = new List<ThreeDFloor>();
 			int count = 0;
 
+			// Get all 3D floors that have the currently highlighted sector tagged. Also order them by their vertical position
+			foreach (ThreeDFloor tdf in threedfloors.Where(o => o.TaggedSectors.Contains(s)).OrderByDescending(o => o.TopHeight))
+				tdfs.Add(tdf);
+
 			// Hide all controls if no sector is selected or selected sector has no 3D floors
-			if (s == null || numfloors == 0)
+			if (s == null || tdfs.Count == 0)
 			{
 				foreach (Control c in tooltipelements)
 				{
@@ -257,7 +266,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				return;
 			}
 
-			foreach (ThreeDFloor f in tdf.OrderByDescending(o => o.TopHeight).ToList())
+			foreach (ThreeDFloor tdf in tdfs)
 			{
 				// Add another control if the list if full
 				if (count >= tooltipelements.Count)
@@ -267,12 +276,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					tooltipelements.Add(tte);
 				}
 
-				General.DisplayZoomedImage(tooltipelements[count].sectorBottomFlat, General.Map.Data.GetFlatImage(f.BottomFlat).GetPreview());
-				General.DisplayZoomedImage(tooltipelements[count].sectorBorderTexture, General.Map.Data.GetFlatImage(f.BorderTexture).GetPreview());
-				General.DisplayZoomedImage(tooltipelements[count].sectorTopFlat, General.Map.Data.GetFlatImage(f.TopFlat).GetPreview());
+				General.DisplayZoomedImage(tooltipelements[count].sectorBottomFlat, General.Map.Data.GetFlatImage(tdf.BottomFlat).GetPreview());
+				General.DisplayZoomedImage(tooltipelements[count].sectorBorderTexture, General.Map.Data.GetFlatImage(tdf.BorderTexture).GetPreview());
+				General.DisplayZoomedImage(tooltipelements[count].sectorTopFlat, General.Map.Data.GetFlatImage(tdf.TopFlat).GetPreview());
 
-				tooltipelements[count].bottomHeight.Text = f.BottomHeight.ToString();
-				tooltipelements[count].topHeight.Text = f.TopHeight.ToString();
+				tooltipelements[count].bottomHeight.Text = tdf.BottomHeight.ToString();
+				tooltipelements[count].topHeight.Text = tdf.TopHeight.ToString();
+
+				if (tdf == highlighted3dfloor)
+					tooltipelements[count].BackColor = General.Colors.ModelWireframe.ToColor();
+				else
+					tooltipelements[count].BackColor = SystemColors.Control;
 
 				tooltipelements[count].Visible = true;
 
@@ -294,6 +308,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Go for all selected sectors
 			foreach (Sector s in orderedselection) vertsList.AddRange(s.FlatVertices);
 			overlayGeometry = vertsList.ToArray();
+
+			if (highlighted3dfloor != null)
+			{
+				vertsList = new List<FlatVertex>();
+
+				foreach (Sector s in highlighted3dfloor.TaggedSectors)
+				{
+					// Ignore the currently highlighted sector and selected sectors
+					if (s != highlighted && !s.Selected)
+						vertsList.AddRange(s.FlatVertices);
+				}
+
+				overlaygeometry3dfloors = vertsList.ToArray();
+			}
 		}
 		
 		// Support function for joining and merging sectors
@@ -354,9 +382,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Previous association highlights something?
 			if((highlighted != null) && (highlighted.Tag > 0)) completeredraw = true;
 
-			// Update the panel with the 3D floors
-			UpdateDocker(s);
-
 			// Set highlight association
 			if (s != null)
 			{
@@ -389,6 +414,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				// Set new highlight and redraw completely
 				highlighted = s;
+				highlighted3dfloor = null;
 				General.Interface.RedrawDisplay();
 			}
 			else
@@ -414,6 +440,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				UpdateOverlay();
 				renderer.Present();
 			}
+
+			// Update the panel with the 3D floors
+			UpdateDocker(s);
 
 			// Show highlight info
 			if((highlighted != null) && !highlighted.IsDisposed)
@@ -1113,6 +1142,104 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Redraw
 			General.Interface.RedrawDisplay();
 		}
+
+		[BeginAction("cyclehighlighted3dfloorup")]
+		public void CycleHighlighted3DFloorUp()
+		{
+			if (highlighted == null)
+				return;
+
+			List<ThreeDFloor> tdfs = new List<ThreeDFloor>();
+
+			// Get all 3D floors that have the currently highlighted sector tagged. Also order them by their vertical position
+			foreach (ThreeDFloor tdf in threedfloors.Where(o => o.TaggedSectors.Contains(highlighted)).OrderByDescending(o => o.TopHeight))
+				tdfs.Add(tdf);
+
+			if (tdfs.Count == 0) // Nothing to highlight
+			{
+				highlighted3dfloor = null;
+			}
+			else if (highlighted3dfloor == null) // No 3D floor currently highlighted? Just get the last one
+			{
+				highlighted3dfloor = tdfs.Last();
+			}
+			else // Find the currently highlighted 3D floor in the list and take the next one
+			{
+				int i;
+
+				for (i = tdfs.Count-1; i >= 0; i--)
+				{
+					if (tdfs[i] == highlighted3dfloor)
+					{
+						if (i > 0)
+						{
+							highlighted3dfloor = tdfs[i - 1];
+							break;
+						}
+					}
+				}
+
+				// Beginning of the list was reached, so don't highlight any 3D floor
+				if (i < 0)
+					highlighted3dfloor = null;
+			}
+
+			UpdateDocker(highlighted);
+
+			updateOverlaySurfaces();
+
+			General.Interface.RedrawDisplay();
+
+		}
+
+		[BeginAction("cyclehighlighted3dfloordown")]
+		public void CycleHighlighted3DFloorDown()
+		{
+			if (highlighted == null)
+				return;
+
+			List<ThreeDFloor> tdfs = new List<ThreeDFloor>();
+
+			// Get all 3D floors that have the currently highlighted sector tagged. Also order them by their vertical position
+			foreach (ThreeDFloor tdf in threedfloors.Where(o => o.TaggedSectors.Contains(highlighted)).OrderByDescending(o => o.TopHeight))
+				tdfs.Add(tdf);
+
+			if (tdfs.Count == 0) // Nothing to highlight
+			{
+				highlighted3dfloor = null;
+			}
+			else if (highlighted3dfloor == null) // No 3D floor currently highlighted? Just get the first one
+			{
+				highlighted3dfloor = tdfs[0];
+			}
+			else // Find the currently highlighted 3D floor in the list and take the next one
+			{
+				int i;
+
+				for (i = 0; i < tdfs.Count; i++)
+				{
+					if (tdfs[i] == highlighted3dfloor)
+					{
+						if (i < tdfs.Count-1)
+						{
+							highlighted3dfloor = tdfs[i + 1];
+							break;
+						}
+					}
+				}
+
+				// End of the list was reached, so don't highlight any 3D floor
+				if (i == tdfs.Count)
+					highlighted3dfloor = null;
+			}
+
+			UpdateDocker(highlighted);
+
+			updateOverlaySurfaces();
+
+			General.Interface.RedrawDisplay();
+		}
+
 		#endregion
 	}
 }
