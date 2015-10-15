@@ -93,7 +93,7 @@
 			this.sharedThreeDFloorsCheckBox.Size = new System.Drawing.Size(155, 17);
 			this.sharedThreeDFloorsCheckBox.TabIndex = 2;
 			this.sharedThreeDFloorsCheckBox.Text = "Show shared 3D floors only";
-			this.toolTip1.SetToolTip(this.sharedThreeDFloorsCheckBox, "If checked only shows the 3D floors that are shared among all selected sectors");
+			this.toolTip1.SetToolTip(this.sharedThreeDFloorsCheckBox, "If checked only shows the 3D floors that\r\nare shared among all selected sectors");
 			this.sharedThreeDFloorsCheckBox.UseVisualStyleBackColor = true;
 			this.sharedThreeDFloorsCheckBox.CheckedChanged += new System.EventHandler(this.sharedThreeDFloorsCheckBox_CheckedChanged);
 			// 

@@ -220,12 +220,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				foreach (ThreeDFloorHelperControl ctrl in hideControls)
 				{
-					ctrl.Visible = false;
+					// Hide controls, unless they are new
+					if(ctrl.IsNew == false)
+						ctrl.Visible = false;
 				}
 			}
 			else
 			{
-				FillThreeDFloorPanel(threedfloors);
+				foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+					ctrl.Show();
 			}
 		}
 	}
