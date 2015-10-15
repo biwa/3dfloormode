@@ -648,7 +648,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					foreach (Sector s in sectors)
 						if (s != null && s.Tags.Contains(ld.Args[0]) && !tmpsectors.Contains(ld.Front.Sector))
 							tmpsectors.Add(ld.Front.Sector);
-							
+				
 			foreach(Sector s in tmpsectors)
 				if(s != null)
 					tdf.Add(new ThreeDFloor(s));

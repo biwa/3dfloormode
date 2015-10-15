@@ -510,9 +510,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// Update labels for 3D floors
 		private void Update3DFloorLabels()
 		{
+			Dictionary<Sector, int> num3dfloors = new Dictionary<Sector, int>();
 			selected3Dfloorlabels = new Dictionary<Sector, string[]>();
 			unselected3Dfloorlabels = new Dictionary<Sector, string[]>();
 
+			foreach (ThreeDFloor tdf in threedfloors)
+			{
+				foreach (Sector s in tdf.TaggedSectors)
+				{
+					if (num3dfloors.ContainsKey(s))
+						num3dfloors[s]++;
+					else
+						num3dfloors.Add(s, 1);
+				}
+			}
+
+			foreach (KeyValuePair<Sector, int> group in num3dfloors)
+			{
+				if (group.Key.Selected)
+					selected3Dfloorlabels.Add(group.Key, new string[] { group.Value + (group.Value == 1 ? " floor" : " floors"), group.Value.ToString() });
+				else
+					unselected3Dfloorlabels.Add(group.Key, new string[] { group.Value + (group.Value == 1 ? " floor" : " floors"), group.Value.ToString() });
+			}
+
+			/*
 			foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
 			{
 				List<ThreeDFloor> tdfs = BuilderPlug.GetThreeDFloors(new List<Sector> { s });
@@ -532,7 +553,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				else
 					unselected3Dfloorlabels.Add(s, new string[] { tdfs.Count + (tdfs.Count == 1 ? " floor" : " floors"), tdfs.Count.ToString() });
 			}
-
+			*/
 		}
 
 		#endregion
@@ -791,8 +812,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 							{
 								BuilderPlug.ProcessThreeDFloors(BuilderPlug.TDFEW.ThreeDFloors);
 								General.Map.Map.Update();
-								SetupLabels();
-								UpdateLabels();
 
 								threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
 							}
@@ -804,10 +823,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 								General.Map.Map.ClearSelectedLinedefs();
 							}
 
+							SetupLabels();
 							UpdateLabels();
 
 							// Update entire display
 							updateOverlaySurfaces();
+							UpdateOverlay();
 							General.Interface.RedrawDisplay();
 						}
 					}
@@ -1083,6 +1104,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Clear labels
 			foreach (TextLabel[] labelarray in labels.Values)
 				foreach (TextLabel l in labelarray) l.Text = "";
+
+			SetupLabels();
+			UpdateLabels();
 
 			updateOverlaySurfaces();
 
