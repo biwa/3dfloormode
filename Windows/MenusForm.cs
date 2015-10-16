@@ -17,6 +17,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public ToolStripButton CeilingSlope { get { return ceilingslope; } }
 		public ToolStripButton FloorAndCeilingSlope { get { return floorandceilingslope; } }
 		public ToolStripButton UpdateSlopes { get { return updateslopes; } }
+		public ToolStripButton RelocateControlSectors { get { return relocatecontrolsectors; } }
 		public ContextMenuStrip AddSectorsContextMenu { get { return addsectorscontextmenu; } }
 
 		public MenusForm()
@@ -144,6 +145,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				e.CloseReason != ToolStripDropDownCloseReason.Keyboard &&
 				e.CloseReason != ToolStripDropDownCloseReason.AppFocusChange)
 				((SlopeMode)General.Editing.Mode).ContextMenuClosing = true;
+		}
+
+		private void relocatecontrolsectors_Click(object sender, EventArgs e)
+		{
+			General.Interface.InvokeTaggedAction(sender, e);
 		}
 	}
 }

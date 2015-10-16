@@ -309,30 +309,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void DeleteControlSector(Sector sector)
 		{
-			List<Thing> deletethings = new List<Thing>();
 			if (sector == null)
 				return;
 
-			// Mark slope things in the sector to be deleted
-			foreach (Thing t in General.Map.Map.Things)
-			{
-				if ((t.Type == 9500 || t.Type == 9501))
-				{
-					t.DetermineSector();
+			General.Map.Map.BeginAddRemove();
 
-					if(t.Sector == sector)
-						deletethings.Add(t);
-				}
-			}
-
-			General.Map.Map.BeginAddRemove(); //mxd
-
-			foreach (Thing t in deletethings)
-			{
-				t.Dispose();
-			}
-
-			//mxd. Get all the linedefs
+			// Get all the linedefs
 			List<Linedef> lines = new List<Linedef>(sector.Sidedefs.Count);
 			foreach (Sidedef side in sector.Sidedefs) lines.Add(side.Line);
 
@@ -358,7 +340,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						lines[i].FlipSidedefs();
 					}
 
-					//mxd. Check textures.
+					// Check textures.
 					if (lines[i].Front.MiddleRequired() && (lines[i].Front.MiddleTexture.Length == 0 || lines[i].Front.MiddleTexture == "-"))
 					{
 						if (lines[i].Front.HighTexture.Length > 0 && lines[i].Front.HighTexture != "-")
@@ -371,7 +353,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						}
 					}
 
-					//mxd. Do we still need high/low textures?
+					// Do we still need high/low textures?
 					lines[i].Front.RemoveUnneededTextures(false);
 
 					// Update sided flags
@@ -379,11 +361,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 			}
 
-			General.Map.Map.EndAddRemove(); //mxd
+			General.Map.Map.EndAddRemove();
 
 			// Update cache values
 			General.Map.IsChanged = true;
-			General.Map.ThingsFilter.Update();
 			General.Map.Map.Update();
 
 		}

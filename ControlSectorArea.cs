@@ -72,8 +72,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int firsttag;
 		private int lasttag;
 
-		private static BlockMap<BlockEntry> blockmap;
-
 		#endregion
 
 		#region ================== Properties
@@ -292,9 +290,39 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			UpdateLinesAndPoints();
 		}
 
+		public List<Vector2D> GetRelocatePositions(int numsectors)
+		{
+			List<Vector2D> positions = new List<Vector2D>();
+			BlockMap<BlockEntry> blockmap = CreateBlockmap(true);
+			int margin = (int)((gridsize - sectorsize) / 2);
+
+			for (int x = (int)outerleft; x < (int)outerright; x += (int)gridsize)
+			{
+				for (int y = (int)outertop; y > (int)outerbottom; y -= (int)gridsize)
+				{
+					List<BlockEntry> blocks = blockmap.GetLineBlocks(
+						new Vector2D(x + 1, y - 1),
+						new Vector2D(x + gridsize - 1, y - gridsize + 1)
+					);
+
+					// The way our blockmap is built and queried we will always get exactly one block
+					if (blocks[0].Sectors.Count == 0)
+					{
+						positions.Add(new Vector2D(x + margin, y - margin));
+						numsectors--;
+					}
+
+					if (numsectors == 0)
+						return positions;
+				}
+			}
+
+			throw new Exception("Not enough space for control sector relocation");
+		}
+
 		public List<DrawnVertex> GetNewControlSectorVertices()
 		{
-			CreateBlockmap();
+			BlockMap<BlockEntry> blockmap = CreateBlockmap();
 
 			int margin = (int)((gridsize - sectorsize) / 2);
 
@@ -304,15 +332,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				for (int y = (int)outertop; y > (int)outerbottom; y -= (int)gridsize)
 				{
 					List<BlockEntry> blocks = blockmap.GetLineBlocks(
-						//new Vector2D(x + margin, y - margin),
-						//new Vector2D(x + sectorsize - (2 * margin), y - sectorsize - (2 * margin))
 						new Vector2D(x + 1, y - 1),
-						new Vector2D(x + sectorsize - 1, y - sectorsize - 1)
+						new Vector2D(x + gridsize - 1, y - gridsize + 1)
 					);
 
-
-					// no elements in the area yet
-					if (blocks.Count == 0)
+					// The way our blockmap is built and queried we will always get exactly one block
+					if (blocks[0].Sectors.Count == 0)
 					{
 						List<DrawnVertex> dv = new List<DrawnVertex>();
 						Point p = new Point(x + margin, y - margin);
@@ -324,25 +349,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						dv.Add(SectorVertex(p.X, p.Y));
 
 						return dv;
-					}
-					else
-					{
-						foreach (BlockEntry be in blocks)
-						{
-							if (be.Sectors.Count == 0)
-							{
-								List<DrawnVertex> dv = new List<DrawnVertex>();
-								Point p = new Point(x + margin, y - margin);
-
-								dv.Add(SectorVertex(p.X, p.Y));
-								dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y));
-								dv.Add(SectorVertex(p.X + BuilderPlug.Me.ControlSectorArea.SectorSize, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-								dv.Add(SectorVertex(p.X, p.Y - BuilderPlug.Me.ControlSectorArea.SectorSize));
-								dv.Add(SectorVertex(p.X, p.Y));
-
-								return dv;
-							}
-						}
 					}
 				}
 			}
@@ -404,20 +410,37 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			return new RectangleF(l, t, r - l, b - t);
 		}
 
-		private void CreateBlockmap()
+		private BlockMap<BlockEntry> CreateBlockmap()
+		{
+			return CreateBlockmap(false);
+		}
+
+		private BlockMap<BlockEntry> CreateBlockmap(bool ignorecontrolsectors)
 		{
 			// Make blockmap
 			RectangleF area = MapSet.CreateArea(General.Map.Map.Vertices);
-			area = MapSet.IncreaseArea(area, General.Map.Map.Things);
 			area = MapSet.IncreaseArea(area, new Vector2D(outerleft, outertop));
 			area = MapSet.IncreaseArea(area, new Vector2D(outerright, outerbottom));
-
 			area = AlignAreaToGrid(area);
 
-			if (blockmap != null) blockmap.Dispose();
-			blockmap = new BlockMap<BlockEntry>(area, (int)gridsize);
-			blockmap.AddLinedefsSet(General.Map.Map.Linedefs);
-			blockmap.AddSectorsSet(General.Map.Map.Sectors);
+			BlockMap<BlockEntry> blockmap = new BlockMap<BlockEntry>(area, (int)gridsize);
+
+			if (ignorecontrolsectors)
+			{
+				foreach (Sector s in General.Map.Map.Sectors)
+				{
+					// Managed control sectors have the custom UDMF field "user_managed_3d_floor" set to true
+					// So if the field is NOT set, add the sector to the blockmap
+					if (s.Fields.GetValue("user_managed_3d_floor", false) == false)
+						blockmap.AddSector(s);
+				}
+			}
+			else
+			{
+				blockmap.AddSectorsSet(General.Map.Map.Sectors);
+			}
+
+			return blockmap;
 		}
 
 		public void Edit()

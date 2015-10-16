@@ -623,6 +623,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Interface.AddButton(BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers);
 			BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers.Click += ViewSelectionNumbers_Click;
 
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.RelocateControlSectors);
+
 			// Convert geometry selection to sectors only
 			General.Map.Map.ConvertSelection(SelectionType.Sectors);
 
@@ -653,6 +655,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Remove the button and event handler for view selection numbers
 			General.Interface.RemoveButton(BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers);
 			BuilderModes.BuilderPlug.Me.MenusForm.ViewSelectionNumbers.Click -= ViewSelectionNumbers_Click;
+
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.RelocateControlSectors);
 
 			// Keep only sectors selected
 			General.Map.Map.ClearSelectedLinedefs();
@@ -1237,6 +1241,74 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			updateOverlaySurfaces();
 
+			General.Interface.RedrawDisplay();
+		}
+
+		[BeginAction("relocate3dfloorcontrolsectors")]
+		public void RelocateControlSectors()
+		{
+			List<Vector2D> positions;
+
+			if (threedfloors.Count == 0)
+			{
+				General.Interface.DisplayStatus(StatusType.Warning, "There are no control sectors to relocate");
+				return;
+			}
+
+			try
+			{
+				 positions = BuilderPlug.Me.ControlSectorArea.GetRelocatePositions(threedfloors.Count);
+			}
+			catch (Exception e)
+			{
+				General.Interface.DisplayStatus(StatusType.Warning, e.Message + ". Please increase the size of the control sector area");
+				return;
+			}
+
+			// Some sanity checks
+			if (positions.Count != threedfloors.Count)
+			{
+				General.Interface.DisplayStatus(StatusType.Warning, "Mismatch between number of relocation points and control sectors. Aborted");
+				return;
+			}
+
+			// Control sectors are not allowed to be bigger than what the CSA expects, otherwise sectors might overlap
+			// Abort relocation if one of the control sectors is too big (that should only happen if the user edited the
+			// sector manually
+			foreach (ThreeDFloor tdf in threedfloors)
+			{
+				if (tdf.Sector.BBox.Width > BuilderPlug.Me.ControlSectorArea.SectorSize || tdf.Sector.BBox.Height > BuilderPlug.Me.ControlSectorArea.SectorSize)
+				{
+					General.Interface.DisplayStatus(StatusType.Warning, string.Format("Control sector {0} exceeds horizontal or vertical dimenstion of {1}. Aborted", tdf.Sector.Index, BuilderPlug.Me.ControlSectorArea.SectorSize));
+					return;
+				}
+			}
+
+			General.Map.UndoRedo.CreateUndo("Relocate 3D floor control sectors");
+
+			// Counter for the new positions
+			int i = 0;
+
+			// Move the control sectors
+			foreach (ThreeDFloor tdf in threedfloors)
+			{
+				Vector2D offset = new Vector2D(tdf.Sector.BBox.Left - positions[i].x, tdf.Sector.BBox.Bottom - positions[i].y);
+				HashSet<Vertex> vertices = new HashSet<Vertex>();
+
+				// Get all vertices
+				foreach (Sidedef sd in tdf.Sector.Sidedefs)
+				{
+					vertices.Add(sd.Line.Start);
+					vertices.Add(sd.Line.End);
+				}
+
+				foreach (Vertex v in vertices)
+					v.Move(v.Position - offset);
+
+				i++;
+			}
+
+			General.Map.Map.Update();
 			General.Interface.RedrawDisplay();
 		}
 
