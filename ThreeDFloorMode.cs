@@ -1312,6 +1312,21 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Interface.RedrawDisplay();
 		}
 
+		[BeginAction("select3dfloorcontrolsector")]
+		public void Select3DFloorControlSector()
+		{
+			if (highlighted3dfloor == null)
+			{
+				General.Interface.DisplayStatus(StatusType.Warning, "You have to highlight a 3D floor to select its control sector");
+				return;
+			}
+
+			General.Map.Map.ClearAllSelected();
+			SelectSector(highlighted3dfloor.Sector, true, true);
+
+			General.Interface.RedrawDisplay();
+		}
+
 		#endregion
 	}
 }
