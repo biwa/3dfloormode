@@ -1099,9 +1099,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// When undo is performed
 		public override void OnUndoEnd()
 		{
+			// Get all 3D floors in case th undo did affect them
+			threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
+
 			// Clear labels
 			SetupLabels();
-
 			UpdateLabels();
 		}
 		
@@ -1117,9 +1119,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		// When redo is performed
 		public override void OnRedoEnd()
 		{
+			// Get all 3D floors in case th redo did affect them
+			threedfloors = BuilderPlug.GetThreeDFloors(General.Map.Map.Sectors.ToList());
+
 			// Clear labels
 			SetupLabels();
-
 			UpdateLabels();
 		}
 		
