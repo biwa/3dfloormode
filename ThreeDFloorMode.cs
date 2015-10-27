@@ -1328,7 +1328,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Map.Map.ClearAllSelected();
 			SelectSector(highlighted3dfloor.Sector, true, true);
 
+			updateOverlaySurfaces();
+
 			General.Interface.RedrawDisplay();
+
+			General.Interface.DisplayStatus(StatusType.Info, "3D floor control sector selected");
 		}
 
 		#endregion
