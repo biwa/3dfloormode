@@ -1137,6 +1137,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				foreach (SlopeVertexGroup svg in groups)
 				{
 					svg.RemoveFromSectors();
+					svg.RemoveUndoRedoUDMFFields(BuilderPlug.Me.SlopeDataSector);
 
 					BuilderPlug.Me.SlopeVertexGroups.Remove(svg);
 				}				

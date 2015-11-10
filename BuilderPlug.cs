@@ -567,7 +567,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						UpdateSlopes(s);
 				}
 			}
-			
 		}
 
 		public void UpdateSlopes(Sector s)

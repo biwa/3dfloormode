@@ -207,6 +207,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
+		public void RemoveUndoRedoUDMFFields(Sector s)
+		{
+			string[] comp = new string[] { "x", "y", "z" };
+
+			s.Fields.BeforeFieldsChange();
+
+			for (int i = 0; i < 3; i++)
+			{
+				foreach (string c in comp)
+				{
+					string fieldname = string.Format("user_svg{0}_v{1}_{2}", id, i, c);
+
+					if (s.Fields.ContainsKey(fieldname))
+						s.Fields.Remove(fieldname);
+				}
+			}
+		}
+
 		public void ApplyToSectors()
 		{
 			List<Sector> removesectors = new List<Sector>();
@@ -349,7 +367,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			Plane p = new Plane(sp[0], sp[1], sp[2], true);
 
-			height = Convert.ToInt32(p.GetZ(GetCircumcenter(sp)));
+			float fheight = p.GetZ(GetCircumcenter(sp));
+
+			// If something went wrong with computing the height use the height
+			// of the first vertex as a workaround
+			if (float.IsNaN(fheight))
+				height = Convert.ToInt32(sp[0].z);
+			else
+				height = Convert.ToInt32(fheight);
 		}
 
 		private Vector2D GetCircumcenter(List<Vector3D> points)
@@ -366,6 +391,22 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			bisector1.GetIntersection(bisector2, out u_ray);
 
 			return bisector1.GetCoordinatesAt(u_ray);
+		}
+
+		public bool VerticesAreValid()
+		{
+			if (vertices.Count == 2 && vertices[0].Pos == vertices[1].Pos)
+				return false;
+
+			if (vertices.Count == 3)
+			{
+				float side = Line2D.GetSideOfLine(vertices[0].Pos, vertices[1].Pos, vertices[3].Pos);
+
+				if (side == 0.0f)
+					return false;
+			}
+
+			return true;
 		}
 
 		#endregion
