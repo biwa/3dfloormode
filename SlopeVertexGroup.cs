@@ -211,6 +211,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			string[] comp = new string[] { "x", "y", "z" };
 
+			if (s == null || s.IsDisposed)
+				return;
+
 			s.Fields.BeforeFieldsChange();
 
 			for (int i = 0; i < 3; i++)
