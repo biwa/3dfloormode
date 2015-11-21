@@ -51,7 +51,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				ctrl.ApplyToThreeDFloor();
 				threedfloors.Add(ctrl.ThreeDFloor);
-				ctrl.Sector.Dispose();
 			}
 
 			this.DialogResult = DialogResult.OK;
@@ -60,9 +59,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void cancelButton_Click(object sender, EventArgs e)
 		{
-			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
-				ctrl.Sector.Dispose();
-
 			this.DialogResult = DialogResult.Cancel;
 			this.Close();
 		}
@@ -230,6 +226,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
 					ctrl.Show();
 			}
+		}
+
+		private void ThreeDFloorEditorWindow_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+				ctrl.Sector.Dispose();
 		}
 	}
 }

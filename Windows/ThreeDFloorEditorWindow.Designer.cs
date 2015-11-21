@@ -118,6 +118,7 @@
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "3D floors";
 			this.Load += new System.EventHandler(this.ThreeDFloorEditorWindow_Load);
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ThreeDFloorEditorWindow_FormClosed);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
