@@ -40,7 +40,7 @@ using CodeImp.DoomBuilder.Types;
 using CodeImp.DoomBuilder.BuilderModes;
 using CodeImp.DoomBuilder.BuilderModes.Interface;
 using CodeImp.DoomBuilder.Controls;
-using CodeImp.DoomBuilder.GZBuilder.Geometry;
+// using CodeImp.DoomBuilder.GZBuilder.Geometry;
 
 #endregion
 
@@ -156,15 +156,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				TextLabel[] labelarray = new TextLabel[s.Labels.Count];
 				for(int i = 0; i < s.Labels.Count; i++)
 				{
-					Vector2D v = s.Labels[i].position;
-					labelarray[i] = new TextLabel(20);
+					labelarray[i] = new TextLabel();
 					labelarray[i].TransformCoords = true;
-					labelarray[i].Rectangle = new RectangleF(v.x, v.y, 0.0f, 0.0f);
+					labelarray[i].Location = s.Labels[i].position;
 					labelarray[i].AlignX = TextAlignmentX.Center;
 					labelarray[i].AlignY = TextAlignmentY.Middle;
-					labelarray[i].Scale = 14f;
 					labelarray[i].Color = General.Colors.Highlight.WithAlpha(255);
-					labelarray[i].Backcolor = General.Colors.Background.WithAlpha(255);
+					labelarray[i].BackColor = General.Colors.Background.WithAlpha(255);
 				}
 				labels.Add(s, labelarray);
 			}
@@ -230,7 +228,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					l.Color = General.Colors.InfoLine;
 
 					// Render only when enough space for the label to see
-					float requiredsize = (General.Map.GetTextSize(group.Value[0], l.Scale).Width) / renderer.Scale;
+					float requiredsize =  (General.Interface.MeasureString(group.Value[0], l.Font).Width / 2) / renderer.Scale;
+
 					if (requiredsize > group.Key.Labels[i].radius)
 					{
 						l.Text = group.Value[1];

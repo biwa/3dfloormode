@@ -190,21 +190,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					float x = sv.Pos.x;
 					float y = sv.Pos.y - 14 * (1 / renderer.Scale);
 
-					TextLabel label = new TextLabel(20);
+					TextLabel label = new TextLabel();
 					label.TransformCoords = true;
-					label.Rectangle = new RectangleF(x, y, 0.0f, 0.0f);
+					label.Location = new Vector2D(x, y);
 					label.AlignX = TextAlignmentX.Center;
 					label.AlignY = TextAlignmentY.Middle;
-					label.Scale = 14f;
-					label.Backcolor = General.Colors.Background.WithAlpha(255);
+					label.BackColor = General.Colors.Background.WithAlpha(255);
 					label.Text = "";
 
 					// Rearrange labels if they'd be (exactly) on each other
 					// TODO: do something like that also for overlapping labels
 					foreach (TextLabel l in labels)
 					{
-						if (l.Rectangle.X == label.Rectangle.X && l.Rectangle.Y == label.Rectangle.Y)
-							label.Rectangle = new RectangleF(x, l.Rectangle.Y - 14.0f * (1 / renderer.Scale), 0.0f, 0.0f);
+						if (l.Location.x == label.Location.x && l.Location.y == label.Location.y)
+							label.Location = new Vector2D(x, l.Location.y - 14.0f * (1 / renderer.Scale));
 					}
 
 					label.Color = white;
