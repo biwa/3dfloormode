@@ -63,7 +63,6 @@
 			this.sectorTopFlat.Size = new System.Drawing.Size(115, 136);
 			this.sectorTopFlat.TabIndex = 4;
 			this.sectorTopFlat.TextureName = "";
-			this.sectorTopFlat.UsePreviews = true;
 			// 
 			// sectorBorderTexture
 			// 
@@ -74,7 +73,6 @@
 			this.sectorBorderTexture.Size = new System.Drawing.Size(115, 136);
 			this.sectorBorderTexture.TabIndex = 3;
 			this.sectorBorderTexture.TextureName = "";
-			this.sectorBorderTexture.UsePreviews = true;
 			// 
 			// sectorBottomFlat
 			// 
@@ -84,7 +82,6 @@
 			this.sectorBottomFlat.Size = new System.Drawing.Size(115, 136);
 			this.sectorBottomFlat.TabIndex = 2;
 			this.sectorBottomFlat.TextureName = "";
-			this.sectorBottomFlat.UsePreviews = true;
 			// 
 			// sectorCeilingHeight
 			// 
