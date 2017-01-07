@@ -69,6 +69,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private Association highlightasso = new Association();
 		private FlatVertex[] overlayGeometry;
 		private FlatVertex[] overlaygeometry3dfloors;
+		private FlatVertex[] overlaygeometry3dfloors_highlighted;
+		private FlatVertex[] overlaygeometry3dfloors_selected;
 
 		// Interface
 		protected bool editpressed;
@@ -182,8 +184,24 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					renderer.RenderHighlight(highlighted.FlatVertices, General.Colors.Highlight.WithAlpha(64).ToInt());
 
-					if(highlighted3dfloor != null)
+					if (highlighted3dfloor != null)
+					{
 						renderer.RenderHighlight(overlaygeometry3dfloors, General.Colors.ModelWireframe.WithAlpha(64).ToInt());
+
+						//show the selected sectors in a darker shade
+						PixelColor darker = General.Colors.ModelWireframe;
+						darker.r = (byte)(darker.r * 0.5);
+						darker.g = (byte)(darker.g * 0.5);
+						darker.b = (byte)(darker.b * 0.5);
+						renderer.RenderHighlight(overlaygeometry3dfloors_selected, darker.WithAlpha(64).ToInt());
+
+						//show the highlighted sectors in a lighter shade
+						PixelColor lighter = General.Colors.ModelWireframe;
+						lighter.r = (byte)(lighter.r + (0.5 * (255 - lighter.r)));
+						lighter.g = (byte)(lighter.g + (0.5 * (255 - lighter.g)));
+						lighter.b = (byte)(lighter.b + (0.5 * (255 - lighter.b)));
+						renderer.RenderHighlight(overlaygeometry3dfloors_highlighted, lighter.WithAlpha(64).ToInt());
+					}
 				}
 
 				if (BuilderModes.BuilderPlug.Me.ViewSelectionNumbers)
@@ -303,6 +321,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			ICollection<Sector> orderedselection = General.Map.Map.GetSelectedSectors(true);
 			List<FlatVertex> vertsList = new List<FlatVertex>();
+			List<FlatVertex> vertsList_highlighted = new List<FlatVertex>();
+			List<FlatVertex> vertsList_selected = new List<FlatVertex>();
 
 			// Go for all selected sectors
 			foreach (Sector s in orderedselection) vertsList.AddRange(s.FlatVertices);
@@ -311,15 +331,23 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (highlighted3dfloor != null)
 			{
 				vertsList = new List<FlatVertex>();
+				vertsList_highlighted = new List<FlatVertex>();
+				vertsList_selected = new List<FlatVertex>();
 
 				foreach (Sector s in highlighted3dfloor.TaggedSectors)
 				{
-					// Ignore the currently highlighted sector and selected sectors
-					if (s != highlighted && !s.Selected)
+					//bin the verticies so that then can be properly colored
+					if (s == highlighted)
+						vertsList_highlighted.AddRange(s.FlatVertices);
+					else if (s.Selected)
+						vertsList_selected.AddRange(s.FlatVertices);
+					else
 						vertsList.AddRange(s.FlatVertices);
 				}
 
 				overlaygeometry3dfloors = vertsList.ToArray();
+				overlaygeometry3dfloors_highlighted = vertsList_highlighted.ToArray();
+				overlaygeometry3dfloors_selected = vertsList_selected.ToArray();
 			}
 		}
 		
@@ -1318,6 +1346,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		[BeginAction("select3dfloorcontrolsector")]
 		public void Select3DFloorControlSector()
 		{
+			//if there is no 3d floor highlighted, then try to select the first one from the top-down, if possible
+			if (highlighted3dfloor == null)
+			{
+				CycleHighlighted3DFloorDown();
+			}
+
 			if (highlighted3dfloor == null)
 			{
 				General.Interface.DisplayStatus(StatusType.Warning, "You have to highlight a 3D floor to select its control sector");

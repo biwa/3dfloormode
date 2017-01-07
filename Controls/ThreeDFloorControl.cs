@@ -124,6 +124,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			for(int i=0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, true);
 
+			//When creating a NEW 3d sector, find the sector that is the tallest, and place the floor on top of it
+			int FloorHeight = int.MinValue;
+			foreach (Sector s in BuilderPlug.TDFEW.SelectedSectors) {
+				if (s.FloorHeight > FloorHeight)
+					FloorHeight = s.FloorHeight;
+			}
+
+			if (FloorHeight != int.MinValue) {
+				int DefaultHeight = General.Settings.DefaultCeilingHeight - General.Settings.DefaultFloorHeight;
+				sectorFloorHeight.Text = FloorHeight.ToString();
+				sectorCeilingHeight.Text = (FloorHeight + DefaultHeight).ToString();
+			}
+
 			sector = General.Map.Map.CreateSector();
 
 			settingup = false;

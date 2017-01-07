@@ -748,18 +748,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 			else if (dragging && highlightedslope != null)
 			{
-				int i = 0;
-
-				Vector2D newpos = GridSetup.SnappedToGrid(mousemappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
-				Vector2D snappedstartpos = GridSetup.SnappedToGrid(dragstartmappos, General.Map.Grid.GridSizeF, 1.0f / General.Map.Grid.GridSizeF);
+				Vector2D newpos = SnapToNearest(mousemappos);
+				Vector2D offset = highlightedslope.Pos - newpos;
 
 				foreach (SlopeVertex sl in GetSelectedSlopeVertices())
-				{
-					sl.Pos = oldpositions[i] + newpos - snappedstartpos;
-					i++;
-				}
-
-				highlightedslope.Pos = oldpositions[i] + newpos - snappedstartpos;
+					sl.Pos -= offset;
+				
+				highlightedslope.Pos = newpos;
 
 				General.Map.IsChanged = true;
 
@@ -803,6 +798,106 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				if(highlightedslope != null)
 					oldpositions.Add(highlightedslope.Pos);
 			}
+		}
+		//retrieves the current mouse position on the grid, snapped as necessary
+		private Vector2D SnapToNearest(Vector2D vm)
+		{
+			float vrange = 20f / renderer.Scale;
+			bool snaptogrid = General.Interface.ShiftState ^ General.Interface.SnapToGrid; //allow temporary disable of snap by holding shift
+
+			if (General.Interface.AutoMerge) //only snap to geometry if the option is enabled
+			{
+				// Try the nearest slope vertex
+				SlopeVertex nh = NearestSlopeVertexSquareRange(vm, vrange);
+				if (nh != null)
+					return nh.Pos;
+
+				// Try the nearest map vertex
+				Vertex nv = General.Map.Map.NearestVertexSquareRange(vm, vrange);
+				if (nv != null)
+					return nv.Position;
+
+				// Try the nearest linedef
+				Linedef nl = General.Map.Map.NearestLinedefRange(vm, vrange);
+				if (nl != null)
+				{
+					// Snap to grid?
+					if (snaptogrid)
+					{
+						// Get grid intersection coordinates
+						List<Vector2D> coords = nl.GetGridIntersections();
+
+						// Find nearest grid intersection
+						bool found = false;
+						float found_distance = float.MaxValue;
+						Vector2D found_coord = new Vector2D();
+						foreach (Vector2D v in coords)
+						{
+							Vector2D delta = vm - v;
+							if (delta.GetLengthSq() < found_distance)
+							{
+								found_distance = delta.GetLengthSq();
+								found_coord = v;
+								found = true;
+							}
+						}
+
+						if (found)
+							return found_coord;
+					}
+					else
+					{
+						return nl.NearestOnLine(vm);
+					}
+				}
+			}
+
+			//Just get the current mouse location instead
+			if (snaptogrid)
+				return General.Map.Grid.SnappedToGrid(vm);
+			return vm;
+		}
+
+		/// <summary>This finds the thing closest to the specified position.</summary>
+		public SlopeVertex NearestSlopeVertexSquareRange(Vector2D pos, float maxrange)
+		{
+			List<SlopeVertex> verts = GetUnSelectedSlopeVertices();
+			if (highlightedslope != null)
+				verts.Remove(highlightedslope);
+
+			return NearestSlopeVertexSquareRange(verts, pos, maxrange);
+		}
+
+		/// <summary>This finds the slope vertex closest to the specified position.</summary>
+		public SlopeVertex NearestSlopeVertexSquareRange(ICollection<SlopeVertex> selection, Vector2D pos, float maxrange)
+		{
+			RectangleF range = RectangleF.FromLTRB(pos.x - maxrange, pos.y - maxrange, pos.x + maxrange, pos.y + maxrange);
+			SlopeVertex closest = null;
+			float distance = float.MaxValue;
+
+			// Go for all vertices in selection
+			foreach (SlopeVertex v in selection)
+			{
+				float px = v.Pos.x;
+				float py = v.Pos.y;
+
+				//mxd. Within range?
+				if ((v.Pos.x < range.Left) || (v.Pos.x > range.Right)
+					|| (v.Pos.y < range.Top) || (v.Pos.y > range.Bottom))
+					continue;
+
+				// Close than previous find?
+				float d = Math.Abs(px - pos.x) + Math.Abs(py - pos.y);
+				if (d < distance)
+				{
+					// This one is closer
+					closest = v;
+					distance = d;
+				}
+			}
+
+			// Return result
+			return closest;
 		}
 
 		// Mouse wants to drag
@@ -970,6 +1065,22 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			return selected;
+		}
+
+		public List<SlopeVertex> GetUnSelectedSlopeVertices()
+		{
+			List<SlopeVertex> notselected = new List<SlopeVertex>();
+
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			{
+				foreach (SlopeVertex sv in svg.Vertices)
+				{
+					if (!sv.Selected)
+						notselected.Add(sv);
+				}
+			}
+
+			return notselected;
 		}
 
 		public List<SlopeVertex> GetAllSlopeVertices()

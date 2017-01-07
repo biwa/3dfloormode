@@ -32,7 +32,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\Build\Plugins\</OutputPath>
+    <OutputPath>..\GZDoom-Builder\Build\Plugins\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -174,15 +174,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Builder.csproj">
+    <ProjectReference Include="..\GZDoom-Builder\Source\Core\Builder.csproj">
       <Project>{818B3D10-F791-4C3F-9AF5-BB2D0079B63C}</Project>
       <Name>Builder</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BuilderEffects\BuilderEffects.csproj">
+    <ProjectReference Include="..\GZDoom-Builder\Source\Plugins\BuilderEffects\BuilderEffects.csproj">
       <Project>{B859BE0F-A992-476D-A642-FA8EFE94AAA5}</Project>
       <Name>BuilderEffects</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BuilderModes\BuilderModes.csproj">
+    <ProjectReference Include="..\GZDoom-Builder\Source\Plugins\BuilderModes\BuilderModes.csproj">
       <Project>{B42D5AA0-F9A6-4234-9C4B-A05B11A64851}</Project>
       <Name>BuilderModes</Name>
     </ProjectReference>
