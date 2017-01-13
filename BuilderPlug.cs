@@ -596,6 +596,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				List<Vector3D> sp = new List<Vector3D>();
 				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
+                //if the dbs file was deleted or corrupted and the svg info is not available, then unbind the svg info from this sector
+                if (svg == null)
+                {
+                    s.Fields.Remove(fn);
+                    continue;
+                }
+
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
