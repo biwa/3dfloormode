@@ -497,12 +497,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				List<Vector3D> sp = new List<Vector3D>();
 				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
-				for (int i = 0; i < svg.Vertices.Count; i++)
+                // If the SVG does not exist unbind the SVG info from this sector
+                if (svg == null)
+                {
+                    s.Fields.Remove(fn);
+                    continue;
+                }
+
+                for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
 				}
 
-				if (svg.Vertices.Count == 2)
+                if (svg.Vertices.Count == 2)
 				{
 					float z = sp[0].z;
 					Line2D line = new Line2D(sp[0], sp[1]);
