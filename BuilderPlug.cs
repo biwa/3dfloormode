@@ -43,7 +43,6 @@ using CodeImp.DoomBuilder.Config;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.BuilderModes;
 // using CodeImp.DoomBuilder.GZBuilder.Geometry;
-using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.VisualModes;
 
 #endregion
@@ -183,39 +182,12 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			controlsectorarea = new ControlSectorArea(-512, 0, 512, 0, 64, 56);
 			BuilderPlug.Me.ControlSectorArea.LoadConfig();
 
-			LoadSlopesFromDBS();
-
 			// Try to find the slope data sector and store slope information in it
 			slopedatasector = GetSlopeDataSector();
 
 			if(slopedatasector != null)
 				foreach (SlopeVertexGroup svg in slopevertexgroups)
 					svg.StoreInSector(slopedatasector);
-		}
-
-		// Write the slope data to the .dbs file when the map is saved
-		public override void OnMapSaveBegin(SavePurpose purpose)
-		{
-			base.OnMapSaveBegin(purpose);
-
-			ListDictionary slopedata = new ListDictionary();
-
-			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
-			{
-				ListDictionary data = new ListDictionary();
-
-				for (int i = 0; i < svg.Vertices.Count; i++)
-				{
-					string name = String.Format("vertex{0}.", i+1);
-					data.Add(name + "x", svg.Vertices[i].Pos.x);
-					data.Add(name + "y", svg.Vertices[i].Pos.y);
-					data.Add(name + "z", svg.Vertices[i].Z);
-				}
-
-				slopedata.Add("slope" + svg.Id.ToString(), data);
-			}
-
-			General.Map.Options.WritePluginSetting("slopes", slopedata);
 		}
 
 		public override void OnUndoEnd()
@@ -439,77 +411,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
             highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
 			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
-		}
-
-		private void LoadSlopesFromDBS()
-		{
-			slopevertexgroups.Clear();
-
-			Regex vertexregex = new Regex(@"vertex(\d)\.(\w+)", RegexOptions.IgnoreCase);
-			Regex sloperegex = new Regex(@"slope(\d+)", RegexOptions.IgnoreCase);
-
-			ListDictionary slopedata = (ListDictionary)General.Map.Options.ReadPluginSetting("slopes", new ListDictionary());
-
-			foreach (DictionaryEntry slopeentry in slopedata)
-			{
-				float[] values = new float[9];
-				int counter = 0;
-
-				Match slopematch = sloperegex.Match((string)slopeentry.Key);
-
-				if (slopematch.Success)
-				{
-					int slopenum = Convert.ToInt32(slopematch.Groups[1].ToString());
-					bool floor = false;
-					bool ceiling = false;
-
-					foreach (DictionaryEntry entry in (ListDictionary)slopeentry.Value)
-					{
-						int voffset = 0;
-						int fcoffset = 0;
-
-						Match vertexmatch = vertexregex.Match((string)entry.Key);
-
-						if (vertexmatch.Success)
-						{
-							int pointnum = Convert.ToInt32(vertexmatch.Groups[1].ToString()) - 1;
-
-							if (pointnum > counter)
-								counter = pointnum;
-
-							voffset = pointnum * 3;
-							fcoffset = pointnum * 2;
-
-							if (vertexmatch.Groups[2].ToString() == "y") voffset += 1;
-							if (vertexmatch.Groups[2].ToString() == "z") voffset += 2;
-
-							values[voffset] = (float)entry.Value;
-						}
-						else if ((string)entry.Key == "planetype")
-						{
-							if ((string)entry.Value == "floor")
-								floor = true;
-							else if ((string)entry.Value == "ceiling")
-								ceiling = true;
-						}
-					}
-
-					List<SlopeVertex> vertices = new List<SlopeVertex>();
-
-					for (int i = 0; i <= counter; i++)
-					{
-						vertices.Add(new SlopeVertex(new Vector2D(values[i * 3], values[i * 3 + 1]), values[i * 3 + 2]));
-					}
-
-					slopevertexgroups.Add(new SlopeVertexGroup(slopenum, vertices));
-				}
-			}
-
-			foreach (SlopeVertexGroup svg in slopevertexgroups)
-			{
-				svg.FindSectors();
-				svg.ComputeHeight();
-			}
 		}
 
 		public void StoreSlopeVertexGroupsInSector()

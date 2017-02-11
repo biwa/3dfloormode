@@ -83,7 +83,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool editpressed;
 
         private List<ThreeDFloor> threedfloors;
-        private List<SlopeObject> slopeobjects;
 		bool dragging = false;
 
 		private List<TextLabel> labels;
