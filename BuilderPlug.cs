@@ -62,6 +62,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	{
 		Floor = 1,
 		Ceiling = 2,
+        Bottom = 4, // Floor of 3D floor control sector
+        Top = 8 // Ceiling of 3D floor control sector
 	}
 
 	public class BuilderPlug : Plug

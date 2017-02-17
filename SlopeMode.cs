@@ -294,7 +294,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 						if (pt == PlaneType.Floor)
 							labelarray[apos].Text = "F";
-						else
+						else if(pt == PlaneType.Ceiling)
 							labelarray[apos].Text = "C";
 
 						// First iteration of loop -> may be the only label needed, so

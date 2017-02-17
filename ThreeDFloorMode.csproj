@@ -110,6 +110,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SectorLabelInfo.cs" />
     <Compile Include="SlopeMode.cs" />
     <Compile Include="SlopeVertex.cs" />
     <Compile Include="SlopeVertexGroup.cs" />
