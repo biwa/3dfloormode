@@ -252,6 +252,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				foreach (Sector s in svg.Sectors)
 				{
+					if (s.Fields == null)
+						continue;
+
 					if ((svg.SectorPlanes[s] & PlaneType.Floor) == PlaneType.Floor)
 					{
 						if (s.Fields.ContainsKey("user_floorplane_id") && s.Fields.GetValue("user_floorplane_id", -1) == svg.Id)
@@ -411,7 +414,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			additiveselect = General.Settings.ReadPluginSetting("BuilderModes", "additiveselect", false);
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
-            highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
+			highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
 			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
 		}
 
@@ -499,19 +502,19 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				List<Vector3D> sp = new List<Vector3D>();
 				SlopeVertexGroup svg = GetSlopeVertexGroup(id);
 
-                // If the SVG does not exist unbind the SVG info from this sector
-                if (svg == null)
-                {
-                    s.Fields.Remove(fn);
-                    continue;
-                }
+				// If the SVG does not exist unbind the SVG info from this sector
+				if (svg == null)
+				{
+					s.Fields.Remove(fn);
+					continue;
+				}
 
-                for (int i = 0; i < svg.Vertices.Count; i++)
+				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
 					sp.Add(new Vector3D(svg.Vertices[i].Pos.x, svg.Vertices[i].Pos.y, svg.Vertices[i].Z));
 				}
 
-                if (svg.Vertices.Count == 2)
+				if (svg.Vertices.Count == 2)
 				{
 					float z = sp[0].z;
 					Line2D line = new Line2D(sp[0], sp[1]);
