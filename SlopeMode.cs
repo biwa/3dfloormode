@@ -145,6 +145,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
 				}
 			}
+			else
+			{
+				BuilderPlug.Me.LoadSlopeVertexGroupsFromSector();
+			}
 
             renderer.SetPresentation(Presentation.Things);
 
@@ -214,106 +218,60 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void SetupLabels()
 		{
-			Dictionary<Sector, List<TextLabel>> sectorlabels = new Dictionary<Sector, List<TextLabel>>();
+			Dictionary<Sector, SectorLabelInfo> sectorlabels = new Dictionary<Sector, SectorLabelInfo>();
 			PixelColor white = new PixelColor(255, 255, 255, 255);
-
-			Dictionary<Sector, Dictionary<PlaneType, SlopeVertexGroup>> requiredlabels = new Dictionary<Sector, Dictionary<PlaneType, SlopeVertexGroup>>();
 
 			if (labels != null)
 			{
 				// Dispose old labels
 				foreach (TextLabel l in labels)
 					l.Dispose();
-			}
 
-			labels = new List<TextLabel>();
+				labels.Clear();
+			}
+			else
+			{
+				labels = new List<TextLabel>();
+			}
 
 			// Go through all sectors that belong to a SVG and set which SVG their floor and
 			// ceiling belongs to
 			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
+				// Process all directly affected sectors
 				foreach (Sector s in svg.Sectors)
 				{
-					if (!requiredlabels.ContainsKey(s))
-					{
-						requiredlabels.Add(s, new Dictionary<PlaneType, SlopeVertexGroup>());
-						requiredlabels[s][PlaneType.Floor] = null;
-						requiredlabels[s][PlaneType.Ceiling] = null;
-					}
+					if(!sectorlabels.ContainsKey(s))
+						sectorlabels.Add(s, new SectorLabelInfo());
 
 					if ((svg.SectorPlanes[s] & PlaneType.Floor) == PlaneType.Floor)
-						requiredlabels[s][PlaneType.Floor] = svg;
+						sectorlabels[s].AddSlopeVertexGroup(PlaneType.Floor, svg);
 
 					if ((svg.SectorPlanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
-						requiredlabels[s][PlaneType.Ceiling] = svg;
+						sectorlabels[s].AddSlopeVertexGroup(PlaneType.Ceiling, svg);
 				}
-			}
 
-			foreach (KeyValuePair<Sector, Dictionary<PlaneType, SlopeVertexGroup>> element in requiredlabels)
-			{
-				int numlabels = 0;
-				int counter = 0;
-				Sector sector = element.Key;
-				Dictionary<PlaneType, SlopeVertexGroup> dict = element.Value;
-
-				// How many planes of this sector have a SVG?
-				if (dict[PlaneType.Floor] != null) numlabels++;
-				if (dict[PlaneType.Ceiling] != null) numlabels++;
-
-				TextLabel[] labelarray = new TextLabel[sector.Labels.Count * numlabels];
-
-				foreach(PlaneType pt in  Enum.GetValues(typeof(PlaneType)))
+				// Process all tagged sectors
+				foreach(Sector s in svg.TaggedSectors)
 				{
-					if (dict[pt] == null) continue;
+					if (!sectorlabels.ContainsKey(s))
+						sectorlabels.Add(s, new SectorLabelInfo());
 
-					// If we're in the second iteration of the loop both the ceiling and
-					// floor of the sector have a SVG, so change to alignment of the
-					// existing labels from center to left
-					if (counter == 1)
-					{
-						for (int i = 0; i < sector.Labels.Count; i++)
-						{
-							labelarray[i].AlignX = TextAlignmentX.Left;
-						}
-					}
+					// Bottom and Top are just virtual, the control sector has Floor and Ceiling
+					if ((svg.SectorPlanes[s] & PlaneType.Floor) == PlaneType.Floor)
+						sectorlabels[s].AddSlopeVertexGroup(PlaneType.Bottom, svg);
 
-					for (int i = 0; i < sector.Labels.Count; i++)
-					{
-						int apos = sector.Labels.Count * counter + i;
-						Vector2D v = sector.Labels[i].position;
-						labelarray[apos] = new TextLabel();
-						labelarray[apos].TransformCoords = true;
-						labelarray[apos].AlignY = TextAlignmentY.Middle;
-						labelarray[apos].BackColor = General.Colors.Background.WithAlpha(255);
-						labelarray[apos].Location = sector.Labels[i].position;
-
-						if (dict[pt].Vertices.Contains(highlightedslope))
-							labelarray[apos].Color = General.Colors.Highlight.WithAlpha(255);
-						else
-							labelarray[apos].Color = white;
-
-						if (pt == PlaneType.Floor)
-							labelarray[apos].Text = "F";
-						else if(pt == PlaneType.Ceiling)
-							labelarray[apos].Text = "C";
-
-						// First iteration of loop -> may be the only label needed, so
-						// set it to be in the center
-						if(counter == 0)
-							labelarray[apos].AlignX = TextAlignmentX.Center;
-						// Second iteration of the loop so set it to be aligned at the right
-						else if(counter == 1)
-							labelarray[apos].AlignX = TextAlignmentX.Right;
-					}
-
-					counter++;
+					if ((svg.SectorPlanes[s] & PlaneType.Ceiling) == PlaneType.Ceiling)
+						sectorlabels[s].AddSlopeVertexGroup(PlaneType.Top, svg);
 				}
-
-				labels.AddRange(labelarray);
 			}
 
-			
-			foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			// Create the labels for each sector and add them to the label list
+			foreach(Sector s in sectorlabels.Keys)
+				labels.AddRange(sectorlabels[s].CreateLabels(s, highlightedslope, renderer.Scale));
+
+			// Z position labels for slope vertices
+			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 			{
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
@@ -327,7 +285,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					label.AlignX = TextAlignmentX.Center;
 					label.AlignY = TextAlignmentY.Middle;
 					label.BackColor = General.Colors.Background.WithAlpha(255);
-					label.Text = "";
+					label.Text = String.Format("Z: {0}", sv.Z);
 
 					// Rearrange labels if they'd be (exactly) on each other
 					// TODO: do something like that also for overlapping labels
@@ -343,8 +301,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						label.Color = General.Colors.Selection.WithAlpha(255);
 					else
 						label.Color = white;
-
-					label.Text += String.Format("Z: {0}", sv.Z);
 
 					labels.Add(label);
 				}

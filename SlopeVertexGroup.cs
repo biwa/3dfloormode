@@ -115,6 +115,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				bool onfloor = s.Fields.GetValue("user_floorplane_id", -1) == id;
 				bool onceiling = s.Fields.GetValue("user_ceilingplane_id", -1) == id;
+				PlaneType pt = 0;
 
 				if (!onfloor && !onceiling)
 					continue;
@@ -122,13 +123,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				sectors.Add(s);
 
 				if (onfloor && onceiling)
-					sectorplanes.Add(s, PlaneType.Floor | PlaneType.Ceiling);
+					pt = PlaneType.Floor | PlaneType.Ceiling;
 				else if (onfloor)
-					sectorplanes.Add(s, PlaneType.Floor);
+					pt = PlaneType.Floor;
 				else if (onceiling)
-					sectorplanes.Add(s, PlaneType.Ceiling);
+					pt = PlaneType.Ceiling;
 
-				GetTaggesSectors(s);
+				sectorplanes.Add(s, pt);
+
+				GetTaggesSectors(s, pt);
 			}
 		}
 
@@ -141,7 +144,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
-		private void GetTaggesSectors(Sector s)
+		private void GetTaggesSectors(Sector s, PlaneType pt)
 		{
 			// Check if the current sector is a 3D floor control sector. If that's the case also store the
 			// tagged sector(s). They will be used for highlighting in slope mode
@@ -153,6 +156,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					{
 						if (!taggedsectors.Contains(ts))
 							taggedsectors.Add(ts);
+
+						if(!sectorplanes.ContainsKey(ts))
+							sectorplanes.Add(ts, pt);
 					}
 				}
 			}
@@ -172,7 +178,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sectorplanes.Add(s, pt);
 			sectors.Add(s);
 
-			GetTaggesSectors(s);
+			GetTaggesSectors(s, pt);
 
 			ApplyToSectors();
 		}
