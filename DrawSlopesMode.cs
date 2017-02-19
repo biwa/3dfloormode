@@ -546,9 +546,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				if (dr == DialogResult.OK)
 				{
-					BuilderPlug.Me.SlopeDataSector = General.Map.Map.GetSelectedSectors(true).ToList()[0];
+					MessageBox.Show(General.Map.Map.GetMarkedSectors(true).Count.ToString());
+					BuilderPlug.Me.SlopeDataSector = General.Map.Map.GetMarkedSectors(true)[0];
 					BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
 				}
+			}
+			else
+			{
+				BuilderPlug.Me.LoadSlopeVertexGroupsFromSector();
 			}
 
 			EnableAutoPanning();

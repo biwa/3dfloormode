@@ -36,20 +36,20 @@
 			// 
 			// useselectedsector
 			// 
-			this.useselectedsector.Location = new System.Drawing.Point(12, 223);
+			this.useselectedsector.Location = new System.Drawing.Point(147, 238);
 			this.useselectedsector.Name = "useselectedsector";
 			this.useselectedsector.Size = new System.Drawing.Size(129, 23);
-			this.useselectedsector.TabIndex = 1;
+			this.useselectedsector.TabIndex = 2;
 			this.useselectedsector.Text = "Use selected sector";
 			this.useselectedsector.UseVisualStyleBackColor = true;
 			this.useselectedsector.Click += new System.EventHandler(this.button1_Click);
 			// 
 			// createnewsector
 			// 
-			this.createnewsector.Location = new System.Drawing.Point(147, 223);
+			this.createnewsector.Location = new System.Drawing.Point(12, 238);
 			this.createnewsector.Name = "createnewsector";
 			this.createnewsector.Size = new System.Drawing.Size(129, 23);
-			this.createnewsector.TabIndex = 2;
+			this.createnewsector.TabIndex = 1;
 			this.createnewsector.Text = "Create sector in CSA";
 			this.createnewsector.UseVisualStyleBackColor = true;
 			this.createnewsector.Click += new System.EventHandler(this.createnewsector_Click);
@@ -57,7 +57,7 @@
 			// cancel
 			// 
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(282, 223);
+			this.cancel.Location = new System.Drawing.Point(282, 238);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(129, 23);
 			this.cancel.TabIndex = 3;
@@ -70,7 +70,7 @@
 			this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
 			this.webBrowser1.Name = "webBrowser1";
 			this.webBrowser1.ScrollBarsEnabled = false;
-			this.webBrowser1.Size = new System.Drawing.Size(399, 205);
+			this.webBrowser1.Size = new System.Drawing.Size(399, 220);
 			this.webBrowser1.TabIndex = 4;
 			// 
 			// SlopeDataSectorDialog
@@ -78,7 +78,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancel;
-			this.ClientSize = new System.Drawing.Size(428, 256);
+			this.ClientSize = new System.Drawing.Size(423, 273);
 			this.Controls.Add(this.webBrowser1);
 			this.Controls.Add(this.cancel);
 			this.Controls.Add(this.createnewsector);
@@ -88,7 +88,7 @@
 			this.MinimizeBox = false;
 			this.Name = "SlopeDataSectorDialog";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "SlopeDataSectorDialog";
+			this.Text = "Slope data sector";
 			this.Load += new System.EventHandler(this.SlopeDataSectorDialog_Load);
 			this.ResumeLayout(false);
 
