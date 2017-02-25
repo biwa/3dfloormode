@@ -316,6 +316,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				foreach (Sector s in svg.Sectors)
 					UpdateSlopes(s);
 
+				// Save the updated data in the sector
+				svg.StoreInSector(slopedatasector);
+
 				if (General.Editing.Mode is BaseVisualMode)
 				{
 					List<Sector> sectors = new List<Sector>();

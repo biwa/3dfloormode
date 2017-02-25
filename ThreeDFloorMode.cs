@@ -164,7 +164,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					labelarray[i].AlignX = TextAlignmentX.Center;
 					labelarray[i].AlignY = TextAlignmentY.Middle;
 					labelarray[i].Color = General.Colors.Highlight.WithAlpha(255);
-					labelarray[i].BackColor = General.Colors.Background.WithAlpha(255);
+					labelarray[i].BackColor = General.Colors.Background.WithAlpha(128);
 				}
 				labels.Add(s, labelarray);
 			}

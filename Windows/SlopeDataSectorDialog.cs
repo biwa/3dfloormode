@@ -42,7 +42,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	body {{ background-color:rgb({0},{1},{2}); font-family:{3}; font-size:12 }}
 </style>
 
-The map does not contain a slope data sector. This sector is required by the slope mode to keep track of undo and redo operations.
+The map does not contain a slope data sector. This sector is required by the slope mode to store data for the slope vertex groups.
 
 You have two options:
 <ul>
