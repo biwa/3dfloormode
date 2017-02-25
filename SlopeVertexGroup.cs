@@ -76,6 +76,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 			}
 
+			// Get reposition value
+			reposition = sector.Fields.GetValue(String.Format("user_svg{0}_reposition", id), false);
+
 			ComputeHeight();
 			FindSectors();
 		}
@@ -215,6 +218,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void RemoveUndoRedoUDMFFields(Sector s)
 		{
+			string fieldname = "";
 			string[] comp = new string[] { "x", "y", "z" };
 
 			if (s == null || s.IsDisposed)
@@ -226,12 +230,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				foreach (string c in comp)
 				{
-					string fieldname = string.Format("user_svg{0}_v{1}_{2}", id, i, c);
+					fieldname = string.Format("user_svg{0}_v{1}_{2}", id, i, c);
 
 					if (s.Fields.ContainsKey(fieldname))
 						s.Fields.Remove(fieldname);
 				}
 			}
+
+			// Remove reposition field
+			fieldname = string.Format("user_svg{0}_reposition", id);
+			if (s.Fields.ContainsKey(fieldname))
+				s.Fields.Remove(fieldname);
 		}
 
 		public void ApplyToSectors()
@@ -291,6 +300,22 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Also store all slope vertices in the sector
 			for (int i = 0; i < vertices.Count; i++)
 				vertices[i].StoreInSector(sector, id, i);
+
+			string identifier = String.Format("user_svg{0}_reposition", id);
+
+			// Add, update, or delete the reposition field
+			if (reposition)
+			{
+				if (sector.Fields.ContainsKey(identifier))
+					sector.Fields[identifier] = new UniValue(UniversalType.Boolean, reposition);
+				else
+					sector.Fields.Add(identifier, new UniValue(UniversalType.Boolean, reposition));
+			}
+			else
+			{
+				if (sector.Fields.ContainsKey(identifier))
+					sector.Fields.Remove(identifier);
+			}
 		}
 
 		public void SelectVertices(bool select)

@@ -370,7 +370,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					foreach (SlopeVertexGroup svg in slopevertexgroups)
 						if (svg.Reposition)
+						{
 							svg.RepositionByAnchor();
+							svg.StoreInSector(slopedatasector);
+						}
 				}
 
 			}
