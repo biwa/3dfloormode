@@ -141,7 +141,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				if (dr == DialogResult.OK)
 				{
-					MessageBox.Show(General.Map.Map.GetMarkedSectors(true).Count.ToString());
 					BuilderPlug.Me.SlopeDataSector = General.Map.Map.GetMarkedSectors(true)[0];
 					BuilderPlug.Me.StoreSlopeVertexGroupsInSector();
 				}
@@ -285,7 +284,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					label.Location = new Vector2D(x, y);
 					label.AlignX = TextAlignmentX.Center;
 					label.AlignY = TextAlignmentY.Middle;
-					label.BackColor = General.Colors.Background.WithAlpha(255);
+					label.BackColor = General.Colors.Background.WithAlpha(128);
 					label.Text = String.Format("Z: {0}", sv.Z);
 
 					// Rearrange labels if they'd be (exactly) on each other
