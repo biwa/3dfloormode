@@ -187,9 +187,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Try to find the slope data sector and store slope information in it
 			slopedatasector = GetSlopeDataSector();
 
-			if(slopedatasector != null)
-				foreach (SlopeVertexGroup svg in slopevertexgroups)
-					svg.StoreInSector(slopedatasector);
+			if (slopedatasector != null)
+				LoadSlopeVertexGroupsFromSector();
 		}
 
 		public override void OnUndoEnd()
