@@ -538,11 +538,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (BuilderPlug.Me.SlopeDataSector == null || BuilderPlug.Me.SlopeDataSector.IsDisposed)
 			{
+				General.Map.UndoRedo.CreateUndo("Set up slope data sector");
+
 				SlopeDataSectorDialog sdsd = new SlopeDataSectorDialog();
 				DialogResult dr = sdsd.ShowDialog();
 
 				if (dr == DialogResult.Cancel)
-					General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
+				{
+					General.Map.UndoRedo.WithdrawUndo();
+					General.Editing.CancelMode();
+					return;
+				}
 
 				if (dr == DialogResult.OK)
 				{
@@ -603,7 +609,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Cancel base class
 			base.OnCancel();
 
-			// Return to original mode
+			// Return to previous stable mode
 			General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
 		}
 

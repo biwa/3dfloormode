@@ -122,8 +122,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnCancel();
 
-			// Return to this mode
-			General.Editing.ChangeMode(new ThingsMode());
+			// Return to previous stable mode
+			General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
 		}
 
 		// Mode engages
@@ -133,11 +133,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			if (BuilderPlug.Me.SlopeDataSector == null || BuilderPlug.Me.SlopeDataSector.IsDisposed)
 			{
+				General.Map.UndoRedo.CreateUndo("Set up slope data sector");
+
 				SlopeDataSectorDialog sdsd = new SlopeDataSectorDialog();
 				DialogResult dr = sdsd.ShowDialog();
 
 				if (dr == DialogResult.Cancel)
-					General.Editing.ChangeMode(General.Editing.PreviousStableMode.Name);
+				{
+					General.Map.UndoRedo.WithdrawUndo();
+					General.Editing.CancelMode();
+					return;
+				}
 
 				if (dr == DialogResult.OK)
 				{
@@ -331,18 +337,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				}
 
 				List<SlopeVertex> vertices = new List<SlopeVertex>();
+				List<Line2D> highlightlines = new List<Line2D>();
 
-				// Store all slope vertices and draw the lines between them
+				// Store all slope vertices and draw the lines between them. If the lines connect highlighted slope vertices
+				// draw them later, so they are on top
 				foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
 				{
+					bool highlighted = svg.Vertices.Where(o => o == highlightedslope).Count() > 0;
+
 					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
 						vertices.Add(svg.Vertices[i]);
 
 						if (i < svg.Vertices.Count - 1)
-							renderer.RenderLine(svg.Vertices[0].Pos, svg.Vertices[i+1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
+						{
+							if (highlighted)
+								highlightlines.Add(new Line2D(svg.Vertices[0].Pos, svg.Vertices[i + 1].Pos));
+							else
+								renderer.RenderLine(svg.Vertices[0].Pos, svg.Vertices[i + 1].Pos, 1, new PixelColor(255, 255, 255, 255), true);
+						}
 					}
 				}
+
+				// Draw highlighted lines
+				foreach (Line2D line in highlightlines)
+					renderer.RenderLine(line.v1, line.v2, 1, General.Colors.Highlight, true);
 
 				// Sort the slope vertex list and draw them. The sorting ensures that selected vertices are always drawn on top
 				foreach(SlopeVertex sv in vertices.OrderBy(o=>o.Selected))
