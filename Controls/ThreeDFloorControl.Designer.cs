@@ -86,6 +86,7 @@
 			// sectorCeilingHeight
 			// 
 			this.sectorCeilingHeight.AllowDecimal = false;
+			this.sectorCeilingHeight.AllowExpressions = false;
 			this.sectorCeilingHeight.AllowNegative = true;
 			this.sectorCeilingHeight.AllowRelative = true;
 			this.sectorCeilingHeight.BackColor = System.Drawing.Color.Transparent;
@@ -104,6 +105,7 @@
 			// sectorFloorHeight
 			// 
 			this.sectorFloorHeight.AllowDecimal = false;
+			this.sectorFloorHeight.AllowExpressions = false;
 			this.sectorFloorHeight.AllowNegative = true;
 			this.sectorFloorHeight.AllowRelative = true;
 			this.sectorFloorHeight.BackColor = System.Drawing.Color.Transparent;
@@ -152,7 +154,6 @@
 			// typeArgument
 			// 
 			this.typeArgument.BackColor = System.Drawing.Color.Transparent;
-			this.typeArgument.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.typeArgument.Location = new System.Drawing.Point(56, 19);
 			this.typeArgument.Name = "typeArgument";
 			this.typeArgument.Size = new System.Drawing.Size(59, 24);
@@ -191,7 +192,6 @@
 			// flagsArgument
 			// 
 			this.flagsArgument.BackColor = System.Drawing.Color.Transparent;
-			this.flagsArgument.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.flagsArgument.Location = new System.Drawing.Point(56, 49);
 			this.flagsArgument.Name = "flagsArgument";
 			this.flagsArgument.Size = new System.Drawing.Size(59, 24);
@@ -200,7 +200,6 @@
 			// alphaArgument
 			// 
 			this.alphaArgument.BackColor = System.Drawing.Color.Transparent;
-			this.alphaArgument.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.alphaArgument.Location = new System.Drawing.Point(56, 79);
 			this.alphaArgument.Name = "alphaArgument";
 			this.alphaArgument.Size = new System.Drawing.Size(59, 24);
@@ -209,11 +208,11 @@
 			// groupBox1
 			// 
 			this.groupBox1.BackColor = System.Drawing.Color.Transparent;
+			this.groupBox1.Controls.Add(this.typeArgument);
+			this.groupBox1.Controls.Add(this.flagsArgument);
 			this.groupBox1.Controls.Add(this.buttonEditSector);
 			this.groupBox1.Controls.Add(this.label6);
 			this.groupBox1.Controls.Add(this.alphaArgument);
-			this.groupBox1.Controls.Add(this.typeArgument);
-			this.groupBox1.Controls.Add(this.flagsArgument);
 			this.groupBox1.Controls.Add(this.label4);
 			this.groupBox1.Controls.Add(this.label5);
 			this.groupBox1.Location = new System.Drawing.Point(372, 8);

@@ -1010,6 +1010,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		protected override void OnDragStop(MouseEventArgs e)
 		{
 			dragging = false;
+
+			BuilderPlug.Me.ControlSectorArea.SaveConfig();
 		}
 
 		// This is called wheh selection ends
