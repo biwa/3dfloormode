@@ -92,6 +92,12 @@
       <DependentUpon>ThreeDFloorTooltipControl.cs</DependentUpon>
     </Compile>
     <Compile Include="DrawSlopesMode.cs" />
+    <Compile Include="Interface\PreferencesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Interface\PreferencesForm.Designer.cs">
+      <DependentUpon>PreferencesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Interface\ThreeDFloorPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -153,6 +159,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Interface\PreferencesForm.resx">
+      <DependentUpon>PreferencesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Actions.cfg" />
     <EmbeddedResource Include="Windows\ThreeDFloorEditorWindow.resx">
       <DependentUpon>ThreeDFloorEditorWindow.cs</DependentUpon>

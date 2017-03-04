@@ -273,42 +273,70 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			// Create the labels for each sector and add them to the label list
-			foreach(Sector s in sectorlabels.Keys)
-				labels.AddRange(sectorlabels[s].CreateLabels(s, highlightedslope, renderer.Scale));
-
-			// Z position labels for slope vertices
-			foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+			if (BuilderPlug.Me.SectorLabelDisplayOption != LabelDisplayOption.Never || General.Interface.AltState == true)
 			{
-				for (int i = 0; i < svg.Vertices.Count; i++)
+				foreach (Sector s in sectorlabels.Keys)
 				{
-					SlopeVertex sv = svg.Vertices[i];
-					float x = sv.Pos.x;
-					float y = sv.Pos.y - 14 * (1 / renderer.Scale);
+					bool showlabel = true;
 
-					TextLabel label = new TextLabel();
-					label.TransformCoords = true;
-					label.Location = new Vector2D(x, y);
-					label.AlignX = TextAlignmentX.Center;
-					label.AlignY = TextAlignmentY.Middle;
-					label.BackColor = General.Colors.Background.WithAlpha(128);
-					label.Text = String.Format("Z: {0}", sv.Z);
-
-					// Rearrange labels if they'd be (exactly) on each other
-					// TODO: do something like that also for overlapping labels
-					foreach (TextLabel l in labels)
+					if (BuilderPlug.Me.SectorLabelDisplayOption == LabelDisplayOption.WhenHighlighted && General.Interface.AltState == false)
 					{
-						if (l.Location.x == label.Location.x && l.Location.y == label.Location.y)
-							label.Location = new Vector2D(x, l.Location.y - l.TextSize.Height * (1 / renderer.Scale));
+						showlabel = false;
+						foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+							if (svg.Vertices.Contains(highlightedslope))
+								showlabel = true;
 					}
 
-					if (svg.Vertices.Contains(highlightedslope))
-						label.Color = General.Colors.Highlight.WithAlpha(255);
-					else if (sv.Selected)
-						label.Color = General.Colors.Selection.WithAlpha(255);
-					else
-						label.Color = white;
+					if(showlabel)
+						labels.AddRange(sectorlabels[s].CreateLabels(s, highlightedslope, renderer.Scale));
+				}
+			}
 
-					labels.Add(label);
+			// Z position labels for slope vertices
+			if (BuilderPlug.Me.SlopeVertexLabelDisplayOption != LabelDisplayOption.Never || General.Interface.AltState == true)
+			{
+				foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
+				{
+					for (int i = 0; i < svg.Vertices.Count; i++)
+					{
+						bool showlabel = true;
+
+						if (BuilderPlug.Me.SlopeVertexLabelDisplayOption == LabelDisplayOption.WhenHighlighted && General.Interface.AltState == false)
+							if (!svg.Vertices.Contains(highlightedslope))
+								showlabel = false;
+
+						if (showlabel)
+						{
+							SlopeVertex sv = svg.Vertices[i];
+							float x = sv.Pos.x;
+							float y = sv.Pos.y - 14 * (1 / renderer.Scale);
+
+							TextLabel label = new TextLabel();
+							label.TransformCoords = true;
+							label.Location = new Vector2D(x, y);
+							label.AlignX = TextAlignmentX.Center;
+							label.AlignY = TextAlignmentY.Middle;
+							label.BackColor = General.Colors.Background.WithAlpha(128);
+							label.Text = String.Format("Z: {0}", sv.Z);
+
+							// Rearrange labels if they'd be (exactly) on each other
+							// TODO: do something like that also for overlapping labels
+							foreach (TextLabel l in labels)
+							{
+								if (l.Location.x == label.Location.x && l.Location.y == label.Location.y)
+									label.Location = new Vector2D(x, l.Location.y - l.TextSize.Height * (1 / renderer.Scale));
+							}
+
+							if (svg.Vertices.Contains(highlightedslope))
+								label.Color = General.Colors.Highlight.WithAlpha(255);
+							else if (sv.Selected)
+								label.Color = General.Colors.Selection.WithAlpha(255);
+							else
+								label.Color = white;
+
+							labels.Add(label);
+						}
+					}
 				}
 			}
 		}
@@ -750,6 +778,26 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			// Highlight nothing
 			highlightedslope = null;
+		}
+
+		public override void OnKeyDown(KeyEventArgs e)
+		{
+			base.OnKeyDown(e);
+
+			if (e.Alt)
+			{
+				General.Interface.RedrawDisplay();
+			}
+		}
+
+		public override void OnKeyUp(KeyEventArgs e)
+		{
+			base.OnKeyUp(e);
+
+			if (!e.Alt)
+			{
+				General.Interface.RedrawDisplay();
+			}
 		}
 
 		// Mouse wants to drag

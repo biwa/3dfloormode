@@ -66,6 +66,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
         Top = 8 // Ceiling of 3D floor control sector
 	}
 
+	public enum LabelDisplayOption
+	{
+		Always,
+		Never,
+		WhenHighlighted,
+	}
+
 	public class BuilderPlug : Plug
 	{
 		#region ================== Variables
@@ -81,6 +88,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private Sector slopedatasector;
 		private bool updateafteraction;
 		private string updateafteractionname;
+		private LabelDisplayOption sectorlabeldisplayoption;
+		private LabelDisplayOption slopevertexlabeldisplayoption;
+		private PreferencesForm preferencesform;
 
 		#endregion
 
@@ -108,6 +118,9 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public float StitchRange { get { return stitchrange; } }
 
 		public Sector SlopeDataSector { get { return slopedatasector; } set { slopedatasector = value; } }
+
+		public LabelDisplayOption SectorLabelDisplayOption { get { return sectorlabeldisplayoption; } set { sectorlabeldisplayoption = value; } }
+		public LabelDisplayOption SlopeVertexLabelDisplayOption { get { return slopevertexlabeldisplayoption; } set { slopevertexlabeldisplayoption = value; } }
 
 		#endregion
 
@@ -383,9 +396,32 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			return base.OnModeChange(oldmode, newmode);
 		}
 
-        #region ================== Actions
-		
-        #endregion
+		// When the Preferences dialog is shown
+		public override void OnShowPreferences(PreferencesController controller)
+		{
+			base.OnShowPreferences(controller);
+
+			// Load preferences
+			preferencesform = new PreferencesForm();
+			preferencesform.Setup(controller);
+		}
+
+		// When the Preferences dialog is closed
+		public override void OnClosePreferences(PreferencesController controller)
+		{
+			base.OnClosePreferences(controller);
+
+			// Apply settings that could have been changed
+			LoadSettings();
+
+			// Unload preferences
+			preferencesform.Dispose();
+			preferencesform = null;
+		}
+
+		#region ================== Actions
+
+		#endregion
 
 		#region ================== Methods
 
@@ -421,6 +457,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			autoclearselection = General.Settings.ReadPluginSetting("BuilderModes", "autoclearselection", false);
 			highlightsloperange = (float)General.Settings.ReadPluginSetting("BuilderModes", "highlightthingsrange", 10);
 			stitchrange = (float)General.Settings.ReadPluginSetting("BuilderModes", "stitchrange", 20);
+			slopevertexlabeldisplayoption = (LabelDisplayOption)General.Settings.ReadPluginSetting("slopevertexlabeldisplayoption", (int)LabelDisplayOption.Always);
+			sectorlabeldisplayoption = (LabelDisplayOption)General.Settings.ReadPluginSetting("sectorlabeldisplayoption", (int)LabelDisplayOption.Always);
 		}
 
 		public void StoreSlopeVertexGroupsInSector()
