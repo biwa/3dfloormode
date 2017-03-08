@@ -283,7 +283,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					{
 						showlabel = false;
 						foreach (SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups)
-							if (svg.Vertices.Contains(highlightedslope))
+							if ((svg.Sectors.Contains(s) || svg.TaggedSectors.Contains(s)) && svg.Vertices.Contains(highlightedslope))
 								showlabel = true;
 					}
 
