@@ -43,7 +43,7 @@
 			this.sectorTopFlat.BackColor = System.Drawing.SystemColors.AppWorkspace;
 			this.sectorTopFlat.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
 			this.sectorTopFlat.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.sectorTopFlat.Location = new System.Drawing.Point(148, 19);
+			this.sectorTopFlat.Location = new System.Drawing.Point(150, 16);
 			this.sectorTopFlat.Name = "sectorTopFlat";
 			this.sectorTopFlat.Size = new System.Drawing.Size(65, 65);
 			this.sectorTopFlat.TabIndex = 22;
@@ -53,7 +53,7 @@
 			this.sectorBorderTexture.BackColor = System.Drawing.SystemColors.AppWorkspace;
 			this.sectorBorderTexture.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
 			this.sectorBorderTexture.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.sectorBorderTexture.Location = new System.Drawing.Point(77, 19);
+			this.sectorBorderTexture.Location = new System.Drawing.Point(79, 16);
 			this.sectorBorderTexture.Name = "sectorBorderTexture";
 			this.sectorBorderTexture.Size = new System.Drawing.Size(65, 65);
 			this.sectorBorderTexture.TabIndex = 21;
@@ -63,7 +63,7 @@
 			this.sectorBottomFlat.BackColor = System.Drawing.SystemColors.AppWorkspace;
 			this.sectorBottomFlat.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
 			this.sectorBottomFlat.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.sectorBottomFlat.Location = new System.Drawing.Point(6, 19);
+			this.sectorBottomFlat.Location = new System.Drawing.Point(8, 16);
 			this.sectorBottomFlat.Name = "sectorBottomFlat";
 			this.sectorBottomFlat.Size = new System.Drawing.Size(65, 65);
 			this.sectorBottomFlat.TabIndex = 20;
@@ -72,7 +72,7 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.BackColor = System.Drawing.Color.Transparent;
-			this.label3.Location = new System.Drawing.Point(74, 3);
+			this.label3.Location = new System.Drawing.Point(76, 0);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(38, 13);
 			this.label3.TabIndex = 19;
@@ -82,7 +82,7 @@
 			// 
 			this.label2.AutoSize = true;
 			this.label2.BackColor = System.Drawing.Color.Transparent;
-			this.label2.Location = new System.Drawing.Point(3, 3);
+			this.label2.Location = new System.Drawing.Point(5, 0);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(40, 13);
 			this.label2.TabIndex = 18;
@@ -92,7 +92,7 @@
 			// 
 			this.label1.AutoSize = true;
 			this.label1.BackColor = System.Drawing.Color.Transparent;
-			this.label1.Location = new System.Drawing.Point(145, 3);
+			this.label1.Location = new System.Drawing.Point(147, 0);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(26, 13);
 			this.label1.TabIndex = 17;
@@ -101,7 +101,7 @@
 			// bottomHeight
 			// 
 			this.bottomHeight.BackColor = System.Drawing.Color.Transparent;
-			this.bottomHeight.Location = new System.Drawing.Point(41, 3);
+			this.bottomHeight.Location = new System.Drawing.Point(43, 0);
 			this.bottomHeight.Name = "bottomHeight";
 			this.bottomHeight.Size = new System.Drawing.Size(30, 13);
 			this.bottomHeight.TabIndex = 23;
@@ -111,7 +111,7 @@
 			// topHeight
 			// 
 			this.topHeight.BackColor = System.Drawing.Color.Transparent;
-			this.topHeight.Location = new System.Drawing.Point(183, 3);
+			this.topHeight.Location = new System.Drawing.Point(185, 0);
 			this.topHeight.Name = "topHeight";
 			this.topHeight.Size = new System.Drawing.Size(30, 13);
 			this.topHeight.TabIndex = 24;
@@ -131,7 +131,8 @@
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Name = "ThreeDFloorHelperTooltipElementControl";
-			this.Size = new System.Drawing.Size(222, 90);
+			this.Size = new System.Drawing.Size(222, 82);
+			this.Paint += new System.Windows.Forms.PaintEventHandler(this.ThreeDFloorHelperTooltipElementControl_Paint);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

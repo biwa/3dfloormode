@@ -301,10 +301,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				tooltipelements[count].topHeight.Text = tdf.TopHeight.ToString();
 
 				if (tdf == highlighted3dfloor)
-					tooltipelements[count].BackColor = General.Colors.ModelWireframe.ToColor();
+					// tooltipelements[count].BackColor = General.Colors.ModelWireframe.ToColor();
+					tooltipelements[count].Highlighted = true;
 				else
-					tooltipelements[count].BackColor = SystemColors.Control;
+					// tooltipelements[count].BackColor = SystemColors.Control;
+					tooltipelements[count].Highlighted = false;
 
+				tooltipelements[count].Refresh();
 				tooltipelements[count].Visible = true;
 
 				count++;

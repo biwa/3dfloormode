@@ -35,19 +35,23 @@
 			this.addThreeDFloorButton = new System.Windows.Forms.Button();
 			this.sharedThreeDFloorsCheckBox = new System.Windows.Forms.CheckBox();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.no3dfloorspanel = new System.Windows.Forms.Panel();
+			this.label1 = new System.Windows.Forms.Label();
+			this.add3dfloorbutton2 = new System.Windows.Forms.Button();
+			this.no3dfloorspanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// threeDFloorPanel
 			// 
-			this.threeDFloorPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.threeDFloorPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.threeDFloorPanel.AutoScroll = true;
 			this.threeDFloorPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.threeDFloorPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.threeDFloorPanel.Location = new System.Drawing.Point(12, 12);
+			this.threeDFloorPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.threeDFloorPanel.Location = new System.Drawing.Point(12, 6);
 			this.threeDFloorPanel.Name = "threeDFloorPanel";
-			this.threeDFloorPanel.Size = new System.Drawing.Size(760, 494);
+			this.threeDFloorPanel.Size = new System.Drawing.Size(760, 500);
 			this.threeDFloorPanel.TabIndex = 0;
 			// 
 			// okButton
@@ -97,6 +101,41 @@
 			this.sharedThreeDFloorsCheckBox.UseVisualStyleBackColor = true;
 			this.sharedThreeDFloorsCheckBox.CheckedChanged += new System.EventHandler(this.sharedThreeDFloorsCheckBox_CheckedChanged);
 			// 
+			// no3dfloorspanel
+			// 
+			this.no3dfloorspanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.no3dfloorspanel.Controls.Add(this.add3dfloorbutton2);
+			this.no3dfloorspanel.Controls.Add(this.label1);
+			this.no3dfloorspanel.Location = new System.Drawing.Point(12, 6);
+			this.no3dfloorspanel.Name = "no3dfloorspanel";
+			this.no3dfloorspanel.Size = new System.Drawing.Size(760, 500);
+			this.no3dfloorspanel.TabIndex = 0;
+			// 
+			// label1
+			// 
+			this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
+			this.label1.AutoSize = true;
+			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label1.Location = new System.Drawing.Point(279, 212);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(227, 25);
+			this.label1.TabIndex = 0;
+			this.label1.Text = "There are no 3D floors";
+			// 
+			// add3dfloorbutton2
+			// 
+			this.add3dfloorbutton2.Anchor = System.Windows.Forms.AnchorStyles.None;
+			this.add3dfloorbutton2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.add3dfloorbutton2.Location = new System.Drawing.Point(320, 254);
+			this.add3dfloorbutton2.Name = "add3dfloorbutton2";
+			this.add3dfloorbutton2.Size = new System.Drawing.Size(145, 33);
+			this.add3dfloorbutton2.TabIndex = 1;
+			this.add3dfloorbutton2.Text = "Add 3D floor";
+			this.add3dfloorbutton2.UseVisualStyleBackColor = true;
+			this.add3dfloorbutton2.Click += new System.EventHandler(this.addThreeDFloorButton_Click);
+			// 
 			// ThreeDFloorEditorWindow
 			// 
 			this.AcceptButton = this.okButton;
@@ -104,6 +143,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelButton;
 			this.ClientSize = new System.Drawing.Size(784, 548);
+			this.Controls.Add(this.no3dfloorspanel);
 			this.Controls.Add(this.sharedThreeDFloorsCheckBox);
 			this.Controls.Add(this.addThreeDFloorButton);
 			this.Controls.Add(this.cancelButton);
@@ -112,13 +152,15 @@
 			this.MaximizeBox = false;
 			this.MaximumSize = new System.Drawing.Size(800, 2000);
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(800, 38);
+			this.MinimumSize = new System.Drawing.Size(800, 200);
 			this.Name = "ThreeDFloorEditorWindow";
 			this.ShowIcon = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "3D floors";
-			this.Load += new System.EventHandler(this.ThreeDFloorEditorWindow_Load);
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ThreeDFloorEditorWindow_FormClosed);
+			this.Load += new System.EventHandler(this.ThreeDFloorEditorWindow_Load);
+			this.no3dfloorspanel.ResumeLayout(false);
+			this.no3dfloorspanel.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -132,6 +174,8 @@
 		private System.Windows.Forms.Button addThreeDFloorButton;
 		private System.Windows.Forms.CheckBox sharedThreeDFloorsCheckBox;
 		private System.Windows.Forms.ToolTip toolTip1;
-
+		private System.Windows.Forms.Panel no3dfloorspanel;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button add3dfloorbutton2;
 	}
 }

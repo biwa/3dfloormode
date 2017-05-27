@@ -57,7 +57,7 @@
 			// 
 			// sectorTopFlat
 			// 
-			this.sectorTopFlat.Location = new System.Drawing.Point(251, 38);
+			this.sectorTopFlat.Location = new System.Drawing.Point(252, 30);
 			this.sectorTopFlat.MultipleTextures = false;
 			this.sectorTopFlat.Name = "sectorTopFlat";
 			this.sectorTopFlat.Size = new System.Drawing.Size(115, 136);
@@ -66,7 +66,7 @@
 			// 
 			// sectorBorderTexture
 			// 
-			this.sectorBorderTexture.Location = new System.Drawing.Point(130, 38);
+			this.sectorBorderTexture.Location = new System.Drawing.Point(131, 30);
 			this.sectorBorderTexture.MultipleTextures = false;
 			this.sectorBorderTexture.Name = "sectorBorderTexture";
 			this.sectorBorderTexture.Required = false;
@@ -76,7 +76,7 @@
 			// 
 			// sectorBottomFlat
 			// 
-			this.sectorBottomFlat.Location = new System.Drawing.Point(9, 38);
+			this.sectorBottomFlat.Location = new System.Drawing.Point(10, 30);
 			this.sectorBottomFlat.MultipleTextures = false;
 			this.sectorBottomFlat.Name = "sectorBottomFlat";
 			this.sectorBottomFlat.Size = new System.Drawing.Size(115, 136);
@@ -96,7 +96,7 @@
 			this.sectorCeilingHeight.ButtonStepSmall = 0.1F;
 			this.sectorCeilingHeight.ButtonStepsUseModifierKeys = false;
 			this.sectorCeilingHeight.ButtonStepsWrapAround = false;
-			this.sectorCeilingHeight.Location = new System.Drawing.Point(296, 8);
+			this.sectorCeilingHeight.Location = new System.Drawing.Point(297, 0);
 			this.sectorCeilingHeight.Name = "sectorCeilingHeight";
 			this.sectorCeilingHeight.Size = new System.Drawing.Size(70, 24);
 			this.sectorCeilingHeight.StepValues = null;
@@ -115,7 +115,7 @@
 			this.sectorFloorHeight.ButtonStepSmall = 0.1F;
 			this.sectorFloorHeight.ButtonStepsUseModifierKeys = false;
 			this.sectorFloorHeight.ButtonStepsWrapAround = false;
-			this.sectorFloorHeight.Location = new System.Drawing.Point(54, 8);
+			this.sectorFloorHeight.Location = new System.Drawing.Point(55, 0);
 			this.sectorFloorHeight.Name = "sectorFloorHeight";
 			this.sectorFloorHeight.Size = new System.Drawing.Size(70, 24);
 			this.sectorFloorHeight.StepValues = null;
@@ -125,7 +125,7 @@
 			// 
 			this.label1.AutoSize = true;
 			this.label1.BackColor = System.Drawing.Color.Transparent;
-			this.label1.Location = new System.Drawing.Point(248, 13);
+			this.label1.Location = new System.Drawing.Point(249, 5);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(26, 13);
 			this.label1.TabIndex = 0;
@@ -135,7 +135,7 @@
 			// 
 			this.label2.AutoSize = true;
 			this.label2.BackColor = System.Drawing.Color.Transparent;
-			this.label2.Location = new System.Drawing.Point(8, 13);
+			this.label2.Location = new System.Drawing.Point(9, 5);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(40, 13);
 			this.label2.TabIndex = 6;
@@ -145,7 +145,7 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.BackColor = System.Drawing.Color.Transparent;
-			this.label3.Location = new System.Drawing.Point(130, 13);
+			this.label3.Location = new System.Drawing.Point(131, 5);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(38, 13);
 			this.label3.TabIndex = 7;
@@ -215,7 +215,7 @@
 			this.groupBox1.Controls.Add(this.alphaArgument);
 			this.groupBox1.Controls.Add(this.label4);
 			this.groupBox1.Controls.Add(this.label5);
-			this.groupBox1.Location = new System.Drawing.Point(372, 8);
+			this.groupBox1.Location = new System.Drawing.Point(373, 0);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(124, 166);
 			this.groupBox1.TabIndex = 5;
@@ -236,7 +236,7 @@
 			// 
 			this.groupBox2.BackColor = System.Drawing.Color.Transparent;
 			this.groupBox2.Controls.Add(this.checkedListBoxSectors);
-			this.groupBox2.Location = new System.Drawing.Point(502, 8);
+			this.groupBox2.Location = new System.Drawing.Point(503, 0);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(124, 166);
 			this.groupBox2.TabIndex = 6;
@@ -255,7 +255,7 @@
 			// 
 			// buttonDuplicate
 			// 
-			this.buttonDuplicate.Location = new System.Drawing.Point(632, 13);
+			this.buttonDuplicate.Location = new System.Drawing.Point(633, 5);
 			this.buttonDuplicate.Name = "buttonDuplicate";
 			this.buttonDuplicate.Size = new System.Drawing.Size(75, 23);
 			this.buttonDuplicate.TabIndex = 7;
@@ -265,7 +265,7 @@
 			// 
 			// buttonSplit
 			// 
-			this.buttonSplit.Location = new System.Drawing.Point(632, 42);
+			this.buttonSplit.Location = new System.Drawing.Point(633, 34);
 			this.buttonSplit.Name = "buttonSplit";
 			this.buttonSplit.Size = new System.Drawing.Size(75, 23);
 			this.buttonSplit.TabIndex = 8;
@@ -275,7 +275,7 @@
 			// 
 			// buttonCheckAll
 			// 
-			this.buttonCheckAll.Location = new System.Drawing.Point(632, 71);
+			this.buttonCheckAll.Location = new System.Drawing.Point(633, 63);
 			this.buttonCheckAll.Name = "buttonCheckAll";
 			this.buttonCheckAll.Size = new System.Drawing.Size(75, 23);
 			this.buttonCheckAll.TabIndex = 9;
@@ -285,7 +285,7 @@
 			// 
 			// buttonUncheckAll
 			// 
-			this.buttonUncheckAll.Location = new System.Drawing.Point(632, 100);
+			this.buttonUncheckAll.Location = new System.Drawing.Point(633, 92);
 			this.buttonUncheckAll.Name = "buttonUncheckAll";
 			this.buttonUncheckAll.Size = new System.Drawing.Size(75, 23);
 			this.buttonUncheckAll.TabIndex = 10;
@@ -296,7 +296,7 @@
 			// buttonDrawSlope
 			// 
 			this.buttonDrawSlope.Enabled = false;
-			this.buttonDrawSlope.Location = new System.Drawing.Point(632, 151);
+			this.buttonDrawSlope.Location = new System.Drawing.Point(633, 143);
 			this.buttonDrawSlope.Name = "buttonDrawSlope";
 			this.buttonDrawSlope.Size = new System.Drawing.Size(75, 23);
 			this.buttonDrawSlope.TabIndex = 16;
@@ -324,8 +324,10 @@
 			this.Controls.Add(this.sectorBottomFlat);
 			this.Controls.Add(this.sectorBorderTexture);
 			this.Controls.Add(this.sectorTopFlat);
+			this.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
 			this.Name = "ThreeDFloorHelperControl";
-			this.Size = new System.Drawing.Size(714, 186);
+			this.Size = new System.Drawing.Size(714, 169);
+			this.Paint += new System.Windows.Forms.PaintEventHandler(this.ThreeDFloorHelperControl_Paint);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);

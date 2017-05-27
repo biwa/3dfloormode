@@ -103,8 +103,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			threeDFloor = new ThreeDFloor();
 
-			this.BackColor = Color.FromArgb(128, Color.Green);
-
 			sectorBorderTexture.TextureName = General.Settings.DefaultTexture;
 			sectorTopFlat.TextureName = General.Settings.DefaultCeilingTexture;
 			sectorBottomFlat.TextureName = General.Settings.DefaultFloorTexture;
@@ -295,6 +293,29 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void buttonDrawSlope_Click(object sender, EventArgs e)
 		{
 			General.Editing.ChangeMode("DrawSlopesMode");
+		}
+
+		private void ThreeDFloorHelperControl_Paint(object sender, PaintEventArgs e)
+		{
+			Color c = Color.FromArgb(0, 192, 0); //  Color.FromArgb(255, Color.Green);
+
+			if (isnew)
+				ControlPaint.DrawBorder(
+					e.Graphics,
+					this.ClientRectangle,
+					c, // leftColor
+					5, // leftWidth
+					ButtonBorderStyle.Solid, // leftStyle
+					c, // topColor
+					0, // topWidth
+					ButtonBorderStyle.None, // topStyle
+					c, // rightColor
+					0, // rightWidth
+					ButtonBorderStyle.None, // rightStyle
+					c, // bottomColor
+					0, // bottomWidth
+					ButtonBorderStyle.None // bottomStyle
+				);
 		}
 	}
 }

@@ -47,7 +47,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			threedfloors = new List<ThreeDFloor>();
 
-			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>())
 			{
 				ctrl.ApplyToThreeDFloor();
 				threedfloors.Add(ctrl.ThreeDFloor);
@@ -63,9 +63,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			this.Close();
 		}
 
-		private void addThreeDFloorButton_Click(object sender, EventArgs e)
+		public void addThreeDFloorButton_Click(object sender, EventArgs e)
 		{
 			ThreeDFloorHelperControl ctrl = new ThreeDFloorHelperControl();
+
+			no3dfloorspanel.Hide();
 
 			threeDFloorPanel.Controls.Add(ctrl);
 
@@ -179,19 +181,33 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void FillThreeDFloorPanel(List<ThreeDFloor> threedfloors)
 		{
-			// Get rid of dummy sectors
-			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
-				ctrl.Sector.Dispose();
+			ClearThreeDFloorPanel();
 
-			// Clear all existing controls
-			threeDFloorPanel.Controls.Clear();
-
-			// Create a new controller instance for each linedef and set its properties
-			foreach (ThreeDFloor tdf in threedfloors.OrderByDescending(o => o.TopHeight).ToList())
+			if (threedfloors.Count > 0)
 			{
-				ThreeDFloorHelperControl ctrl = new ThreeDFloorHelperControl(tdf);
+				// Create a new controller instance for each linedef and set its properties
+				foreach (ThreeDFloor tdf in threedfloors.OrderByDescending(o => o.TopHeight).ToList())
+				{
+					ThreeDFloorHelperControl ctrl = new ThreeDFloorHelperControl(tdf);
 
-				threeDFloorPanel.Controls.Add(ctrl);
+					threeDFloorPanel.Controls.Add(ctrl);
+				}
+
+				no3dfloorspanel.Hide();
+			}
+			else
+			{
+				no3dfloorspanel.Show();
+			}
+		}
+
+		private void ClearThreeDFloorPanel()
+		{
+			// Get rid of dummy sectors and clear existing controls
+			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>().ToList())
+			{
+				ctrl.Sector.Dispose();
+				threeDFloorPanel.Controls.Remove(ctrl);
 			}
 		}
 
@@ -205,7 +221,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				foreach (Sector s in selectedSectors)
 				{
-					foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+					foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>())
 					{
 						// If the selected sector is not in the control's tagged sectors the control
 						// should be hidden
@@ -223,15 +239,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 			else
 			{
-				foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
+				foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>())
 					ctrl.Show();
 			}
 		}
 
 		private void ThreeDFloorEditorWindow_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls)
-				ctrl.Sector.Dispose();
+			ClearThreeDFloorPanel();
 		}
 	}
 }
