@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 	{
 		List<ThreeDFloor> threedfloors;
 		List<Sector> selectedsectors;
+		List<ThreeDFloorHelperControl> controlpool;
 
 		public List<Sector> SelectedSectors { get { return selectedsectors; } }
 
@@ -33,6 +35,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public ThreeDFloorEditorWindow()
 		{
 			this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width/2, Screen.PrimaryScreen.WorkingArea.Height/2);
+			controlpool = new List<ThreeDFloorHelperControl>();
 			InitializeComponent();
 		}
 
@@ -43,14 +46,38 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			FillThreeDFloorPanel(threedfloors);
 		}
 
+		// Gets a control from the pool or creates a new one
+		private ThreeDFloorHelperControl GetThreeDFloorControl()
+		{
+			ThreeDFloorHelperControl ctrl = controlpool.FirstOrDefault(o => o.Used == false);
+
+			if (ctrl == null)
+			{
+				ctrl = new ThreeDFloorHelperControl();
+				ctrl.Used = true;
+				controlpool.Add(ctrl);
+				threeDFloorPanel.Controls.Add(ctrl);
+			}
+			else
+			{
+				ctrl.SetDefaults();
+				ctrl.Used = true;
+			}
+
+			return ctrl;
+		}
+
 		private void okButton_Click(object sender, EventArgs e)
 		{
 			threedfloors = new List<ThreeDFloor>();
 
 			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>())
 			{
-				ctrl.ApplyToThreeDFloor();
-				threedfloors.Add(ctrl.ThreeDFloor);
+				if (ctrl.Used)
+				{
+					ctrl.ApplyToThreeDFloor();
+					threedfloors.Add(ctrl.ThreeDFloor);
+				}
 			}
 
 			this.DialogResult = DialogResult.OK;
@@ -65,20 +92,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		public void addThreeDFloorButton_Click(object sender, EventArgs e)
 		{
-			ThreeDFloorHelperControl ctrl = new ThreeDFloorHelperControl();
+			ThreeDFloorHelperControl ctrl = GetThreeDFloorControl();
 
-			no3dfloorspanel.Hide();
-
-			threeDFloorPanel.Controls.Add(ctrl);
+			ctrl.Show();
 
 			threeDFloorPanel.ScrollControlIntoView(ctrl);
+
+			no3dfloorspanel.Hide();
 		}
 
 		public void DuplicateThreeDFloor(ThreeDFloorHelperControl ctrl)
 		{
-			ThreeDFloorHelperControl dup = new ThreeDFloorHelperControl(ctrl);
+			ThreeDFloorHelperControl dup = GetThreeDFloorControl();
 
-			threeDFloorPanel.Controls.Add(dup);
+			dup.Update(ctrl);
 
 			threeDFloorPanel.ScrollControlIntoView(dup);
 		}
@@ -92,7 +119,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			for (int i = 0; i < ctrl.checkedListBoxSectors.Items.Count; i++)
 			{
-				// if (ctrl.checkedListBoxSectors.GetItemChecked(i))
 				if(ctrl.checkedListBoxSectors.GetItemCheckState(i) == CheckState.Checked)
 					items.Add(i);
 			}
@@ -122,31 +148,14 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (items.Count == 1)
 				startat = 0;
 
-			// Start at 1 because we can keep the original 3D floor and just uncheck all but
-			// one checkbox
-			/*
 			for (int i = 0; i < numsplits; i++)
 			{
-				ThreeDFloorHelperControl split = new ThreeDFloorHelperControl(ctrl);
+				var newctrl = GetThreeDFloorControl();
 
-				for (int j = 1; j < split.checkedListBoxSectors.Items.Count; j++)
-				{
-					split.checkedListBoxSectors.SetItemChecked(j, false);
-				}
+				newctrl.Update(ctrl);
+				newctrl.Show();
 
-				split.checkedListBoxSectors.SetItemChecked(items[i], true);
-
-				threeDFloorPanel.Controls.Add(split);
-
-				threeDFloorPanel.ScrollControlIntoView(split);
-			}
-			*/
-
-			for (int i = 0; i < numsplits; i++)
-			{
-				var newctrl = new ThreeDFloorHelperControl(ctrl);
 				controls.Add(newctrl);
-				threeDFloorPanel.Controls.Add(newctrl);
 			}
 
 			for (int i = controls.Count - 1; i >= 0 ; i--)
@@ -161,36 +170,18 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				useitem--;
 			}
-
-			/*
-
-			if (items.Count == 1)
-			{
-				ctrl.checkedListBoxSectors.SetItemChecked(items[0], false);
-			}
-			else
-			{
-				// Uncheck the checkboxes from the original 3D floor
-				for (int i = 1; i < items.Count; i++)
-				{
-					ctrl.checkedListBoxSectors.SetItemChecked(items[i], false);
-				}
-			}
-			*/
 		}
 
 		private void FillThreeDFloorPanel(List<ThreeDFloor> threedfloors)
 		{
-			ClearThreeDFloorPanel();
-
 			if (threedfloors.Count > 0)
 			{
 				// Create a new controller instance for each linedef and set its properties
 				foreach (ThreeDFloor tdf in threedfloors.OrderByDescending(o => o.TopHeight).ToList())
 				{
-					ThreeDFloorHelperControl ctrl = new ThreeDFloorHelperControl(tdf);
-
-					threeDFloorPanel.Controls.Add(ctrl);
+					ThreeDFloorHelperControl ctrl = GetThreeDFloorControl();
+					ctrl.Update(tdf);
+					ctrl.Show();
 				}
 
 				no3dfloorspanel.Hide();
@@ -199,15 +190,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				no3dfloorspanel.Show();
 			}
-		}
 
-		private void ClearThreeDFloorPanel()
-		{
-			// Get rid of dummy sectors and clear existing controls
-			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>().ToList())
+			// Hide all unused pool controls
+			if (controlpool.Count - threedfloors.Count > 0)
 			{
-				ctrl.Sector.Dispose();
-				threeDFloorPanel.Controls.Remove(ctrl);
+				foreach (ThreeDFloorHelperControl ctrl in controlpool.Skip(threedfloors.Count))
+				{
+					ctrl.Used = false;
+					ctrl.Hide();
+				}
 			}
 		}
 
@@ -233,20 +224,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				foreach (ThreeDFloorHelperControl ctrl in hideControls)
 				{
 					// Hide controls, unless they are new
-					if(ctrl.IsNew == false)
-						ctrl.Visible = false;
+					if (ctrl.IsNew == false)
+						ctrl.Hide();
 				}
 			}
 			else
 			{
 				foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>())
-					ctrl.Show();
+					if (ctrl.Used)
+						ctrl.Show();
 			}
 		}
 
 		private void ThreeDFloorEditorWindow_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			ClearThreeDFloorPanel();
+			// Get rid of dummy sectors and makes all controls available
+			foreach (ThreeDFloorHelperControl ctrl in threeDFloorPanel.Controls.OfType<ThreeDFloorHelperControl>().ToList())
+			{
+				if (ctrl.Sector != null)
+					ctrl.Sector.Dispose();
+
+				ctrl.Used = false;
+			}
+
+			General.Map.Map.Update();
 		}
 	}
 }

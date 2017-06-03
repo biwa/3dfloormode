@@ -443,8 +443,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (selectedSectors.Count <= 0 && General.Editing.Mode.HighlightedObject is Sector)
 				selectedSectors.Add((Sector)General.Editing.Mode.HighlightedObject);
 
-			tdfew.ThreeDFloors = GetThreeDFloors(selectedSectors);
+			if (tdfew == null)
+				tdfew = new ThreeDFloorEditorWindow();
 
+			tdfew.ThreeDFloors = GetThreeDFloors(selectedSectors);
 			DialogResult result = tdfew.ShowDialog((Form)General.Interface);
 
 			return result;

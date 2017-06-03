@@ -82,7 +82,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private Dictionary<Sector, string[]> selected3Dfloorlabels;
 		private Dictionary<Sector, string[]> unselected3Dfloorlabels;
 
-		ThreeDFloorHelperTooltipElementControl ctrl = new ThreeDFloorHelperTooltipElementControl();
+		ThreeDFloorHelperTooltipElementControl ctrl;
 		List<ThreeDFloorHelperTooltipElementControl> tooltipelements;
 
 		ControlSectorArea.Highlight csahighlight = ControlSectorArea.Highlight.None;

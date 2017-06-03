@@ -29,42 +29,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private Sector sector;
 		private bool settingup;
 		private List<int> checkedsectors;
+		private bool used;
 
 		public ThreeDFloor ThreeDFloor { get { return threeDFloor; } }
 		public bool IsNew { get { return isnew; } }
 		public Sector Sector { get { return sector; } }
 		public List<int> CheckedSectors { get { return checkedsectors; } }
+		public bool Used { get { return used; } set { used = value; } }
 
 		// Create the control from an existing linedef
 		public ThreeDFloorHelperControl(ThreeDFloor threeDFloor)
 		{
 			InitializeComponent();
 
-			isnew = false;
-			settingup = true;
-
-			this.threeDFloor = threeDFloor;
-
-			sectorBorderTexture.TextureName = threeDFloor.BorderTexture;
-			sectorTopFlat.TextureName = threeDFloor.TopFlat;
-			sectorBottomFlat.TextureName = threeDFloor.BottomFlat;
-			sectorCeilingHeight.Text = threeDFloor.TopHeight.ToString();
-			sectorFloorHeight.Text = threeDFloor.BottomHeight.ToString();
-
-			typeArgument.Setup(General.Map.Config.LinedefActions[160].Args[1]);
-			flagsArgument.Setup(General.Map.Config.LinedefActions[160].Args[2]);
-			alphaArgument.Setup(General.Map.Config.LinedefActions[160].Args[3]);
-
-			typeArgument.SetValue(threeDFloor.Type);
-			flagsArgument.SetValue(threeDFloor.Flags);
-			alphaArgument.SetValue(threeDFloor.Alpha);
-
-			AddSectorCheckboxes();
-
-			sector = General.Map.Map.CreateSector();
-
-			if (threeDFloor.Sector != null)
-				threeDFloor.Sector.CopyPropertiesTo(sector);
+			Update(threeDFloor);
 
 			settingup = false;
 		}
@@ -74,21 +52,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			settingup = true;
 
-			sectorBorderTexture.TextureName = threeDFloor.BorderTexture = ctrl.threeDFloor.BorderTexture;
-			sectorTopFlat.TextureName = threeDFloor.TopFlat = ctrl.threeDFloor.TopFlat;
-			sectorBottomFlat.TextureName = threeDFloor.BottomFlat = ctrl.threeDFloor.BottomFlat;
-			sectorCeilingHeight.Text = ctrl.threeDFloor.TopHeight.ToString();
-			sectorFloorHeight.Text = ctrl.threeDFloor.BottomHeight.ToString();
-
-			threeDFloor.TopHeight = ctrl.threeDFloor.TopHeight;
-			threeDFloor.BottomHeight = ctrl.threeDFloor.BottomHeight;
-
-			typeArgument.SetValue(ctrl.threeDFloor.Type);
-			flagsArgument.SetValue(ctrl.threeDFloor.Flags);
-			alphaArgument.SetValue(ctrl.threeDFloor.Alpha);
-
-			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
-				checkedListBoxSectors.SetItemChecked(i, ctrl.checkedListBoxSectors.GetItemChecked(i));
+			Update(ctrl);
 
 			settingup = false;
 		}
@@ -98,6 +62,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			InitializeComponent();
 
+			SetDefaults();
+
+			settingup = false;
+		}
+		
+		public void SetDefaults()
+		{
 			isnew = true;
 			settingup = true;
 
@@ -119,25 +90,77 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			AddSectorCheckboxes();
 
-			for(int i=0; i < checkedListBoxSectors.Items.Count; i++)
+			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, true);
 
 			//When creating a NEW 3d sector, find the sector that is the tallest, and place the floor on top of it
 			int FloorHeight = int.MinValue;
-			foreach (Sector s in BuilderPlug.TDFEW.SelectedSectors) {
+			foreach (Sector s in BuilderPlug.TDFEW.SelectedSectors)
+			{
 				if (s.FloorHeight > FloorHeight)
 					FloorHeight = s.FloorHeight;
 			}
 
-			if (FloorHeight != int.MinValue) {
+			if (FloorHeight != int.MinValue)
+			{
 				int DefaultHeight = General.Settings.DefaultCeilingHeight - General.Settings.DefaultFloorHeight;
 				sectorFloorHeight.Text = FloorHeight.ToString();
 				sectorCeilingHeight.Text = (FloorHeight + DefaultHeight).ToString();
 			}
 
 			sector = General.Map.Map.CreateSector();
+		}
 
-			settingup = false;
+		public void Update(ThreeDFloorHelperControl ctrl)
+		{
+			sectorBorderTexture.TextureName = threeDFloor.BorderTexture = ctrl.threeDFloor.BorderTexture;
+			sectorTopFlat.TextureName = threeDFloor.TopFlat = ctrl.threeDFloor.TopFlat;
+			sectorBottomFlat.TextureName = threeDFloor.BottomFlat = ctrl.threeDFloor.BottomFlat;
+			sectorCeilingHeight.Text = ctrl.threeDFloor.TopHeight.ToString();
+			sectorFloorHeight.Text = ctrl.threeDFloor.BottomHeight.ToString();
+
+			threeDFloor.TopHeight = ctrl.threeDFloor.TopHeight;
+			threeDFloor.BottomHeight = ctrl.threeDFloor.BottomHeight;
+
+			typeArgument.SetValue(ctrl.threeDFloor.Type);
+			flagsArgument.SetValue(ctrl.threeDFloor.Flags);
+			alphaArgument.SetValue(ctrl.threeDFloor.Alpha);
+
+			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
+				checkedListBoxSectors.SetItemChecked(i, ctrl.checkedListBoxSectors.GetItemChecked(i));
+		}
+
+		public void Update(ThreeDFloor threeDFloor)
+		{
+			isnew = false;
+			settingup = true;
+
+			this.threeDFloor = threeDFloor;
+
+			sectorBorderTexture.TextureName = threeDFloor.BorderTexture;
+			sectorTopFlat.TextureName = threeDFloor.TopFlat;
+			sectorBottomFlat.TextureName = threeDFloor.BottomFlat;
+			sectorCeilingHeight.Text = threeDFloor.TopHeight.ToString();
+			sectorFloorHeight.Text = threeDFloor.BottomHeight.ToString();
+
+			typeArgument.Setup(General.Map.Config.LinedefActions[160].Args[1]);
+			flagsArgument.Setup(General.Map.Config.LinedefActions[160].Args[2]);
+			alphaArgument.Setup(General.Map.Config.LinedefActions[160].Args[3]);
+
+			typeArgument.SetValue(threeDFloor.Type);
+			flagsArgument.SetValue(threeDFloor.Flags);
+			alphaArgument.SetValue(threeDFloor.Alpha);
+
+			AddSectorCheckboxes();
+
+			if(sector == null || sector.IsDisposed)
+				sector = General.Map.Map.CreateSector();
+
+			if (threeDFloor.Sector != null)
+				threeDFloor.Sector.CopyPropertiesTo(sector);
+
+			if (sector != null && !sector.IsDisposed)
+				sector.Selected = false;
 		}
 
 		public void ApplyToThreeDFloor()
@@ -183,9 +206,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 		private void AddSectorCheckboxes()
 		{
-			List<Sector> sectors = new List<Sector>(BuilderPlug.TDFEW.SelectedSectors);
+			List<Sector> sectors = new List<Sector>(BuilderPlug.TDFEW.SelectedSectors.OrderBy(o => o.Index));
 
 			checkedsectors = new List<int>();
+
+			checkedListBoxSectors.Items.Clear();
 
 			foreach (Sector s in ThreeDFloor.TaggedSectors)
 			{
