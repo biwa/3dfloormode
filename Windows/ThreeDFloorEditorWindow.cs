@@ -106,6 +106,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			ThreeDFloorHelperControl dup = GetThreeDFloorControl();
 
 			dup.Update(ctrl);
+			ctrl.Show();
 
 			threeDFloorPanel.ScrollControlIntoView(dup);
 		}
