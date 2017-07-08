@@ -36,14 +36,6 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
-			this.typeArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.label5 = new System.Windows.Forms.Label();
-			this.label6 = new System.Windows.Forms.Label();
-			this.flagsArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.alphaArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.buttonEditSector = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.checkedListBoxSectors = new System.Windows.Forms.CheckedListBox();
 			this.buttonDuplicate = new System.Windows.Forms.Button();
@@ -51,7 +43,18 @@
 			this.buttonCheckAll = new System.Windows.Forms.Button();
 			this.buttonUncheckAll = new System.Windows.Forms.Button();
 			this.buttonDrawSlope = new System.Windows.Forms.Button();
-			this.groupBox1.SuspendLayout();
+			this.borderHeightLabel = new System.Windows.Forms.Label();
+			this.typeArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
+			this.flagsArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
+			this.buttonEditSector = new System.Windows.Forms.Button();
+			this.label6 = new System.Windows.Forms.Label();
+			this.alphaArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.label5 = new System.Windows.Forms.Label();
+			this.label7 = new System.Windows.Forms.Label();
+			this.label8 = new System.Windows.Forms.Label();
+			this.sectorBrightness = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
+			this.tagsLabel = new System.Windows.Forms.Label();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -151,87 +154,6 @@
 			this.label3.TabIndex = 7;
 			this.label3.Text = "Border";
 			// 
-			// typeArgument
-			// 
-			this.typeArgument.BackColor = System.Drawing.Color.Transparent;
-			this.typeArgument.Location = new System.Drawing.Point(56, 19);
-			this.typeArgument.Name = "typeArgument";
-			this.typeArgument.Size = new System.Drawing.Size(59, 24);
-			this.typeArgument.TabIndex = 0;
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.BackColor = System.Drawing.Color.Transparent;
-			this.label4.Location = new System.Drawing.Point(7, 24);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(34, 13);
-			this.label4.TabIndex = 9;
-			this.label4.Text = "Type:";
-			// 
-			// label5
-			// 
-			this.label5.AutoSize = true;
-			this.label5.BackColor = System.Drawing.Color.Transparent;
-			this.label5.Location = new System.Drawing.Point(7, 54);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(35, 13);
-			this.label5.TabIndex = 10;
-			this.label5.Text = "Flags:";
-			// 
-			// label6
-			// 
-			this.label6.AutoSize = true;
-			this.label6.BackColor = System.Drawing.Color.Transparent;
-			this.label6.Location = new System.Drawing.Point(7, 84);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(37, 13);
-			this.label6.TabIndex = 11;
-			this.label6.Text = "Alpha:";
-			// 
-			// flagsArgument
-			// 
-			this.flagsArgument.BackColor = System.Drawing.Color.Transparent;
-			this.flagsArgument.Location = new System.Drawing.Point(56, 49);
-			this.flagsArgument.Name = "flagsArgument";
-			this.flagsArgument.Size = new System.Drawing.Size(59, 24);
-			this.flagsArgument.TabIndex = 1;
-			// 
-			// alphaArgument
-			// 
-			this.alphaArgument.BackColor = System.Drawing.Color.Transparent;
-			this.alphaArgument.Location = new System.Drawing.Point(56, 79);
-			this.alphaArgument.Name = "alphaArgument";
-			this.alphaArgument.Size = new System.Drawing.Size(59, 24);
-			this.alphaArgument.TabIndex = 2;
-			// 
-			// groupBox1
-			// 
-			this.groupBox1.BackColor = System.Drawing.Color.Transparent;
-			this.groupBox1.Controls.Add(this.typeArgument);
-			this.groupBox1.Controls.Add(this.flagsArgument);
-			this.groupBox1.Controls.Add(this.buttonEditSector);
-			this.groupBox1.Controls.Add(this.label6);
-			this.groupBox1.Controls.Add(this.alphaArgument);
-			this.groupBox1.Controls.Add(this.label4);
-			this.groupBox1.Controls.Add(this.label5);
-			this.groupBox1.Location = new System.Drawing.Point(373, 0);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(124, 166);
-			this.groupBox1.TabIndex = 5;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "3D floor properties";
-			// 
-			// buttonEditSector
-			// 
-			this.buttonEditSector.Location = new System.Drawing.Point(9, 109);
-			this.buttonEditSector.Name = "buttonEditSector";
-			this.buttonEditSector.Size = new System.Drawing.Size(106, 23);
-			this.buttonEditSector.TabIndex = 15;
-			this.buttonEditSector.Text = "Edit control sector";
-			this.buttonEditSector.UseVisualStyleBackColor = true;
-			this.buttonEditSector.Click += new System.EventHandler(this.buttonEditSector_Click);
-			// 
 			// groupBox2
 			// 
 			this.groupBox2.BackColor = System.Drawing.Color.Transparent;
@@ -305,17 +227,149 @@
 			this.buttonDrawSlope.Visible = false;
 			this.buttonDrawSlope.Click += new System.EventHandler(this.buttonDrawSlope_Click);
 			// 
+			// borderHeightLabel
+			// 
+			this.borderHeightLabel.Location = new System.Drawing.Point(196, 5);
+			this.borderHeightLabel.Name = "borderHeightLabel";
+			this.borderHeightLabel.Size = new System.Drawing.Size(50, 13);
+			this.borderHeightLabel.TabIndex = 17;
+			this.borderHeightLabel.Text = "0";
+			this.borderHeightLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			// 
+			// typeArgument
+			// 
+			this.typeArgument.BackColor = System.Drawing.Color.Transparent;
+			this.typeArgument.Location = new System.Drawing.Point(438, 0);
+			this.typeArgument.Name = "typeArgument";
+			this.typeArgument.Size = new System.Drawing.Size(59, 24);
+			this.typeArgument.TabIndex = 18;
+			// 
+			// flagsArgument
+			// 
+			this.flagsArgument.BackColor = System.Drawing.Color.Transparent;
+			this.flagsArgument.Location = new System.Drawing.Point(438, 30);
+			this.flagsArgument.Name = "flagsArgument";
+			this.flagsArgument.Size = new System.Drawing.Size(59, 24);
+			this.flagsArgument.TabIndex = 19;
+			// 
+			// buttonEditSector
+			// 
+			this.buttonEditSector.Location = new System.Drawing.Point(376, 143);
+			this.buttonEditSector.Name = "buttonEditSector";
+			this.buttonEditSector.Size = new System.Drawing.Size(121, 23);
+			this.buttonEditSector.TabIndex = 24;
+			this.buttonEditSector.Text = "Edit control sector";
+			this.buttonEditSector.UseVisualStyleBackColor = true;
+			this.buttonEditSector.Click += new System.EventHandler(this.buttonEditSector_Click);
+			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.BackColor = System.Drawing.Color.Transparent;
+			this.label6.Location = new System.Drawing.Point(395, 65);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(37, 13);
+			this.label6.TabIndex = 23;
+			this.label6.Text = "Alpha:";
+			// 
+			// alphaArgument
+			// 
+			this.alphaArgument.BackColor = System.Drawing.Color.Transparent;
+			this.alphaArgument.Location = new System.Drawing.Point(438, 60);
+			this.alphaArgument.Name = "alphaArgument";
+			this.alphaArgument.Size = new System.Drawing.Size(59, 24);
+			this.alphaArgument.TabIndex = 20;
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.BackColor = System.Drawing.Color.Transparent;
+			this.label4.Location = new System.Drawing.Point(396, 5);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(34, 13);
+			this.label4.TabIndex = 21;
+			this.label4.Text = "Type:";
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.BackColor = System.Drawing.Color.Transparent;
+			this.label5.Location = new System.Drawing.Point(395, 35);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(35, 13);
+			this.label5.TabIndex = 22;
+			this.label5.Text = "Flags:";
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.BackColor = System.Drawing.Color.Transparent;
+			this.label7.Location = new System.Drawing.Point(373, 95);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(59, 13);
+			this.label7.TabIndex = 25;
+			this.label7.Text = "Brightness:";
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.BackColor = System.Drawing.Color.Transparent;
+			this.label8.Location = new System.Drawing.Point(390, 125);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(40, 13);
+			this.label8.TabIndex = 26;
+			this.label8.Text = "Tag(s):";
+			// 
+			// sectorBrightness
+			// 
+			this.sectorBrightness.AllowDecimal = false;
+			this.sectorBrightness.AllowExpressions = false;
+			this.sectorBrightness.AllowNegative = true;
+			this.sectorBrightness.AllowRelative = true;
+			this.sectorBrightness.BackColor = System.Drawing.Color.Transparent;
+			this.sectorBrightness.ButtonStep = 8;
+			this.sectorBrightness.ButtonStepBig = 10F;
+			this.sectorBrightness.ButtonStepFloat = 1F;
+			this.sectorBrightness.ButtonStepSmall = 0.1F;
+			this.sectorBrightness.ButtonStepsUseModifierKeys = false;
+			this.sectorBrightness.ButtonStepsWrapAround = false;
+			this.sectorBrightness.Location = new System.Drawing.Point(438, 90);
+			this.sectorBrightness.Name = "sectorBrightness";
+			this.sectorBrightness.Size = new System.Drawing.Size(59, 24);
+			this.sectorBrightness.StepValues = null;
+			this.sectorBrightness.TabIndex = 27;
+			// 
+			// tagsLabel
+			// 
+			this.tagsLabel.AutoSize = true;
+			this.tagsLabel.Location = new System.Drawing.Point(436, 125);
+			this.tagsLabel.Name = "tagsLabel";
+			this.tagsLabel.Size = new System.Drawing.Size(35, 13);
+			this.tagsLabel.TabIndex = 28;
+			this.tagsLabel.Text = "label9";
+			// 
 			// ThreeDFloorHelperControl
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.tagsLabel);
+			this.Controls.Add(this.sectorBrightness);
+			this.Controls.Add(this.label8);
+			this.Controls.Add(this.label7);
+			this.Controls.Add(this.typeArgument);
+			this.Controls.Add(this.flagsArgument);
+			this.Controls.Add(this.buttonEditSector);
+			this.Controls.Add(this.label6);
+			this.Controls.Add(this.alphaArgument);
+			this.Controls.Add(this.label4);
+			this.Controls.Add(this.label5);
+			this.Controls.Add(this.borderHeightLabel);
 			this.Controls.Add(this.buttonDrawSlope);
 			this.Controls.Add(this.buttonUncheckAll);
 			this.Controls.Add(this.buttonCheckAll);
 			this.Controls.Add(this.buttonSplit);
 			this.Controls.Add(this.buttonDuplicate);
 			this.Controls.Add(this.groupBox2);
-			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
@@ -328,8 +382,6 @@
 			this.Name = "ThreeDFloorHelperControl";
 			this.Size = new System.Drawing.Size(714, 169);
 			this.Paint += new System.Windows.Forms.PaintEventHandler(this.ThreeDFloorHelperControl_Paint);
-			this.groupBox1.ResumeLayout(false);
-			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
@@ -346,20 +398,24 @@
 		public CodeImp.DoomBuilder.Controls.FlatSelectorControl sectorBottomFlat;
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox sectorCeilingHeight;
 		public CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox sectorFloorHeight;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.GroupBox groupBox1;
-		public CodeImp.DoomBuilder.Controls.ArgumentBox typeArgument;
-		public CodeImp.DoomBuilder.Controls.ArgumentBox flagsArgument;
-		public CodeImp.DoomBuilder.Controls.ArgumentBox alphaArgument;
 		private System.Windows.Forms.GroupBox groupBox2;
 		public System.Windows.Forms.CheckedListBox checkedListBoxSectors;
 		private System.Windows.Forms.Button buttonDuplicate;
 		private System.Windows.Forms.Button buttonSplit;
 		private System.Windows.Forms.Button buttonCheckAll;
 		private System.Windows.Forms.Button buttonUncheckAll;
-		private System.Windows.Forms.Button buttonEditSector;
 		private System.Windows.Forms.Button buttonDrawSlope;
+		private System.Windows.Forms.Label borderHeightLabel;
+		public Controls.ArgumentBox typeArgument;
+		public Controls.ArgumentBox flagsArgument;
+		private System.Windows.Forms.Button buttonEditSector;
+		private System.Windows.Forms.Label label6;
+		public Controls.ArgumentBox alphaArgument;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label8;
+		public Controls.ButtonsNumericTextbox sectorBrightness;
+		private System.Windows.Forms.Label tagsLabel;
 	}
 }

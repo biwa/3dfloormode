@@ -45,6 +45,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private int type;
 		private int flags;
 		private int alpha;
+		private int brightness;
 		private int topheight;
 		private int bottomheight;
 		private bool isnew;
@@ -63,6 +64,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public int Type { get { return type; } set { type = value; } }
 		public int Flags { get { return flags; } set { flags = value; } }
 		public int Alpha { get { return alpha; } set { alpha = value; } }
+		public int Brightness { get { return brightness; }set { brightness = value; } }
 		public int TopHeight { get { return topheight; } set { topheight = value; } }
 		public int BottomHeight { get { return bottomheight; } set { bottomheight = value; } }
 		public bool IsNew { get { return isnew; } set { isnew = value; } }
@@ -95,6 +97,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			bottomflat = sector.FloorTexture;
 			topheight = sector.CeilHeight;
 			bottomheight = sector.FloorHeight;
+			brightness = sector.Brightness;
 
 			foreach (Sidedef sd in sector.Sidedefs)
 			{
@@ -174,6 +177,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sector.FloorHeight = bottomheight;
 			sector.SetCeilTexture(topflat);
 			sector.SetFloorTexture(bottomflat);
+			sector.Brightness = brightness;
 
 			foreach (Sidedef sd in sector.Sidedefs)
 			{

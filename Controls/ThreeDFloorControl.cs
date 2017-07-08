@@ -83,6 +83,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			typeArgument.Setup(General.Map.Config.LinedefActions[160].Args[1]);
 			flagsArgument.Setup(General.Map.Config.LinedefActions[160].Args[2]);
 			alphaArgument.Setup(General.Map.Config.LinedefActions[160].Args[3]);
+			sectorBrightness.Text = General.Settings.DefaultBrightness.ToString();
 
 			typeArgument.SetDefaultValue();
 			flagsArgument.SetDefaultValue();
@@ -118,6 +119,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sectorBottomFlat.TextureName = threeDFloor.BottomFlat = ctrl.threeDFloor.BottomFlat;
 			sectorCeilingHeight.Text = ctrl.threeDFloor.TopHeight.ToString();
 			sectorFloorHeight.Text = ctrl.threeDFloor.BottomHeight.ToString();
+			borderHeightLabel.Text = (ctrl.threeDFloor.TopHeight - ctrl.threeDFloor.BottomHeight).ToString();
 
 			threeDFloor.TopHeight = ctrl.threeDFloor.TopHeight;
 			threeDFloor.BottomHeight = ctrl.threeDFloor.BottomHeight;
@@ -125,6 +127,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			typeArgument.SetValue(ctrl.threeDFloor.Type);
 			flagsArgument.SetValue(ctrl.threeDFloor.Flags);
 			alphaArgument.SetValue(ctrl.threeDFloor.Alpha);
+			sectorBrightness.Text = ctrl.threeDFloor.Brightness.ToString();
 
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, ctrl.checkedListBoxSectors.GetItemChecked(i));
@@ -142,6 +145,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sectorBottomFlat.TextureName = threeDFloor.BottomFlat;
 			sectorCeilingHeight.Text = threeDFloor.TopHeight.ToString();
 			sectorFloorHeight.Text = threeDFloor.BottomHeight.ToString();
+			borderHeightLabel.Text = (threeDFloor.TopHeight - threeDFloor.BottomHeight).ToString();
 
 			typeArgument.Setup(General.Map.Config.LinedefActions[160].Args[1]);
 			flagsArgument.Setup(General.Map.Config.LinedefActions[160].Args[2]);
@@ -150,6 +154,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			typeArgument.SetValue(threeDFloor.Type);
 			flagsArgument.SetValue(threeDFloor.Flags);
 			alphaArgument.SetValue(threeDFloor.Alpha);
+			sectorBrightness.Text = threeDFloor.Brightness.ToString();
 
 			AddSectorCheckboxes();
 
@@ -157,7 +162,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				sector = General.Map.Map.CreateSector();
 
 			if (threeDFloor.Sector != null)
+			{
 				threeDFloor.Sector.CopyPropertiesTo(sector);
+				tagsLabel.Text = String.Join(", ", sector.Tags.Select(o => o.ToString()).ToArray());
+			}
 
 			if (sector != null && !sector.IsDisposed)
 				sector.Selected = false;
@@ -177,11 +185,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			threeDFloor.Type = int.Parse(typeArgument.Text);
 			threeDFloor.Flags = int.Parse(flagsArgument.Text);
 			threeDFloor.Alpha = int.Parse(alphaArgument.Text);
+			threeDFloor.Brightness = sectorBrightness.GetResult(threeDFloor.Brightness);
 
 			threeDFloor.IsNew = isnew;
 
-			if(threeDFloor.Sector != null)
+			if (threeDFloor.Sector != null)
+			{
 				sector.CopyPropertiesTo(threeDFloor.Sector);
+				tagsLabel.Text = String.Join(", ", sector.Tags.Select(o => o.ToString()).ToArray());
+			}
 
 			threeDFloor.TaggedSectors = new List<Sector>();
 
@@ -263,6 +275,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sector.SetFloorTexture(sectorBottomFlat.TextureName);
 			sector.CeilHeight = sectorCeilingHeight.GetResult(sector.CeilHeight);
 			sector.FloorHeight = sectorFloorHeight.GetResult(sector.FloorHeight);
+			sector.Brightness = sectorBrightness.GetResult(sector.Brightness);
 
 			DialogResult result = General.Interface.ShowEditSectors(new List<Sector> { sector });
 
@@ -272,6 +285,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				sectorBottomFlat.TextureName = sector.FloorTexture;
 				sectorCeilingHeight.Text = sector.CeilHeight.ToString();
 				sectorFloorHeight.Text = sector.FloorHeight.ToString();
+				sectorBrightness.Text = sector.Brightness.ToString();
+				tagsLabel.Text = String.Join(", ", sector.Tags.Select(o => o.ToString()).ToArray());
 			}
 		}
 
