@@ -104,6 +104,7 @@
 			this.sectorCeilingHeight.Size = new System.Drawing.Size(70, 24);
 			this.sectorCeilingHeight.StepValues = null;
 			this.sectorCeilingHeight.TabIndex = 1;
+			this.sectorCeilingHeight.WhenTextChanged += new System.EventHandler(this.RecomputeBorderHeight);
 			// 
 			// sectorFloorHeight
 			// 
@@ -123,6 +124,7 @@
 			this.sectorFloorHeight.Size = new System.Drawing.Size(70, 24);
 			this.sectorFloorHeight.StepValues = null;
 			this.sectorFloorHeight.TabIndex = 0;
+			this.sectorFloorHeight.WhenTextChanged += new System.EventHandler(this.RecomputeBorderHeight);
 			// 
 			// label1
 			// 

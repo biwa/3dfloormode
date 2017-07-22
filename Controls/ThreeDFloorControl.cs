@@ -361,5 +361,10 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					ButtonBorderStyle.None // bottomStyle
 				);
 		}
+
+		private void RecomputeBorderHeight(object sender, EventArgs e)
+		{
+			borderHeightLabel.Text = (sectorCeilingHeight.GetResult(threeDFloor.TopHeight) - sectorFloorHeight.GetResult(threeDFloor.BottomHeight)).ToString();
+		}
 	}
 }
