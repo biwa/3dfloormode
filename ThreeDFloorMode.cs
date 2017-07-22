@@ -299,6 +299,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				tooltipelements[count].bottomHeight.Text = tdf.BottomHeight.ToString();
 				tooltipelements[count].topHeight.Text = tdf.TopHeight.ToString();
+				tooltipelements[count].borderHeight.Text = (tdf.TopHeight - tdf.BottomHeight).ToString();
 
 				if (tdf == highlighted3dfloor)
 					// tooltipelements[count].BackColor = General.Colors.ModelWireframe.ToColor();

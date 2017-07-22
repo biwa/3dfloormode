@@ -89,6 +89,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			flagsArgument.SetDefaultValue();
 			alphaArgument.SetDefaultValue();
 
+			tagsLabel.Text = "0";
+
 			AddSectorCheckboxes();
 
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
@@ -186,6 +188,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			threeDFloor.Flags = int.Parse(flagsArgument.Text);
 			threeDFloor.Alpha = int.Parse(alphaArgument.Text);
 			threeDFloor.Brightness = sectorBrightness.GetResult(threeDFloor.Brightness);
+
+			threeDFloor.Tags = sector.Tags;
 
 			threeDFloor.IsNew = isnew;
 

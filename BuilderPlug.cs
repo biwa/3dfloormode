@@ -624,6 +624,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			var sectorsByTag = new Dictionary<int, List<Sector>>();
 			var sectorsToThreeDFloors = new Dictionary<Sector, List<ThreeDFloor>>();
 			var sectorGroups = new List<List<Sector>>();
+			List<int> tagblacklist = new List<int>();
 
 			if(selectedSectors == null)
 				selectedSectors = new List<Sector>(General.Map.Map.GetSelectedSectors(true));
@@ -653,6 +654,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 			General.Map.UndoRedo.CreateUndo("Modify 3D floors");
 
+			// Create a list of all tags used by the control sectors. This is necessary so that
+			// tags that will be assigned to not yet existing geometry will not be used
+			foreach (ThreeDFloor tdf in threedfloors)
+				foreach (int tag in tdf.Tags)
+					if (!tagblacklist.Contains(tag))
+						tagblacklist.Add(tag);
+
 			try
 			{
 				foreach (ThreeDFloor tdf in threedfloors)
@@ -661,7 +669,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 						tdf.DeleteControlSector();
 
 					if (tdf.IsNew || tdf.Rebuild)
-						tdf.CreateGeometry();
+						tdf.CreateGeometry(tagblacklist);
 
 					tdf.UpdateGeometry();
 				}
@@ -756,7 +764,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					else
 						try
 						{
-							newtag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag();
+							newtag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag(tagblacklist);
 						}
 						catch (Exception e)
 						{

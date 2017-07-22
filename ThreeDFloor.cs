@@ -51,6 +51,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private bool isnew;
 		private bool rebuild;
 		private int udmftag;
+		private List<int> tags;
 
 		public static Rectangle controlsectorarea = new Rectangle(-512, 512, 512, -512);
 
@@ -70,7 +71,8 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public bool IsNew { get { return isnew; } set { isnew = value; } }
 		public bool Rebuild { get { return rebuild; } set { rebuild = value; } }
 		public int UDMFTag { get { return udmftag; } set { udmftag = value; } }
-		
+		public List<int> Tags { get { return tags; } set { tags = value; } }
+
 		public ThreeDFloor()
 		{
 			sector = null;
@@ -82,6 +84,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			bordertexture = General.Settings.DefaultTexture;
 			type = 1;
 			flags = 0;
+			tags = new List<int>();
 			
 			alpha = 255;
 		}
@@ -98,6 +101,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			topheight = sector.CeilHeight;
 			bottomheight = sector.FloorHeight;
 			brightness = sector.Brightness;
+			tags = new List<int>();
 
 			foreach (Sidedef sd in sector.Sidedefs)
 			{
@@ -178,6 +182,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			sector.SetCeilTexture(topflat);
 			sector.SetFloorTexture(bottomflat);
 			sector.Brightness = brightness;
+			sector.Tags = tags;
 
 			foreach (Sidedef sd in sector.Sidedefs)
 			{
@@ -227,7 +232,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
-		public bool CreateGeometry()
+		public bool CreateGeometry(List<int> tagblacklist)
 		{
 			List<DrawnVertex> drawnvertices = new List<DrawnVertex>();
 			List<Vertex> vertices = new List<Vertex>();
@@ -264,7 +269,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			if (General.Map.UDMF == true)
 			{
 				if(isnew)
-					udmftag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag();
+					udmftag = BuilderPlug.Me.ControlSectorArea.GetNewSectorTag(tagblacklist);
 
 				BindTag(udmftag);
 			}

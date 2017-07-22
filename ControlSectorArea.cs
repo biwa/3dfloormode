@@ -486,20 +486,22 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			UpdateLinesAndPoints();
 		}
 
-		public int GetNewSectorTag()
+		public int GetNewSectorTag(List<int> tagblacklist)
 		{
+			List<int> usedtags = new List<int>();
+
 			if (usecustomtagrange)
 			{
 				for (int i = firsttag; i <= lasttag; i++)
 				{
-					if (General.Map.Map.GetSectorsByTag(i).Count == 0)
+					if (!tagblacklist.Contains(i) && General.Map.Map.GetSectorsByTag(i).Count == 0)
 						return i;
 				}
 
 				throw new Exception("No free tags in the custom range between " + firsttag.ToString() + " and " + lasttag.ToString() + ".");
 			}
 
-			return General.Map.Map.GetNewTag();
+			return General.Map.Map.GetNewTag(tagblacklist);
 		}
 
 		public int GetNewLineID()

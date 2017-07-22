@@ -36,6 +36,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.bottomHeight = new System.Windows.Forms.Label();
 			this.topHeight = new System.Windows.Forms.Label();
+			this.borderHeight = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// sectorTopFlat
@@ -118,10 +119,21 @@
 			this.topHeight.Text = "X";
 			this.topHeight.TextAlign = System.Drawing.ContentAlignment.TopRight;
 			// 
+			// borderHeight
+			// 
+			this.borderHeight.BackColor = System.Drawing.Color.Transparent;
+			this.borderHeight.Location = new System.Drawing.Point(114, 0);
+			this.borderHeight.Name = "borderHeight";
+			this.borderHeight.Size = new System.Drawing.Size(30, 13);
+			this.borderHeight.TabIndex = 25;
+			this.borderHeight.Text = "X";
+			this.borderHeight.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			// 
 			// ThreeDFloorHelperTooltipElementControl
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.borderHeight);
 			this.Controls.Add(this.topHeight);
 			this.Controls.Add(this.bottomHeight);
 			this.Controls.Add(this.sectorTopFlat);
@@ -148,5 +160,6 @@
 		public System.Windows.Forms.Panel sectorBottomFlat;
 		public System.Windows.Forms.Label bottomHeight;
 		public System.Windows.Forms.Label topHeight;
+		public System.Windows.Forms.Label borderHeight;
 	}
 }
