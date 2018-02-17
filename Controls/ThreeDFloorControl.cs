@@ -176,7 +176,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		public void ApplyToThreeDFloor()
 		{
 			Regex r = new Regex(@"\d+");
-			bool guessslope = false;
 
 			threeDFloor.TopHeight = sectorCeilingHeight.GetResult(threeDFloor.TopHeight);
 			threeDFloor.BottomHeight = sectorFloorHeight.GetResult(threeDFloor.BottomHeight);
@@ -212,11 +211,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					Sector s = General.Map.Map.GetSectorByIndex(int.Parse(matches[0].ToString()));
 					threeDFloor.TaggedSectors.Add(s);
 				}
-			}
-
-			if (guessslope)
-			{
-				threeDFloor.GuessSlopeVector();
 			}
 		}
 
@@ -318,27 +312,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
-        private void bottomSlopeHeight_WhenTextChanged(object sender, EventArgs e)
-        {
-            if (!settingup)
-            {
-                threeDFloor.Rebuild = true;
-            }
-        }
-
-        private void topSlopeHeight_WhenTextChanged(object sender, EventArgs e)
-        {
-            if (!settingup)
-            {
-                threeDFloor.Rebuild = true;
-            }
-        }
-
-		private void buttonDrawSlope_Click(object sender, EventArgs e)
-		{
-			General.Editing.ChangeMode("DrawSlopesMode");
-		}
-
 		private void ThreeDFloorHelperControl_Paint(object sender, PaintEventArgs e)
 		{
 			Color c = Color.FromArgb(0, 192, 0); //  Color.FromArgb(255, Color.Green);
@@ -365,6 +338,11 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		private void RecomputeBorderHeight(object sender, EventArgs e)
 		{
 			borderHeightLabel.Text = (sectorCeilingHeight.GetResult(threeDFloor.TopHeight) - sectorFloorHeight.GetResult(threeDFloor.BottomHeight)).ToString();
+		}
+
+		private void buttonDetach_Click(object sender, EventArgs e)
+		{
+			((ThreeDFloorEditorWindow)this.ParentForm).DetachThreeDFloor(this);
 		}
 	}
 }

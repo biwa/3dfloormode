@@ -42,7 +42,6 @@
 			this.buttonSplit = new System.Windows.Forms.Button();
 			this.buttonCheckAll = new System.Windows.Forms.Button();
 			this.buttonUncheckAll = new System.Windows.Forms.Button();
-			this.buttonDrawSlope = new System.Windows.Forms.Button();
 			this.borderHeightLabel = new System.Windows.Forms.Label();
 			this.typeArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
 			this.flagsArgument = new CodeImp.DoomBuilder.Controls.ArgumentBox();
@@ -55,6 +54,7 @@
 			this.label8 = new System.Windows.Forms.Label();
 			this.sectorBrightness = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.tagsLabel = new System.Windows.Forms.Label();
+			this.buttonDetach = new System.Windows.Forms.Button();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -199,7 +199,7 @@
 			// 
 			// buttonCheckAll
 			// 
-			this.buttonCheckAll.Location = new System.Drawing.Point(633, 63);
+			this.buttonCheckAll.Location = new System.Drawing.Point(633, 92);
 			this.buttonCheckAll.Name = "buttonCheckAll";
 			this.buttonCheckAll.Size = new System.Drawing.Size(75, 23);
 			this.buttonCheckAll.TabIndex = 9;
@@ -209,25 +209,13 @@
 			// 
 			// buttonUncheckAll
 			// 
-			this.buttonUncheckAll.Location = new System.Drawing.Point(633, 92);
+			this.buttonUncheckAll.Location = new System.Drawing.Point(633, 121);
 			this.buttonUncheckAll.Name = "buttonUncheckAll";
 			this.buttonUncheckAll.Size = new System.Drawing.Size(75, 23);
 			this.buttonUncheckAll.TabIndex = 10;
 			this.buttonUncheckAll.Text = "Uncheck all";
 			this.buttonUncheckAll.UseVisualStyleBackColor = true;
 			this.buttonUncheckAll.Click += new System.EventHandler(this.buttonUncheckAll_Click);
-			// 
-			// buttonDrawSlope
-			// 
-			this.buttonDrawSlope.Enabled = false;
-			this.buttonDrawSlope.Location = new System.Drawing.Point(633, 143);
-			this.buttonDrawSlope.Name = "buttonDrawSlope";
-			this.buttonDrawSlope.Size = new System.Drawing.Size(75, 23);
-			this.buttonDrawSlope.TabIndex = 16;
-			this.buttonDrawSlope.Text = "Draw slope";
-			this.buttonDrawSlope.UseVisualStyleBackColor = true;
-			this.buttonDrawSlope.Visible = false;
-			this.buttonDrawSlope.Click += new System.EventHandler(this.buttonDrawSlope_Click);
 			// 
 			// borderHeightLabel
 			// 
@@ -350,10 +338,21 @@
 			this.tagsLabel.TabIndex = 28;
 			this.tagsLabel.Text = "label9";
 			// 
+			// buttonDetach
+			// 
+			this.buttonDetach.Location = new System.Drawing.Point(633, 63);
+			this.buttonDetach.Name = "buttonDetach";
+			this.buttonDetach.Size = new System.Drawing.Size(75, 23);
+			this.buttonDetach.TabIndex = 29;
+			this.buttonDetach.Text = "Detach";
+			this.buttonDetach.UseVisualStyleBackColor = true;
+			this.buttonDetach.Click += new System.EventHandler(this.buttonDetach_Click);
+			// 
 			// ThreeDFloorHelperControl
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.buttonDetach);
 			this.Controls.Add(this.tagsLabel);
 			this.Controls.Add(this.sectorBrightness);
 			this.Controls.Add(this.label8);
@@ -366,7 +365,6 @@
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.borderHeightLabel);
-			this.Controls.Add(this.buttonDrawSlope);
 			this.Controls.Add(this.buttonUncheckAll);
 			this.Controls.Add(this.buttonCheckAll);
 			this.Controls.Add(this.buttonSplit);
@@ -406,7 +404,6 @@
 		private System.Windows.Forms.Button buttonSplit;
 		private System.Windows.Forms.Button buttonCheckAll;
 		private System.Windows.Forms.Button buttonUncheckAll;
-		private System.Windows.Forms.Button buttonDrawSlope;
 		private System.Windows.Forms.Label borderHeightLabel;
 		public Controls.ArgumentBox typeArgument;
 		public Controls.ArgumentBox flagsArgument;
@@ -419,5 +416,6 @@
 		private System.Windows.Forms.Label label8;
 		public Controls.ButtonsNumericTextbox sectorBrightness;
 		private System.Windows.Forms.Label tagsLabel;
+		private System.Windows.Forms.Button buttonDetach;
 	}
 }

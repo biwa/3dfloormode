@@ -197,41 +197,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
-		public void GuessSlopeVector()
-		{
-			List<Linedef> lds = new List<Linedef>();
-			Linedef ld1 = null;
-			Linedef ld2 = null;
-			float length = 0;
-
-			foreach (Sector s in taggedsectors)
-			{
-				foreach (Sidedef sd in s.Sidedefs)
-				{
-					if (!lds.Contains(sd.Line)) lds.Add(sd.Line);
-				}
-			}
-
-			foreach (Linedef l1 in lds)
-			{
-				foreach (Linedef l2 in lds)
-				{
-					if (l1 == l2) continue;
-
-					Vector2D v1 = l1.Line.GetCoordinatesAt(0.5f);
-					Vector2D v2 = l2.Line.GetCoordinatesAt(0.5f);
-					float l = new Line2D(v1, v2).GetLength();
-
-					if (l > length)
-					{
-						length = l;
-						ld1 = l1;
-						ld2 = l2;
-					}
-				}
-			}
-		}
-
 		public bool CreateGeometry(List<int> tagblacklist)
 		{
 			List<DrawnVertex> drawnvertices = new List<DrawnVertex>();

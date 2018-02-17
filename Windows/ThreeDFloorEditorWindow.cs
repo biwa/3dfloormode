@@ -106,7 +106,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			ThreeDFloorHelperControl dup = GetThreeDFloorControl();
 
 			dup.Update(ctrl);
-			ctrl.Show();
+			dup.Show();
 
 			threeDFloorPanel.ScrollControlIntoView(dup);
 		}
@@ -171,6 +171,23 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				useitem--;
 			}
+		}
+
+		public void DetachThreeDFloor(ThreeDFloorHelperControl ctrl)
+		{
+			ThreeDFloorHelperControl dup = GetThreeDFloorControl();
+
+			dup.Update(ctrl);
+
+			for (int i = 0; i < ctrl.checkedListBoxSectors.Items.Count; i++)
+			{
+				if (ctrl.checkedListBoxSectors.GetItemCheckState(i) == CheckState.Checked)
+					ctrl.checkedListBoxSectors.SetItemChecked(i, false);
+			}
+
+			dup.Show();
+
+			threeDFloorPanel.ScrollControlIntoView(dup);
 		}
 
 		private void FillThreeDFloorPanel(List<ThreeDFloor> threedfloors)

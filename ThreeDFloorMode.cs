@@ -46,7 +46,7 @@ using CodeImp.DoomBuilder.Controls;
 
 namespace CodeImp.DoomBuilder.ThreeDFloorMode
 {
-	[EditMode(DisplayName = "3D Floor Editing Mode",
+	[EditMode(DisplayName = "3D Floor Mode",
 			  SwitchAction = "threedfloorhelpermode",		// Action name used to switch to this mode
 			  ButtonImage = "ThreeDFloorIcon.png",	// Image resource name for the button
 			  ButtonOrder = int.MinValue + 501,	// Position of the button (lower is more to the left)
@@ -1364,14 +1364,13 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				return;
 			}
 
-			General.Map.Map.ClearAllSelected();
 			SelectSector(highlighted3dfloor.Sector, true, true);
 
 			updateOverlaySurfaces();
 
 			General.Interface.RedrawDisplay();
 
-			General.Interface.DisplayStatus(StatusType.Info, "3D floor control sector selected");
+			General.Interface.DisplayStatus(StatusType.Info, String.Format("3D floor control sector selected. {0} sector(s) selected.", General.Map.Map.GetSelectedSectors(true).Count));
 		}
 
 		#endregion
