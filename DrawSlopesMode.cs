@@ -535,6 +535,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			return true;
 		}
 
+		private bool IsControlSector(Sector s)
+		{
+			//Determine whether or not the sector is actually a control sector for a 3D floor
+			foreach (Sidedef sd in s.Sidedefs)
+			{
+				if (sd.Line.Action == 160)
+					return true;
+			}
+			return false;
+		}
+
 		#endregion
 
 		#region ================== Events
@@ -644,34 +655,48 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				// Fills the slope vertex list for both floor and ceiling slopes. Alos tried
 				// to determine the default z position of the vertex
-				for (int i = 0; i < points.Count; i++)
+				List<Sector> selected = (List<Sector>)General.Map.Map.GetSelectedSectors(true);
+				if (selected.Count == 1 && IsControlSector(selected[0]))
 				{
-					float zf = 0;
-					float zc = 0;
-					Sector s = General.Map.Map.GetSectorByCoordinates(points[i].pos);
-
-					if (s != null)
+					//If a 3D floor control sector is selected, then just use the height of it directly
+					float zf = selected[0].FloorHeight;
+					float zc = selected[0].CeilHeight;
+					for (int i = 0; i < points.Count; i++)
 					{
-						foreach (Sidedef sd in s.Sidedefs)
+						sv_floor.Add(new SlopeVertex(points[i].pos, zf));
+						sv_ceiling.Add(new SlopeVertex(points[i].pos, zc));
+					}
+				} else {
+					//For normal sectors, grab the height of the sector each control handle lies within
+					for (int i = 0; i < points.Count; i++)
+					{
+						float zf = 0;
+						float zc = 0;
+						Sector s = General.Map.Map.GetSectorByCoordinates(points[i].pos);
+
+						if (s != null)
 						{
-							if (sd.Line.Line.GetSideOfLine(points[i].pos) == 0)
+							foreach (Sidedef sd in s.Sidedefs)
 							{
-								if (sd.Line.Back != null && !General.Map.Map.GetSelectedSectors(true).Contains(sd.Line.Back.Sector))
+								if (sd.Line.Line.GetSideOfLine(points[i].pos) == 0)
 								{
-									zf = sd.Line.Back.Sector.FloorHeight;
-									zc = sd.Line.Back.Sector.CeilHeight;
-								}
-								else
-								{
-									zf = sd.Line.Front.Sector.FloorHeight;
-									zc = sd.Line.Front.Sector.CeilHeight;
+									if (sd.Line.Back != null && !selected.Contains(sd.Line.Back.Sector))
+									{
+										zf = sd.Line.Back.Sector.FloorHeight;
+										zc = sd.Line.Back.Sector.CeilHeight;
+									}
+									else
+									{
+										zf = sd.Line.Front.Sector.FloorHeight;
+										zc = sd.Line.Front.Sector.CeilHeight;
+									}
 								}
 							}
 						}
-					}
 
-					sv_floor.Add(new SlopeVertex(points[i].pos, zf));
-					sv_ceiling.Add(new SlopeVertex(points[i].pos, zc));
+						sv_floor.Add(new SlopeVertex(points[i].pos, zf));
+						sv_ceiling.Add(new SlopeVertex(points[i].pos, zc));
+					}
 				}
 
 				// Create the floor slope vertex group and add it to all selected sectors
@@ -682,7 +707,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					svg.Sectors.Clear();
 
-					foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
+					foreach (Sector s in selected)
 					{
 						// Make sure the field work with undo/redo
 						s.Fields.BeforeFieldsChange();
@@ -706,7 +731,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 					svg.Sectors.Clear();
 
-					foreach (Sector s in General.Map.Map.GetSelectedSectors(true))
+					foreach (Sector s in selected)
 					{
 						// Make sure the field work with undo/redo
 						s.Fields.BeforeFieldsChange();

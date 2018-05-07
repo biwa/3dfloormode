@@ -124,14 +124,15 @@
 			// positionz
 			// 
 			this.positionz.AllowDecimal = true;
+			this.positionz.AllowExpressions = false;
 			this.positionz.AllowNegative = true;
 			this.positionz.AllowRelative = true;
 			this.positionz.BackColor = System.Drawing.Color.Transparent;
 			this.positionz.ButtonStep = 8;
-			this.positionz.ButtonStepBig = 10F;
-			this.positionz.ButtonStepFloat = 1F;
-			this.positionz.ButtonStepSmall = 0.1F;
-			this.positionz.ButtonStepsUseModifierKeys = false;
+			this.positionz.ButtonStepBig = 16F;
+			this.positionz.ButtonStepFloat = 8F;
+			this.positionz.ButtonStepSmall = 1F;
+			this.positionz.ButtonStepsUseModifierKeys = true;
 			this.positionz.ButtonStepsWrapAround = false;
 			this.positionz.Location = new System.Drawing.Point(29, 82);
 			this.positionz.Name = "positionz";
@@ -142,14 +143,15 @@
 			// positiony
 			// 
 			this.positiony.AllowDecimal = true;
+			this.positiony.AllowExpressions = false;
 			this.positiony.AllowNegative = true;
 			this.positiony.AllowRelative = true;
 			this.positiony.BackColor = System.Drawing.Color.Transparent;
 			this.positiony.ButtonStep = 8;
-			this.positiony.ButtonStepBig = 10F;
-			this.positiony.ButtonStepFloat = 1F;
-			this.positiony.ButtonStepSmall = 0.1F;
-			this.positiony.ButtonStepsUseModifierKeys = false;
+			this.positiony.ButtonStepBig = 16F;
+			this.positiony.ButtonStepFloat = 8F;
+			this.positiony.ButtonStepSmall = 1F;
+			this.positiony.ButtonStepsUseModifierKeys = true;
 			this.positiony.ButtonStepsWrapAround = false;
 			this.positiony.Location = new System.Drawing.Point(29, 52);
 			this.positiony.Name = "positiony";
@@ -160,14 +162,15 @@
 			// positionx
 			// 
 			this.positionx.AllowDecimal = true;
+			this.positionx.AllowExpressions = false;
 			this.positionx.AllowNegative = true;
 			this.positionx.AllowRelative = true;
 			this.positionx.BackColor = System.Drawing.Color.Transparent;
 			this.positionx.ButtonStep = 8;
-			this.positionx.ButtonStepBig = 10F;
-			this.positionx.ButtonStepFloat = 1F;
-			this.positionx.ButtonStepSmall = 0.1F;
-			this.positionx.ButtonStepsUseModifierKeys = false;
+			this.positionx.ButtonStepBig = 16F;
+			this.positionx.ButtonStepFloat = 8F;
+			this.positionx.ButtonStepSmall = 1F;
+			this.positionx.ButtonStepsUseModifierKeys = true;
 			this.positionx.ButtonStepsWrapAround = false;
 			this.positionx.Location = new System.Drawing.Point(29, 20);
 			this.positionx.Name = "positionx";

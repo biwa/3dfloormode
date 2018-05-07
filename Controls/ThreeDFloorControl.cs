@@ -83,7 +83,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			typeArgument.Setup(General.Map.Config.LinedefActions[160].Args[1]);
 			flagsArgument.Setup(General.Map.Config.LinedefActions[160].Args[2]);
 			alphaArgument.Setup(General.Map.Config.LinedefActions[160].Args[3]);
-			sectorBrightness.Text = General.Settings.DefaultBrightness.ToString();
 
 			typeArgument.SetDefaultValue();
 			flagsArgument.SetDefaultValue();
@@ -96,19 +95,30 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			for (int i = 0; i < checkedListBoxSectors.Items.Count; i++)
 				checkedListBoxSectors.SetItemChecked(i, true);
 
-			//When creating a NEW 3d sector, find the sector that is the tallest, and place the floor on top of it
+			//When creating a NEW 3d sector, find information about what is selected to populate the defaults
 			int FloorHeight = int.MinValue;
+			int SectorDarkest = int.MaxValue;
 			foreach (Sector s in BuilderPlug.TDFEW.SelectedSectors)
 			{
 				if (s.FloorHeight > FloorHeight)
 					FloorHeight = s.FloorHeight;
+				if (s.Brightness < SectorDarkest)
+					SectorDarkest = s.Brightness;
 			}
 
+			//set the floor height to match the lowest sector selected, then offset the height by the configured default
 			if (FloorHeight != int.MinValue)
 			{
 				int DefaultHeight = General.Settings.DefaultCeilingHeight - General.Settings.DefaultFloorHeight;
 				sectorFloorHeight.Text = FloorHeight.ToString();
 				sectorCeilingHeight.Text = (FloorHeight + DefaultHeight).ToString();
+			}
+
+			//set the brightness to match the darkest of all the selected sectors by default
+			if (SectorDarkest != int.MaxValue) {
+				sectorBrightness.Text = SectorDarkest.ToString();
+			} else {
+				sectorBrightness.Text = General.Settings.DefaultBrightness.ToString();
 			}
 
 			sector = General.Map.Map.CreateSector();
