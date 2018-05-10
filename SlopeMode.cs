@@ -299,42 +299,56 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				{
 					for (int i = 0; i < svg.Vertices.Count; i++)
 					{
-						bool showlabel = true;
-
-						if (BuilderPlug.Me.SlopeVertexLabelDisplayOption == LabelDisplayOption.WhenHighlighted && General.Interface.AltState == false)
-							if (!svg.Vertices.Contains(highlightedslope))
-								showlabel = false;
-
-						if (showlabel)
+						if (BuilderPlug.Me.SlopeVertexLabelDisplayOption == LabelDisplayOption.Always || General.Interface.AltState == true || svg.Vertices.Contains(highlightedslope))
 						{
 							SlopeVertex sv = svg.Vertices[i];
+							float scale = 1 / renderer.Scale;
 							float x = sv.Pos.x;
-							float y = sv.Pos.y - 14 * (1 / renderer.Scale);
-
-							TextLabel label = new TextLabel();
-							label.TransformCoords = true;
-							label.Location = new Vector2D(x, y);
-							label.AlignX = TextAlignmentX.Center;
-							label.AlignY = TextAlignmentY.Middle;
-							label.BackColor = General.Colors.Background.WithAlpha(128);
-							label.Text = String.Format("Z: {0}", sv.Z);
+							float y = sv.Pos.y - 14 * scale;
+							string value = String.Format("Z: {0}", sv.Z);
+							bool showlabel = true;
 
 							// Rearrange labels if they'd be (exactly) on each other
 							// TODO: do something like that also for overlapping labels
 							foreach (TextLabel l in labels)
 							{
-								if (l.Location.x == label.Location.x && l.Location.y == label.Location.y)
-									label.Location = new Vector2D(x, l.Location.y - l.TextSize.Height * (1 / renderer.Scale));
+								if (l.Location.x == x && l.Location.y == y) {
+									// Reduce visual clutter by de-duping stacked labels, when "show all labels" is enabled
+									if (l.Text == value) {
+										showlabel = false; //dedupe
+
+										// If any of the shared label lines are highlighted/selected, then override the color
+										if (svg.Vertices.Contains(highlightedslope))
+											l.Color = General.Colors.Highlight.WithAlpha(255);
+										else if (sv.Selected)
+											l.Color = General.Colors.Selection.WithAlpha(255);
+									} else {
+										// Adjust the label position down one line
+										y -= l.TextSize.Height * scale;
+									}
+								}
 							}
 
-							if (svg.Vertices.Contains(highlightedslope))
-								label.Color = General.Colors.Highlight.WithAlpha(255);
-							else if (sv.Selected)
-								label.Color = General.Colors.Selection.WithAlpha(255);
-							else
-								label.Color = white;
+							// Only proceed if the label was not deduped
+							if (showlabel)
+							{
+								TextLabel label = new TextLabel();
+								label.TransformCoords = true;
+								label.Location = new Vector2D(x, y);
+								label.AlignX = TextAlignmentX.Center;
+								label.AlignY = TextAlignmentY.Middle;
+								label.BackColor = General.Colors.Background.WithAlpha(128);
+								label.Text = value;
 
-							labels.Add(label);
+								if (svg.Vertices.Contains(highlightedslope))
+									label.Color = General.Colors.Highlight.WithAlpha(255);
+								else if (sv.Selected)
+									label.Color = General.Colors.Selection.WithAlpha(255);
+								else
+									label.Color = white;
+
+								labels.Add(label);
+							}
 						}
 					}
 				}
@@ -659,6 +673,31 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			General.Interface.RedrawDisplay();
 		}
 
+		//Build a list of the closest svs, that share the same distance away from the mouse cursor
+		private List<SlopeVertex> GetVertexStack()
+		{
+			List<SlopeVertex> stack = new List<SlopeVertex>();
+			float d, last = float.MaxValue;
+
+			foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups) {
+				foreach(SlopeVertex sv in svg.Vertices)
+				{
+					d = Vector2D.Distance(sv.Pos, mousemappos);
+					if (d <= BuilderModes.BuilderPlug.Me.HighlightRange / renderer.Scale) {
+						if (d > last)
+							continue; //discard
+						else if (d < last)
+							stack.Clear();
+
+						stack.Add(sv);
+						last = d;
+					}
+				}
+			}
+
+			return stack;
+		}
+
 		// Mouse moves
 		public override void OnMouseMove(MouseEventArgs e)
 		{
@@ -679,22 +718,20 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				SlopeVertex oldhighlight = highlightedslope;
 				Sector oldhighlightedsector = highlightedsector;
 
-                float distance = float.MaxValue;
-                float d;
-
-				highlightedslope = null;
-
-				foreach(SlopeVertexGroup svg in BuilderPlug.Me.SlopeVertexGroups) {
-					foreach(SlopeVertex sv in svg.Vertices)
+				//select the closest handle within grabbing distance
+				List<SlopeVertex> stack = GetVertexStack();
+				if (stack.Count > 0) {
+					SlopeVertex sv = stack[0];
+					if (sv != highlightedslope)
 					{
-						d = Vector2D.Distance(sv.Pos, mousemappos);
-
-						if (d <= BuilderModes.BuilderPlug.Me.HighlightRange / renderer.Scale && d < distance)
-						{
-							distance = d;
+						//if the "closest" handle is the same distance away as the already highlighted handle, then do nothing
+						if (highlightedslope == null || (Vector2D.Distance(sv.Pos, mousemappos) != Vector2D.Distance(highlightedslope.Pos, mousemappos))) {
 							highlightedslope = sv;
 						}
 					}
+				} else {
+					//nothing within distance, so reset the highlight
+					highlightedslope = null;
 				}
 
 				// If no slope vertex is highlighted, check if a sector should be
@@ -1267,7 +1304,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 
 				foreach (SlopeVertexGroup svg in groups)
 				{
-					svg.RemoveFromSectors();
+                    svg.RemovePlanes();
 					svg.RemoveUndoRedoUDMFFields(BuilderPlug.Me.SlopeDataSector);
 
 					BuilderPlug.Me.SlopeVertexGroups.Remove(svg);
@@ -1282,6 +1319,45 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 				// Redraw screen
 				General.Interface.RedrawDisplay();
 			}
+		}
+
+
+		[BeginAction("cyclehighlighted3dfloorup")]
+		public void CycleHighlighted3DFloorUp()
+		{
+			if (highlightedslope == null)
+				return;
+			List<SlopeVertex> stack = GetVertexStack();
+			if (stack.Count == 0)
+				return;
+
+			int idx = stack.IndexOf(highlightedslope) + 1;
+			if (idx >= stack.Count)
+				idx = 0;
+			highlightedslope = stack[idx];
+
+			updateOverlaySurfaces();
+			UpdateOverlay();
+			General.Interface.RedrawDisplay();
+		}
+
+		[BeginAction("cyclehighlighted3dfloordown")]
+		public void CycleHighlighted3DFloorDown()
+		{
+			if (highlightedslope == null)
+				return;
+			List<SlopeVertex> stack = GetVertexStack();
+			if (stack.Count == 0)
+				return;
+
+			int idx = stack.IndexOf(highlightedslope) - 1;
+			if (idx < 0)
+				idx = stack.Count - 1;
+			highlightedslope = stack[idx];
+
+			updateOverlaySurfaces();
+			UpdateOverlay();
+			General.Interface.RedrawDisplay();
 		}
 		
 		#endregion

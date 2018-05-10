@@ -237,6 +237,7 @@
     <ProjectReference Include="..\..\Core\Builder.csproj">
       <Project>{818b3d10-f791-4c3f-9af5-bb2d0079b63c}</Project>
       <Name>Builder</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\BuilderEffects\BuilderEffects.csproj">
       <Project>{b859be0f-a992-476d-a642-fa8efe94aaa5}</Project>

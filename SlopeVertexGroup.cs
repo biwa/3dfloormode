@@ -138,7 +138,15 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 		}
 
-		public void RemoveFromSectors()
+        public void RemovePlanes()
+        {
+            foreach (Sector s in sectors.ToList())
+            {
+                RemoveSector(s, this.sectorplanes[s]);
+            }
+        }
+
+        public void RemoveFromSectors()
 		{
 			foreach (Sector s in sectors.ToList())
 			{

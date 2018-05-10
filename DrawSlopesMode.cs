@@ -186,31 +186,44 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			{
 				for (int i = 0; i < svg.Vertices.Count; i++)
 				{
-					SlopeVertex sv = svg.Vertices[i];
-					float x = sv.Pos.x;
-					float y = sv.Pos.y - 14 * (1 / renderer.Scale);
-
-					TextLabel label = new TextLabel();
-					label.TransformCoords = true;
-					label.Location = new Vector2D(x, y);
-					label.AlignX = TextAlignmentX.Center;
-					label.AlignY = TextAlignmentY.Middle;
-					label.BackColor = General.Colors.Background.WithAlpha(255);
-					label.Text = "";
-
-					// Rearrange labels if they'd be (exactly) on each other
-					// TODO: do something like that also for overlapping labels
-					foreach (TextLabel l in labels)
+					if (BuilderPlug.Me.SlopeVertexLabelDisplayOption == LabelDisplayOption.Always || General.Interface.AltState == true)
 					{
-						if (l.Location.x == label.Location.x && l.Location.y == label.Location.y)
-							label.Location = new Vector2D(x, l.Location.y - 14.0f * (1 / renderer.Scale));
+						SlopeVertex sv = svg.Vertices[i];
+						float scale = 1 / renderer.Scale;
+						float x = sv.Pos.x;
+						float y = sv.Pos.y - 14 * scale;
+						string value = String.Format("Z: {0}", sv.Z);
+						bool showlabel = true;
+
+						// Rearrange labels if they'd be (exactly) on each other
+						foreach (TextLabel l in labels)
+						{
+							if (l.Location.x == x && l.Location.y == y) {
+								// Reduce visual clutter by de-duping stacked labels, when "show all labels" is enabled
+								if (l.Text == value) {
+									showlabel = false; //dedupe
+								} else {
+									// Adjust the label position down one line
+									y -= l.TextSize.Height * scale;
+								}
+							}
+						}
+
+						// Only proceed if the label was not deduped
+						if (showlabel)
+						{
+							TextLabel label = new TextLabel();
+							label.TransformCoords = true;
+							label.Location = new Vector2D(x, y);
+							label.AlignX = TextAlignmentX.Center;
+							label.AlignY = TextAlignmentY.Middle;
+							label.BackColor = General.Colors.Background.WithAlpha(128);
+							label.Text = value;
+							label.Color = white;
+
+							labels.Add(label);
+						}
 					}
-
-					label.Color = white;
-
-					label.Text += String.Format("Z: {0}", sv.Z);
-
-					labels.Add(label);
 				}
 			}
 		}
