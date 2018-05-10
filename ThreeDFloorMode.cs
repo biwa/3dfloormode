@@ -775,11 +775,6 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 					renderer.Present();
 				}
 			}
-			else
-			{
-				// Start making a selection
-				StartMultiSelection();
-			}
 
 			base.OnSelectBegin();
 		}
@@ -908,8 +903,17 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 		{
 			base.OnMouseMove(e);
 
-			// Not holding any buttons?
-			if (e.Button == MouseButtons.None)
+			if (selectpressed && !editpressed && !selecting)
+			{
+				// Check if moved enough pixels for multiselect
+				Vector2D delta = mousedownpos - mousepos;
+				if ((Math.Abs(delta.x) > 2) || (Math.Abs(delta.y) > 2))
+				{
+					// Start multiselecting
+					StartMultiSelection();
+				}
+			}
+			else if (e.Button == MouseButtons.None)
 			{
 				csahighlight = BuilderPlug.Me.ControlSectorArea.CheckHighlight(mousemappos, renderer.Scale);
 
