@@ -77,7 +77,7 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			}
 
 			// Get reposition value
-			reposition = sector.Fields.GetValue(String.Format("user_svg{0}_reposition", id), false);
+			reposition = sector.Fields.GetValue(String.Format("user_svg{0}_reposition", id), true);
 
 			ComputeHeight();
 			FindSectors();
@@ -314,15 +314,16 @@ namespace CodeImp.DoomBuilder.ThreeDFloorMode
 			// Add, update, or delete the reposition field
 			if (reposition)
 			{
+				//default action
 				if (sector.Fields.ContainsKey(identifier))
-					sector.Fields[identifier] = new UniValue(UniversalType.Boolean, reposition);
-				else
-					sector.Fields.Add(identifier, new UniValue(UniversalType.Boolean, reposition));
+					sector.Fields.Remove(identifier);
 			}
 			else
 			{
 				if (sector.Fields.ContainsKey(identifier))
-					sector.Fields.Remove(identifier);
+					sector.Fields[identifier] = new UniValue(UniversalType.Boolean, reposition);
+				else
+					sector.Fields.Add(identifier, new UniValue(UniversalType.Boolean, reposition));
 			}
 		}
 
